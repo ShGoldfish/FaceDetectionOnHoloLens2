@@ -66,16 +66,16 @@ public class NetworkCon : MonoBehaviour
 		int bytesRead = sender.Receive(buffer);
 		string dataReceived = Encoding.UTF8.GetString(buffer, 0, bytesRead);
 
-		print("dataReceived: " + dataReceived);
+		//print("dataReceived: " + dataReceived);
 
 		contextDetection.num_faces = 0;
-		contextDetection.faces_box = new List<List<float>>();
+		contextDetection.faces_box = new List<List<int>>();
 		if (dataReceived != null && dataReceived != " " )
 		{
 			List<float> numbers = Array.ConvertAll(dataReceived.Split(','), float.Parse).ToList();
 			for (int i = 0; i < numbers.Count; i += 4)
 			{
-				contextDetection.faces_box.Add(new List<float> { numbers[i], numbers[i+1], numbers[i+2], numbers[i+3] });
+				contextDetection.faces_box.Add(new List<int> { Convert.ToInt32(numbers[i]), Convert.ToInt32(numbers[i+1]), Convert.ToInt32(numbers[i+2]), Convert.ToInt32(numbers[i+3]) });
 				contextDetection.num_faces++;
 			}
 		}

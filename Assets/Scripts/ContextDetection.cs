@@ -6,7 +6,7 @@ public class ContextDetection : MonoBehaviour
 	TextMesh msgFace;
 	TextMesh msgVoice;
 	public int num_faces;
-	public List<List<float>> faces_box;
+	public List<List<int>> faces_box;
 
 	public bool isTalking;
 
@@ -15,7 +15,7 @@ public class ContextDetection : MonoBehaviour
 		isTalking = false;
 		msgFace = GameObject.Find("MessageFace").GetComponent<TextMesh>();
 		msgVoice = GameObject.Find("MessageVoice").GetComponent<TextMesh>();
-		faces_box = new List<List<float>>();
+		faces_box = new List<List<int>>();
 	}
 
 	private void Update()
