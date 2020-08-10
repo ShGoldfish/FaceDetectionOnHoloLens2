@@ -3,7 +3,9 @@ using System.Net.Sockets;
 using System.Text;
 using UnityEngine;
 using System.Threading;
-using System.Globalization;
+using System.Collections.Generic;
+using System;
+using System.Linq;
 
 public class NetworkCon : MonoBehaviour
 {
@@ -56,32 +58,28 @@ public class NetworkCon : MonoBehaviour
 	}
 
 	void ConnectionRec()
-	{						 
+	{
 		byte[] buffer = new byte[sender.ReceiveBufferSize];
-		
+
 		sender.Send(imageBufferBytesArray, imageBufferBytesArray.Length, 0);
 
 		int bytesRead = sender.Receive(buffer);
 		string dataReceived = Encoding.UTF8.GetString(buffer, 0, bytesRead);
 
-		if (dataReceived != null)
-		{
-			if (dataReceived == "stop")
-			{
-				recieving = false;
-			}
-			else
-			{
+		print("dataReceived: " + dataReceived);
 
-				int o;
-				if (int.TryParse(dataReceived, NumberStyles.Integer, CultureInfo.InvariantCulture.NumberFormat, out o))
-					contextDetection.num_faces = o;
-				else
-					print("can't parse");
-				print("Number of Detected Faces: " + dataReceived.ToString());
-				
+		contextDetection.num_faces = 0;
+		contextDetection.faces_box = new List<List<float>>();
+		if (dataReceived != null && dataReceived != " " )
+		{
+			List<float> numbers = Array.ConvertAll(dataReceived.Split(','), float.Parse).ToList();
+			for (int i = 0; i < numbers.Count; i += 4)
+			{
+				contextDetection.faces_box.Add(new List<float> { numbers[i], numbers[i+1], numbers[i+2], numbers[i+3] });
+				contextDetection.num_faces++;
 			}
 		}
+		print("num of Detected Faces: " + contextDetection.num_faces);
 	}
 
 	void OnDestroy()
