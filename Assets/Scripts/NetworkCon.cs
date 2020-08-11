@@ -24,7 +24,7 @@ public class NetworkCon : MonoBehaviour
 		ThreadStart ts_get = new ThreadStart(GetInfo);
 		mThread_get = new Thread(ts_get);
 		mThread_get.Start();
-		Debug.Log("Shakiba's app trying net connection.");
+		//Debug.Log("Shakiba's app trying net connection.");
 	}
 
 	public static IPAddress GetLocalIPAddress()
@@ -79,7 +79,7 @@ public class NetworkCon : MonoBehaviour
 				contextDetection.num_faces++;
 			}
 		}
-		print("num of Detected Faces: " + contextDetection.num_faces);
+		//print("num of Detected Faces: " + contextDetection.num_faces);
 	}
 
 	void OnDestroy()

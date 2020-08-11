@@ -5,6 +5,7 @@ using UnityEngine;
 public class AppManager : MonoBehaviour
 {
 	bool is_trans;
+	public TextMesh msgBlocking;
 	ContextDetection contextDetection;
 	private Camera cam;
 
@@ -30,29 +31,23 @@ public class AppManager : MonoBehaviour
 	private bool Overlapping(List<int> faceBox)
 	{
 		float minX1, minY1, maxX1, maxY1, minX2, minY2, maxX2, maxY2;
-		minX1 = Convert.ToInt32(gameObject.GetComponent<SpriteRenderer>().sprite.bounds.min.x);
-		minY1 = Convert.ToInt32(gameObject.GetComponent<SpriteRenderer>().sprite.bounds.min.y);
-		maxX1 = Convert.ToInt32(gameObject.GetComponent<SpriteRenderer>().sprite.bounds.max.x);
-		maxY1 = Convert.ToInt32(gameObject.GetComponent<SpriteRenderer>().sprite.bounds.max.y);
-		print(gameObject.name + ": " + minX1 + ", " + minY1 + ", " + maxX1 + ", " + maxY1);
-
-		//Vector3 point1 = new Vector3();
-		//Vector3 point2 = new Vector3();
-		//point1 = cam.ScreenToWorldPoint(new Vector3(minX1, minY1, cam.nearClipPlane));
-		//point2 = cam.ScreenToWorldPoint(new Vector3(maxX1, maxY1, cam.nearClipPlane));
-		//print("App: " + point1.x + ", " + point1.y + ", " + point2.x + ", " + point2.y);
-
+		minX1 = cam.WorldToScreenPoint(transform.position).x;		// or -29
+		maxX1 = minX1 + 58;	// or 29
+		minY1 = cam.WorldToScreenPoint(transform.position).y;		// or -58
+		maxY1 = minY1 + 116; // or 58
 
 		minX2 = faceBox[0];
 		minY2 = faceBox[1];
 		maxX2 = faceBox[2];
 		maxY2 = faceBox[3];
-		print("Face: " + minX2 + ", " + minY2 + ", " + maxX2 + ", " + maxY2);
 
-		//point1 = cam.ScreenToWorldPoint(new Vector3(minX2, minY2, cam.nearClipPlane));
-		//point2 = cam.ScreenToWorldPoint(new Vector3(maxX2, maxY2, cam.nearClipPlane));
-		//print("Face 2: " + point1.x + ", " + point1.y + ", " + point2.x + ", " + point2.y);
+		//print("Face: " + minX2 + ", " + minY2 + ", " + maxX2 + ", " + maxY2);	
+		//print(gameObject.name + ": " + minX1 + " " + minY1+ " " + gameObject.GetComponent<SpriteRenderer>().sprite.bounds.size.ToString());
+		//Debug.DrawLine(new Vector3(minX1, minY1, 15.0f), new Vector3(maxX1, maxY1, 15.0f), Color.blue);
+		//Debug.DrawLine(new Vector3(minX2, minY2, 15.0f), new Vector3(maxX2, maxY2, 15.0f), Color.green);
+		//Debug.DrawLine(new Vector3(0.0f, 0.0f, 2.0f), new Vector3(0.0f, 0.0f, 2.0f), Color.green);
 
+	
 		if ((maxX1 <= maxX2 && maxX1 >= minX2) || (minX1 <= maxX2 && minX1 >= minX2))
 		{
 			if (minY1 >= maxY2)
@@ -74,28 +69,44 @@ public class AppManager : MonoBehaviour
 		return false;	
 	}
 
+	private void DrawLine(Vector3 start, Vector3 end, Color color)
+	{
+		GameObject myLine = new GameObject();
+		myLine.transform.position = start;
+		myLine.AddComponent<LineRenderer>();
+		LineRenderer lr = myLine.GetComponent<LineRenderer>();
+		lr.material = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
+		lr.startColor = color;
+		lr.endColor= color;
+		lr.startWidth = 0.1f;
+		lr.endWidth = 0.1f;
+		lr.SetPosition(0, start);
+		lr.SetPosition(1, end);
+	}
+
 	private void Update()
 	{
+		bool blocking = BlockingFace();
+		msgBlocking.text = "Is Blocking a Face: " + blocking;
 		if (contextDetection.InConversation())
 		{
-			print("is BlockingFace: " + BlockingFace());
+			// if the current app is opaque and blocks the face
 			if (!is_trans)
 			{
-				// change game object's color to transparent
-				gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0f);
-
+				//if (blocking)
+				//{
+				// change game object's to transparent
+				gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+				is_trans = true;
+				//}
 			}
-			is_trans = true;
 		}
-		else
+		else //if (!blocking) // will be else to if (!is_trans)
 		{
-			if (is_trans)
-			{
-				// change game object's color to non-transparent
-				gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-
-			}
+			// make it opaque
+			gameObject.GetComponent<SpriteRenderer>().color = Color.white;
 			is_trans = false;
 		}
+		//}
 	}
 }
