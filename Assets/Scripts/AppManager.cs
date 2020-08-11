@@ -34,7 +34,7 @@ public class AppManager : MonoBehaviour
 		minY1 = Convert.ToInt32(gameObject.GetComponent<SpriteRenderer>().sprite.bounds.min.y);
 		maxX1 = Convert.ToInt32(gameObject.GetComponent<SpriteRenderer>().sprite.bounds.max.x);
 		maxY1 = Convert.ToInt32(gameObject.GetComponent<SpriteRenderer>().sprite.bounds.max.y);
-		print("App: " + minX1 + ", " + minY1 + ", " + maxX1 + ", " + maxY1);
+		print(gameObject.name + ": " + minX1 + ", " + minY1 + ", " + maxX1 + ", " + maxY1);
 
 		//Vector3 point1 = new Vector3();
 		//Vector3 point2 = new Vector3();
