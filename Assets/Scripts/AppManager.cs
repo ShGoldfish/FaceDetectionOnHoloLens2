@@ -4,6 +4,11 @@ using UnityEngine;
 
 public class AppManager : MonoBehaviour
 {
+	public bool test;
+	// all start as head fixed
+	// when started, other is the worldFixed Game Object
+	public GameObject otherGO;
+
 	bool is_trans;
 	public TextMesh msgBlocking;
 	ContextDetection contextDetection;
@@ -11,6 +16,7 @@ public class AppManager : MonoBehaviour
 
 	private void Start()
 	{
+		test = false;
 		cam = Camera.main;
 		contextDetection = GameObject.Find("Manager").GetComponent<ContextDetection>();
 		is_trans = false;
@@ -31,9 +37,9 @@ public class AppManager : MonoBehaviour
 	private bool Overlapping(List<int> faceBox)
 	{
 		float minX1, minY1, maxX1, maxY1, minX2, minY2, maxX2, maxY2;
-		minX1 = cam.WorldToScreenPoint(transform.position).x;		// or -29
-		maxX1 = minX1 + 58;	// or 29
-		minY1 = cam.WorldToScreenPoint(transform.position).y;		// or -58
+		minX1 = transform.position.x; //cam.WorldToScreenPoint(transform.position).x;		// or -29
+		maxX1 = minX1 + 58; // or 29
+		minY1 = transform.position.y; //cam.WorldToScreenPoint(transform.position).y;		// or -58
 		maxY1 = minY1 + 116; // or 58
 
 		minX2 = faceBox[0];
@@ -43,11 +49,11 @@ public class AppManager : MonoBehaviour
 
 		//print("Face: " + minX2 + ", " + minY2 + ", " + maxX2 + ", " + maxY2);	
 		//print(gameObject.name + ": " + minX1 + " " + minY1+ " " + gameObject.GetComponent<SpriteRenderer>().sprite.bounds.size.ToString());
-		//Debug.DrawLine(new Vector3(minX1, minY1, 15.0f), new Vector3(maxX1, maxY1, 15.0f), Color.blue);
-		//Debug.DrawLine(new Vector3(minX2, minY2, 15.0f), new Vector3(maxX2, maxY2, 15.0f), Color.green);
+		//Debug.DrawLine(cam.WorldToViewportPoint( new Vector3(minX1, minY1, 15.0f)), cam.WorldToViewportPoint(new Vector3(maxX1, maxY1, 15.0f)), Color.blue);
+		//Debug.DrawLine(cam.ScreenToWorldPoint(new Vector3(minX2, minY2, 15.0f)), cam.ScreenToWorldPoint(new Vector3(maxX2, maxY2, 15.0f)), Color.green);
 		//Debug.DrawLine(new Vector3(0.0f, 0.0f, 2.0f), new Vector3(0.0f, 0.0f, 2.0f), Color.green);
 
-	
+
 		if ((maxX1 <= maxX2 && maxX1 >= minX2) || (minX1 <= maxX2 && minX1 >= minX2))
 		{
 			if (minY1 >= maxY2)
@@ -86,6 +92,11 @@ public class AppManager : MonoBehaviour
 
 	private void Update()
 	{
+		// Test:
+		if (test)
+		{
+			ChangeFixation();
+		}
 		bool blocking = BlockingFace();
 		msgBlocking.text = "Is Blocking a Face: " + blocking;
 		if (contextDetection.InConversation())
@@ -109,4 +120,19 @@ public class AppManager : MonoBehaviour
 		}
 		//}
 	}
+
+	public void ChangeFixation()
+	{
+		test = false;
+		otherGO.GetComponent<AppManager>().test = false;
+		
+		otherGO.transform.localPosition = transform.localPosition;
+		otherGO.GetComponent<AppManager>().msgBlocking.text = msgBlocking.text;
+		otherGO.GetComponent<AppManager>().is_trans = is_trans;
+		otherGO.GetComponent<AppManager>().otherGO = gameObject;
+
+		otherGO.SetActive(true);
+		gameObject.SetActive(false);
+	}
+
 }
