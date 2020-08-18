@@ -97,6 +97,7 @@ public class AppManager : MonoBehaviour
 		{
 			ChangeFixation();
 		}
+
 		bool blocking = BlockingFace();
 		msgBlocking.text = "Is Blocking a Face: " + blocking;
 		if (contextDetection.InConversation())
@@ -108,6 +109,7 @@ public class AppManager : MonoBehaviour
 				//{
 				// change game object's to transparent
 				gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+				GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 				is_trans = true;
 				//}
 			}
@@ -116,6 +118,7 @@ public class AppManager : MonoBehaviour
 		{
 			// make it opaque
 			gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
 			is_trans = false;
 		}
 		//}
@@ -137,4 +140,18 @@ public class AppManager : MonoBehaviour
 		gameObject.SetActive(false);
 	}
 
+	public static GameObject GetChildWithName(GameObject obj, string name)
+	{
+		foreach (Transform eachChild in obj.transform)
+		{
+			if (eachChild.name == name)
+			{
+				return eachChild.gameObject;
+			}
+			else if (eachChild.transform.Find(name))
+				return eachChild.transform.Find(name).gameObject;
+		}
+
+		return null;
+	}
 }
