@@ -123,10 +123,12 @@ public class AppManager : MonoBehaviour
 
 	public void ChangeFixation()
 	{
+		print(gameObject.name + " changing fixation!");
 		test = false;
 		otherGO.GetComponent<AppManager>().test = false;
 		
-		otherGO.transform.localPosition = transform.localPosition;
+		otherGO.transform.position = transform.position;
+		otherGO.transform.rotation = transform.rotation;
 		otherGO.GetComponent<AppManager>().msgBlocking.text = msgBlocking.text;
 		otherGO.GetComponent<AppManager>().is_trans = is_trans;
 		otherGO.GetComponent<AppManager>().otherGO = gameObject;
