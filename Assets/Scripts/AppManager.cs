@@ -5,6 +5,7 @@ using UnityEngine;
 public class AppManager : MonoBehaviour
 {
 	public bool test;
+	//public GameObject facego;
 	// all start as head fixed
 	// when started, other is the worldFixed Game Object
 	public GameObject otherGO;
@@ -22,74 +23,6 @@ public class AppManager : MonoBehaviour
 		is_trans = false;
 	}
 
-	private bool BlockingFace()
-	{
-		foreach (List<int> faceBox in contextDetection.faces_box)
-		{
-			if (Overlapping(faceBox))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private bool Overlapping(List<int> faceBox)
-	{
-		float minX1, minY1, maxX1, maxY1, minX2, minY2, maxX2, maxY2;
-		minX1 = transform.position.x; //cam.WorldToScreenPoint(transform.position).x;		// or -29
-		maxX1 = minX1 + 58; // or 29
-		minY1 = transform.position.y; //cam.WorldToScreenPoint(transform.position).y;		// or -58
-		maxY1 = minY1 + 116; // or 58
-
-		minX2 = faceBox[0];
-		minY2 = faceBox[1];
-		maxX2 = faceBox[2];
-		maxY2 = faceBox[3];
-
-		//print("Face: " + minX2 + ", " + minY2 + ", " + maxX2 + ", " + maxY2);	
-		//print(gameObject.name + ": " + minX1 + " " + minY1+ " " + gameObject.GetComponent<SpriteRenderer>().sprite.bounds.size.ToString());
-		//Debug.DrawLine(cam.WorldToViewportPoint( new Vector3(minX1, minY1, 15.0f)), cam.WorldToViewportPoint(new Vector3(maxX1, maxY1, 15.0f)), Color.blue);
-		//Debug.DrawLine(cam.ScreenToWorldPoint(new Vector3(minX2, minY2, 15.0f)), cam.ScreenToWorldPoint(new Vector3(maxX2, maxY2, 15.0f)), Color.green);
-		//Debug.DrawLine(new Vector3(0.0f, 0.0f, 2.0f), new Vector3(0.0f, 0.0f, 2.0f), Color.green);
-
-
-		if ((maxX1 <= maxX2 && maxX1 >= minX2) || (minX1 <= maxX2 && minX1 >= minX2))
-		{
-			if (minY1 >= maxY2)
-				return false;
-			if (maxY1 <= minY2)
-				return false;
-			return true;
-
-		}
-		else if ((maxX1 <= minX2 && maxX1 >= maxX2))
-		{
-			if (minY1 >= maxY2)
-				return false;
-			if (maxY1 <= minY2)
-				return false;
-			return true;
-
-		}
-		return false;	
-	}
-
-	private void DrawLine(Vector3 start, Vector3 end, Color color)
-	{
-		GameObject myLine = new GameObject();
-		myLine.transform.position = start;
-		myLine.AddComponent<LineRenderer>();
-		LineRenderer lr = myLine.GetComponent<LineRenderer>();
-		lr.material = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
-		lr.startColor = color;
-		lr.endColor= color;
-		lr.startWidth = 0.1f;
-		lr.endWidth = 0.1f;
-		lr.SetPosition(0, start);
-		lr.SetPosition(1, end);
-	}
-
 	private void Update()
 	{
 		// Test:
@@ -105,23 +38,194 @@ public class AppManager : MonoBehaviour
 			// if the current app is opaque and blocks the face
 			if (!is_trans)
 			{
-				//if (blocking)
-				//{
-				// change game object's to transparent
-				gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-				GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-				is_trans = true;
-				//}
+				if (blocking)
+				{
+					//change game object's to transparent
+					gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+					GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+					is_trans = true;
+				}
+			}
+			else if (!blocking) // will be else to if (!is_trans)
+			{
+				// make it opaque
+				gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+				GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
+				is_trans = false;
 			}
 		}
-		else //if (!blocking) // will be else to if (!is_trans)
+	}
+
+	private bool BlockingFace()
+	{
+		foreach (List<int> faceBox in contextDetection.faces_box)
 		{
-			// make it opaque
-			gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
-			is_trans = false;
+			if (Overlapping(faceBox))
+			{
+				return true;
+			}
 		}
+		return false;
+	}
+	private List<int> Corners(GameObject go)
+	{
+		Bounds bounds = go.GetComponent<Collider>().bounds;
+		Vector3 cen = bounds.center;
+		Vector3 ext = bounds.extents;
+		float screenheight = Screen.height;
+		Vector2 min = cam.WorldToScreenPoint(new Vector3(cen.x - ext.x, cen.y - ext.y, cen.z - ext.z));
+		Vector2 max = min;
+
+		//0
+		Vector2 point = min;
+		min = new Vector2(min.x >= point.x ? point.x : min.x, min.y >= point.y ? point.y : min.y);
+		max = new Vector2(max.x <= point.x ? point.x : max.x, max.y <= point.y ? point.y : max.y);
+
+		//1
+		point = cam.WorldToScreenPoint(new Vector3(cen.x + ext.x, cen.y - ext.y, cen.z - ext.z));
+		min = new Vector2(min.x >= point.x ? point.x : min.x, min.y >= point.y ? point.y : min.y);
+		max = new Vector2(max.x <= point.x ? point.x : max.x, max.y <= point.y ? point.y : max.y);
+
+
+		//2
+		point = cam.WorldToScreenPoint(new Vector3(cen.x - ext.x, cen.y - ext.y, cen.z + ext.z));
+		min = new Vector2(min.x >= point.x ? point.x : min.x, min.y >= point.y ? point.y : min.y);
+		max = new Vector2(max.x <= point.x ? point.x : max.x, max.y <= point.y ? point.y : max.y);
+
+		//3
+		point = cam.WorldToScreenPoint(new Vector3(cen.x + ext.x, cen.y - ext.y, cen.z + ext.z));
+		min = new Vector2(min.x >= point.x ? point.x : min.x, min.y >= point.y ? point.y : min.y);
+		max = new Vector2(max.x <= point.x ? point.x : max.x, max.y <= point.y ? point.y : max.y);
+
+		//4
+		point = cam.WorldToScreenPoint(new Vector3(cen.x - ext.x, cen.y + ext.y, cen.z - ext.z));
+		min = new Vector2(min.x >= point.x ? point.x : min.x, min.y >= point.y ? point.y : min.y);
+		max = new Vector2(max.x <= point.x ? point.x : max.x, max.y <= point.y ? point.y : max.y);
+
+		//5
+		point = cam.WorldToScreenPoint(new Vector3(cen.x + ext.x, cen.y + ext.y, cen.z - ext.z));
+		min = new Vector2(min.x >= point.x ? point.x : min.x, min.y >= point.y ? point.y : min.y);
+		max = new Vector2(max.x <= point.x ? point.x : max.x, max.y <= point.y ? point.y : max.y);
+
+		//6
+		point = cam.WorldToScreenPoint(new Vector3(cen.x - ext.x, cen.y + ext.y, cen.z + ext.z));
+		min = new Vector2(min.x >= point.x ? point.x : min.x, min.y >= point.y ? point.y : min.y);
+		max = new Vector2(max.x <= point.x ? point.x : max.x, max.y <= point.y ? point.y : max.y);
+
+		//7
+		point = cam.WorldToScreenPoint(new Vector3(cen.x + ext.x, cen.y + ext.y, cen.z + ext.z));
+		min = new Vector2(min.x >= point.x ? point.x : min.x, min.y >= point.y ? point.y : min.y);
+		max = new Vector2(max.x <= point.x ? point.x : max.x, max.y <= point.y ? point.y : max.y);
+
+		List<int> ret = new List<int> { Convert.ToInt32(min.x), Convert.ToInt32(min.y), Convert.ToInt32(max.x - min.x), Convert.ToInt32(max.y - min.y) };
+		return ret;
+
+	}
+
+	private bool Overlapping(List<int> faceBox)
+	{
+		float minX1, minY1, maxX1, maxY1, minX2, minY2, maxX2, maxY2;
+		List<int> corners = Corners(gameObject);
+		minX1 = corners[0];
+		minY1 = corners[1];
+		maxX1 = corners[2];
+		maxY1 = corners[3];
+
+
+		////////////////////////////////////////////////////for test//////////////////////////
+		//corners = Corners(facego);
+		//minX2 = corners[0];
+		//minY2 = corners[1];
+		//maxX2 = corners[2];
+		//maxY2 = corners[3];
+		minX2 = faceBox[0];
+		minY2 = faceBox[1];
+		maxX2 = faceBox[2];
+		maxY2 = faceBox[3];
+		Rect faceRect = new Rect(minX2, minY2, maxX2 , maxY2 );
+		bool r = faceRect.Overlaps(new Rect(minX1, minY1, maxX1 , maxY1 ));
+		print(r);
+		return r;
+		//Bounds bnds = gameObject.GetComponent<Collider>().bounds;
+		//if (RectContainsPnt(bnds, new Vector2(minX2, minY2)) || RectContainsPnt(bnds, new Vector2(minX2, maxY2)) || RectContainsPnt(bnds, new Vector2(maxX2, minY2)) || RectContainsPnt(bnds, new Vector2(maxX2, maxY2)))
+		//{
+		//	print(true);
+		//	return true;
 		//}
+		//bnds = facego.GetComponent<Collider>().bounds;
+		//if (RectContainsPnt(bnds, new Vector2(minX1, minY1)) || RectContainsPnt(bnds, new Vector2(minX1, maxY1)) || RectContainsPnt(bnds, new Vector2(maxX1, minY1)) || RectContainsPnt(bnds, new Vector2(maxX1, maxY1)))
+		//{
+		//	print(true);
+		//	return true;
+		//}
+		//print(false);
+		//return false;
+
+		//////////////////////////////////////////////////////////////////////ACTUAL
+		// 2 is Face
+		//minX2 = faceBox[0];
+		//minY2 = faceBox[1];
+		//maxX2 = faceBox[2];
+		//maxY2 = faceBox[3];
+
+		//print("Face: " + minX2 + ", " + minY2 + ", " + maxX2 + ", " + maxY2);
+		//print(gameObject.name + ": " + minX1 + ", " + minY1 + ", " + maxX1 + ", " + maxY1);
+		//Debug.DrawLine(cam.WorldToViewportPoint(new Vector3(minX1, minY1, 15.0f)), cam.WorldToViewportPoint(new Vector3(maxX1, maxY1, 15.0f)), Color.blue);
+		//Debug.DrawLine(cam.ScreenToWorldPoint(new Vector3(minX2, minY2, 15.0f)), cam.ScreenToWorldPoint(new Vector3(maxX2, maxY2, 15.0f)), Color.green);
+		//Debug.DrawLine(new Vector3(0.0f, 0.0f, 2.0f), new Vector3(0.0f, 0.0f, 2.0f), Color.green);
+
+		if ((maxX1 <= maxX2 && maxX1 >= minX2) || (minX1 <= maxX2 && minX1 >= minX2))
+		{
+			if (minY1 >= maxY2)
+			{
+				print(false);
+				return false;
+			}
+			if (maxY1 <= minY2)
+			{
+				print(false);
+				return false;
+			}
+			
+			print(true);
+			return true;
+			
+
+		}
+		else if ((maxX1 <= minX2 && maxX1 >= maxX2))
+		{
+			if (minY1 >= maxY2)
+			{
+				print(false);
+				return false;
+			}
+			if (maxY1 <= minY2)
+			{
+				print(false);
+				return false;
+			}
+
+			print(true);
+			return true;
+
+		}
+		print(false);
+		return false;
+	}
+
+	private void DrawLine(Vector3 start, Vector3 end, Color color)
+	{
+		GameObject myLine = new GameObject();
+		myLine.transform.position = start;
+		myLine.AddComponent<LineRenderer>();
+		LineRenderer lr = myLine.GetComponent<LineRenderer>();
+		lr.material = new Material(Shader.Find("Particles/Alpha Blended Premultiply"));
+		lr.startColor = color;
+		lr.endColor= color;
+		lr.startWidth = 0.1f;
+		lr.endWidth = 0.1f;
+		lr.SetPosition(0, start);
+		lr.SetPosition(1, end);
 	}
 
 	public void ChangeFixation()
@@ -154,4 +258,52 @@ public class AppManager : MonoBehaviour
 
 		return null;
 	}
+
+	bool RectContainsPnt(Bounds rect, Vector2 pnt)
+	{
+		return pnt.x <= rect.max.x &&
+			   pnt.y <= rect.max.y &&
+			   pnt.x >= rect.min.x &&
+			   pnt.y >= rect.min.y;
+	}
+
+	//private void OnGUI()
+	//{
+	//	List<int> corners = Corners(gameObject);
+	//	int minX1, minY1, maxX1, maxY1;
+	//	minX1 = corners[0];
+	//	minY1 = corners[1];
+	//	maxX1 = corners[2];
+	//	maxY1 = corners[3];
+
+	//	Texture2D texture = new Texture2D(1, 1);
+	//	texture.SetPixel(0, 0, Color.cyan);
+	//	texture.Apply();
+	//	GUI.skin.box.normal.background = texture;
+	//	GUI.Box(new Rect(minX1, minY1, maxX1, maxY1), GUIContent.none);
+
+	//	// test
+	//	//corners = Corners(facego);
+	//	//minX1 = corners[0];
+	//	//minY1 = corners[1];
+	//	//maxX1 = corners[2];
+	//	//maxY1 = corners[3];
+
+	//	//Texture2D texture3 = new Texture2D(1, 1);
+	//	//texture3.SetPixel(0, 0, Color.black);
+	//	//texture3.Apply();
+	//	//GUI.skin.box.normal.background = texture3;
+	//	//GUI.Box(new Rect(minX1, minY1, maxX1, maxY1), GUIContent.none);
+
+
+	//	// FACES
+	//	foreach (List<int> fb in contextDetection.faces_box)
+	//	{
+	//		Texture2D texture2 = new Texture2D(1, 1);
+	//		texture2.SetPixel(0, 0, Color.green);
+	//		texture2.Apply();
+	//		GUI.skin.box.normal.background = texture2;
+	//		GUI.Box(new Rect(fb[0], fb[1], fb[2], fb[3]), GUIContent.none);
+	//	}
+	//}
 }
