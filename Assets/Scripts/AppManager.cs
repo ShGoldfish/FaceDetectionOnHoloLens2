@@ -8,8 +8,8 @@ public class AppManager : MonoBehaviour
 	//public GameObject facego;
 	// all start as head fixed
 	// when started, other is the worldFixed Game Object
-	public GameObject otherGO;
 
+	public GameObject otherGO;
 	bool is_trans;
 	public TextMesh msgBlocking;
 	ContextDetection contextDetection;
@@ -17,20 +17,16 @@ public class AppManager : MonoBehaviour
 
 	private void Start()
 	{
-		test = false;
 		cam = Camera.main;
 		contextDetection = GameObject.Find("Manager").GetComponent<ContextDetection>();
 		is_trans = false;
+
+		// test and extra
+		test = true;
 	}
 
 	private void Update()
 	{
-		// Test:
-		if (test)
-		{
-			ChangeFixation();
-		}
-
 		bool blocking = BlockingFace();
 		msgBlocking.text = "Is Blocking a Face: " + blocking;
 		if (contextDetection.InConversation())
@@ -67,6 +63,7 @@ public class AppManager : MonoBehaviour
 		}
 		return false;
 	}
+
 	private List<int> Corners(GameObject go)
 	{
 		Bounds bounds = go.GetComponent<Collider>().bounds;
@@ -140,77 +137,26 @@ public class AppManager : MonoBehaviour
 		//maxY2 = corners[3];
 		minX2 = faceBox[0];
 		minY2 = faceBox[1];
-		maxX2 = faceBox[2];
-		maxY2 = faceBox[3];
+		maxX2 = faceBox[2] - minX2;
+		maxY2 = faceBox[3] - minY2;
 		Rect faceRect = new Rect(minX2, minY2, maxX2 , maxY2 );
 		bool r = faceRect.Overlaps(new Rect(minX1, minY1, maxX1 , maxY1 ));
-		print(r);
+		//print(gameObject.name  + ": " + r);
+		if (test)
+		{
+			print("Face: " + minX2 + ", " + minY2 + ", " + maxX2 + ", " + maxY2);
+			print(gameObject.name + ": " + minX1 + ", " + minY1 + ", " + maxX1 + ", " + maxY1);
+			test = false;
+		}
 		return r;
-		//Bounds bnds = gameObject.GetComponent<Collider>().bounds;
-		//if (RectContainsPnt(bnds, new Vector2(minX2, minY2)) || RectContainsPnt(bnds, new Vector2(minX2, maxY2)) || RectContainsPnt(bnds, new Vector2(maxX2, minY2)) || RectContainsPnt(bnds, new Vector2(maxX2, maxY2)))
-		//{
-		//	print(true);
-		//	return true;
-		//}
-		//bnds = facego.GetComponent<Collider>().bounds;
-		//if (RectContainsPnt(bnds, new Vector2(minX1, minY1)) || RectContainsPnt(bnds, new Vector2(minX1, maxY1)) || RectContainsPnt(bnds, new Vector2(maxX1, minY1)) || RectContainsPnt(bnds, new Vector2(maxX1, maxY1)))
-		//{
-		//	print(true);
-		//	return true;
-		//}
-		//print(false);
-		//return false;
+	
 
 		//////////////////////////////////////////////////////////////////////ACTUAL
-		// 2 is Face
-		//minX2 = faceBox[0];
-		//minY2 = faceBox[1];
-		//maxX2 = faceBox[2];
-		//maxY2 = faceBox[3];
 
-		//print("Face: " + minX2 + ", " + minY2 + ", " + maxX2 + ", " + maxY2);
-		//print(gameObject.name + ": " + minX1 + ", " + minY1 + ", " + maxX1 + ", " + maxY1);
 		//Debug.DrawLine(cam.WorldToViewportPoint(new Vector3(minX1, minY1, 15.0f)), cam.WorldToViewportPoint(new Vector3(maxX1, maxY1, 15.0f)), Color.blue);
 		//Debug.DrawLine(cam.ScreenToWorldPoint(new Vector3(minX2, minY2, 15.0f)), cam.ScreenToWorldPoint(new Vector3(maxX2, maxY2, 15.0f)), Color.green);
 		//Debug.DrawLine(new Vector3(0.0f, 0.0f, 2.0f), new Vector3(0.0f, 0.0f, 2.0f), Color.green);
 
-		if ((maxX1 <= maxX2 && maxX1 >= minX2) || (minX1 <= maxX2 && minX1 >= minX2))
-		{
-			if (minY1 >= maxY2)
-			{
-				print(false);
-				return false;
-			}
-			if (maxY1 <= minY2)
-			{
-				print(false);
-				return false;
-			}
-			
-			print(true);
-			return true;
-			
-
-		}
-		else if ((maxX1 <= minX2 && maxX1 >= maxX2))
-		{
-			if (minY1 >= maxY2)
-			{
-				print(false);
-				return false;
-			}
-			if (maxY1 <= minY2)
-			{
-				print(false);
-				return false;
-			}
-
-			print(true);
-			return true;
-
-		}
-		print(false);
-		return false;
 	}
 
 	private void DrawLine(Vector3 start, Vector3 end, Color color)
@@ -231,8 +177,6 @@ public class AppManager : MonoBehaviour
 	public void ChangeFixation()
 	{
 		print(gameObject.name + " changing fixation!");
-		test = false;
-		otherGO.GetComponent<AppManager>().test = false;
 		
 		otherGO.transform.position = transform.position;
 		otherGO.transform.rotation = transform.rotation;
@@ -259,51 +203,29 @@ public class AppManager : MonoBehaviour
 		return null;
 	}
 
-	bool RectContainsPnt(Bounds rect, Vector2 pnt)
+	private void OnGUI()
 	{
-		return pnt.x <= rect.max.x &&
-			   pnt.y <= rect.max.y &&
-			   pnt.x >= rect.min.x &&
-			   pnt.y >= rect.min.y;
+		List<int> corners = Corners(gameObject);
+		int minX1, minY1, maxX1, maxY1;
+		minX1 = corners[0];
+		minY1 = corners[1];
+		maxX1 = corners[2];
+		maxY1 = corners[3];
+
+		Texture2D texture = new Texture2D(1, 1);
+		texture.SetPixel(0, 0, Color.cyan);
+		texture.Apply();
+		GUI.skin.box.normal.background = texture;
+		GUI.Box(new Rect(minX1, minY1, maxX1, maxY1), GUIContent.none);
+
+		// FACES
+		foreach (List<int> fb in contextDetection.faces_box)
+		{
+			Texture2D texture2 = new Texture2D(1, 1);
+			texture2.SetPixel(0, 0, Color.green);
+			texture2.Apply();
+			GUI.skin.box.normal.background = texture2;
+			GUI.Box(new Rect(fb[0], fb[1], -(fb[2]- fb[0]), -(fb[3] - fb[1])), GUIContent.none);
+		}
 	}
-
-	//private void OnGUI()
-	//{
-	//	List<int> corners = Corners(gameObject);
-	//	int minX1, minY1, maxX1, maxY1;
-	//	minX1 = corners[0];
-	//	minY1 = corners[1];
-	//	maxX1 = corners[2];
-	//	maxY1 = corners[3];
-
-	//	Texture2D texture = new Texture2D(1, 1);
-	//	texture.SetPixel(0, 0, Color.cyan);
-	//	texture.Apply();
-	//	GUI.skin.box.normal.background = texture;
-	//	GUI.Box(new Rect(minX1, minY1, maxX1, maxY1), GUIContent.none);
-
-	//	// test
-	//	//corners = Corners(facego);
-	//	//minX1 = corners[0];
-	//	//minY1 = corners[1];
-	//	//maxX1 = corners[2];
-	//	//maxY1 = corners[3];
-
-	//	//Texture2D texture3 = new Texture2D(1, 1);
-	//	//texture3.SetPixel(0, 0, Color.black);
-	//	//texture3.Apply();
-	//	//GUI.skin.box.normal.background = texture3;
-	//	//GUI.Box(new Rect(minX1, minY1, maxX1, maxY1), GUIContent.none);
-
-
-	//	// FACES
-	//	foreach (List<int> fb in contextDetection.faces_box)
-	//	{
-	//		Texture2D texture2 = new Texture2D(1, 1);
-	//		texture2.SetPixel(0, 0, Color.green);
-	//		texture2.Apply();
-	//		GUI.skin.box.normal.background = texture2;
-	//		GUI.Box(new Rect(fb[0], fb[1], fb[2], fb[3]), GUIContent.none);
-	//	}
-	//}
 }
