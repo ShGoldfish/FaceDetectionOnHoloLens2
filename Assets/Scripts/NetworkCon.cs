@@ -6,6 +6,8 @@ using System.Threading;
 using System.Collections.Generic;
 using System;
 using System.Linq;
+using System.Collections;
+using UnityEngine.Networking;
 
 public class NetworkCon : MonoBehaviour
 {
@@ -60,7 +62,7 @@ public class NetworkCon : MonoBehaviour
 	void ConnectionRec()
 	{
 		byte[] buffer = new byte[sender.ReceiveBufferSize];
-
+		//print("/////////////////////////////////////////////////////SIZE IS: " + imageBufferBytesArray.Length);
 		sender.Send(imageBufferBytesArray, imageBufferBytesArray.Length, 0);
 
 		int bytesRead = sender.Receive(buffer);
@@ -86,4 +88,5 @@ public class NetworkCon : MonoBehaviour
 	{
 		sender.Close();
 	}
+
 }

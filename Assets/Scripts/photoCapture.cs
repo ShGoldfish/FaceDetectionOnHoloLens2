@@ -2,7 +2,6 @@
 using UnityEngine;
 using UnityEngine.XR.WSA.WebCam;
 
-
 public class photoCapture : MonoBehaviour
 {
 	PhotoCapture photoCaptureObject = null;
@@ -11,6 +10,9 @@ public class photoCapture : MonoBehaviour
 	Renderer m_CanvasRenderer = null;
 	CameraParameters m_CameraParameters;
 	NetworkCon netCon;
+
+	public Matrix4x4 cameraToWorldMatrix;
+	public Matrix4x4 projectionMatrix;
 
 	void Start()
 	{
@@ -50,8 +52,6 @@ public class photoCapture : MonoBehaviour
 	{
 		if (result.success)
 		{
-			Matrix4x4 projectionMatrix;
-			photoCaptureFrame.TryGetProjectionMatrix(out projectionMatrix);
 
 			// Copy the raw image data into our target texture
 			photoCaptureFrame.UploadImageDataToTexture(targetTexture);
@@ -59,9 +59,17 @@ public class photoCapture : MonoBehaviour
 
 			// Take another photo
 			photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
-			
+
 			// Write to file
 			netCon.imageBufferBytesArray = targetTexture.EncodeToJPG();
+
+			// For Coordinate systems, from Lee's code
+
+			// TIME TO DO MAGIC
+			// Taken from https://forum.unity.com/threads/implementing-locatable-camera-shader-code.417261/
+			print("////////////////////TryGetCameraToWorldMatrix :" + photoCaptureFrame.TryGetCameraToWorldMatrix(out cameraToWorldMatrix));
+			print("/////////////////////TryGetProjectionMatrix :" + photoCaptureFrame.TryGetProjectionMatrix(out projectionMatrix));
+
 		}
 	}
 
@@ -71,4 +79,18 @@ public class photoCapture : MonoBehaviour
 		photoCaptureObject = null;
 	}
 
+
+	// Taken from https://docs.microsoft.com/en-us/windows/mixed-reality/locatable-camera
+	// Helper method to convert hololens application space to world space
+	public static Vector3 UnProjectVector(Matrix4x4 proj, Vector3 to)
+	{
+		Vector3 world = new Vector3(0, 0, 0);
+		var axsX = proj.GetRow(0);
+		var axsY = proj.GetRow(1);
+		var axsZ = proj.GetRow(2);
+		world.z = to.z / axsZ.z;
+		world.y = (to.y - (world.z * axsY.z)) / axsY.y;
+		world.x = (to.x - (world.z * axsX.z)) / axsX.x;
+		return world;
+	}
 }

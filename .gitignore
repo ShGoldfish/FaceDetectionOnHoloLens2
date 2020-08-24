@@ -22,7 +22,7 @@ gitignore/Unity.gitignore
 [Bb]uild/
 [Bb]uilds/
 [Ll]ogs/
-
+[Hh]L1/
 # Never ignore Asset meta data
 ![Aa]ssets/**/*.meta
 

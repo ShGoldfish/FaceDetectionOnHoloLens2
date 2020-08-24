@@ -14,6 +14,7 @@ public class AppManager : MonoBehaviour
 	public TextMesh msgBlocking;
 	ContextDetection contextDetection;
 	private Camera cam;
+	photoCapture pc;
 
 	private void Start()
 	{
@@ -23,32 +24,27 @@ public class AppManager : MonoBehaviour
 
 		// test and extra
 		test = true;
+		pc = Camera.main.GetComponent<photoCapture>();
 	}
 
 	private void Update()
 	{
 		bool blocking = BlockingFace();
 		msgBlocking.text = "Is Blocking a Face: " + blocking;
-		if (contextDetection.InConversation())
+
+		if (!blocking) 
 		{
-			// if the current app is opaque and blocks the face
-			if (!is_trans)
-			{
-				if (blocking)
-				{
-					//change game object's to transparent
-					gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-					GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-					is_trans = true;
-				}
-			}
-			else if (!blocking) // will be else to if (!is_trans)
-			{
-				// make it opaque
-				gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-				GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
-				is_trans = false;
-			}
+			// make it opaque
+			gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
+			is_trans = false;
+		}
+		else if (contextDetection.InConversation())
+		{
+			//change game object's to transparent
+			gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+			is_trans = true;			
 		}
 	}
 
@@ -123,31 +119,43 @@ public class AppManager : MonoBehaviour
 	{
 		float minX1, minY1, maxX1, maxY1, minX2, minY2, maxX2, maxY2;
 		List<int> corners = Corners(gameObject);
-		minX1 = corners[0];
+		maxX1 = corners[0];
 		minY1 = corners[1];
-		maxX1 = corners[2];
+		minX1 = corners[2];
 		maxY1 = corners[3];
 
 
 		////////////////////////////////////////////////////for test//////////////////////////
-		//corners = Corners(facego);
-		//minX2 = corners[0];
-		//minY2 = corners[1];
-		//maxX2 = corners[2];
-		//maxY2 = corners[3];
 		minX2 = faceBox[0];
 		minY2 = faceBox[1];
 		maxX2 = faceBox[2] - minX2;
 		maxY2 = faceBox[3] - minY2;
-		Rect faceRect = new Rect(minX2, minY2, maxX2 , maxY2 );
-		bool r = faceRect.Overlaps(new Rect(minX1, minY1, maxX1 , maxY1 ));
-		//print(gameObject.name  + ": " + r);
+
+		// Form Lee
+		// Transform the projected clip space position back into real world web camera space
+		Vector3 faceInRW_min = photoCapture.UnProjectVector(pc.projectionMatrix, new Vector3(minX2, minY2, 1.0f));
+		Vector3 faceInRW_max = photoCapture.UnProjectVector(pc.projectionMatrix, new Vector3(maxX2, maxY2, 1.0f));
+
+		// Transform the captured image's pixel location that is in the real world space of the 
+		// physical web camera back into our virtual world space.
+		Vector3 cam_face_min = pc.cameraToWorldMatrix.inverse * faceInRW_min;
+		Vector3 cam_face_max = pc.cameraToWorldMatrix.inverse * faceInRW_max;
+
+		Rect faceRectcam = new Rect(cam_face_min.x, cam_face_min.y, cam_face_max.x, cam_face_max.y);
+
+		Vector3 cam_app_min = pc.cameraToWorldMatrix.inverse * new Vector3(minX1, minY1, 1.0f);
+		Vector3 cam_app_max = pc.cameraToWorldMatrix.inverse * new Vector3(maxX1, maxY1, 1.0f);
 		if (test)
 		{
-			print("Face: " + minX2 + ", " + minY2 + ", " + maxX2 + ", " + maxY2);
+			print("RW_face: " + faceInRW_min.x + ", " + faceInRW_min.y + ", " + faceInRW_max.x + ", " + faceInRW_max.y);
+			print("camera_face: " + cam_face_min.x + ", " + cam_face_min.y + ", " + cam_face_max.x + ", " + cam_face_max.y);
+			print("camera_ " + gameObject.name + ": " + cam_app_min.x + ", " + cam_app_min.y + ", " + cam_app_max.x + ", " + cam_app_max.y);
 			print(gameObject.name + ": " + minX1 + ", " + minY1 + ", " + maxX1 + ", " + maxY1);
-			test = false;
+
 		}
+		bool r = faceRectcam.Overlaps(new Rect(minX1, minY1, maxX1, maxY1));
+		print("Camera face overlapps " + gameObject.name + ": " + r);
+
 		return r;
 	
 
@@ -228,4 +236,5 @@ public class AppManager : MonoBehaviour
 			GUI.Box(new Rect(fb[0], fb[1], -(fb[2]- fb[0]), -(fb[3] - fb[1])), GUIContent.none);
 		}
 	}
+
 }
