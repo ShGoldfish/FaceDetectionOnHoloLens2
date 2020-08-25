@@ -119,9 +119,9 @@ public class AppManager : MonoBehaviour
 	{
 		float minX1, minY1, maxX1, maxY1, minX2, minY2, maxX2, maxY2;
 		List<int> corners = Corners(gameObject);
-		maxX1 = corners[0];
+		minX1 = corners[0];
 		minY1 = corners[1];
-		minX1 = corners[2];
+		maxX1 = corners[2];
 		maxY1 = corners[3];
 
 
@@ -158,7 +158,6 @@ public class AppManager : MonoBehaviour
 
 		return r;
 	
-
 		//////////////////////////////////////////////////////////////////////ACTUAL
 
 		//Debug.DrawLine(cam.WorldToViewportPoint(new Vector3(minX1, minY1, 15.0f)), cam.WorldToViewportPoint(new Vector3(maxX1, maxY1, 15.0f)), Color.blue);
