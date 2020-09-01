@@ -70,12 +70,12 @@ public class AppManager : MonoBehaviour
 		foreach (List<int> faceBox in manager.faces_box)
 		{
 			// Commentd for Test purpose only:
-			//if (IsOverlapping(faceBox))
-			//{
-			//	return true;
-			//}
+			if (IsOverlapping(faceBox))
+			{
+				return true;
+			}
 			// uncommentd for Test purpose only:
-			return true;
+			//return true;
 		}
 		return false;
 	}
