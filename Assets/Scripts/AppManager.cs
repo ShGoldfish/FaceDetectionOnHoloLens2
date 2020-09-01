@@ -4,13 +4,18 @@ using UnityEngine;
 
 public class AppManager : MonoBehaviour
 {
+	// constants
+	const int fpsRate = 60;
+
+	// General 
 	Manager manager;
 	private Camera cam;
-	public GameObject otherGO;
 
-	bool isTranslucent;
+	// Each App's vars
+	public GameObject otherGO;
 	int timeSinceCurrentTranslucency;
 	public TextMesh msgBlocking;
+	bool isTranslucent;
 
 
 	private void Start()
@@ -24,11 +29,8 @@ public class AppManager : MonoBehaviour
 
 	private void Update()
 	{
-		if (timeSinceCurrentTranslucency > 3)
-		{
-			UpdateTranslucency();
-			timeSinceCurrentTranslucency = 0;
-		}
+		
+		UpdateTranslucency();	
 		timeSinceCurrentTranslucency++;
 	}
 
@@ -39,7 +41,8 @@ public class AppManager : MonoBehaviour
 		msgBlocking.text = "Is Blocking a Face: " + blocking;
 		if (!blocking)
 		{
-			if (isTranslucent)
+			// wait 3 seconds before making it opaque again
+			if (isTranslucent && timeSinceCurrentTranslucency > 3 * fpsRate)
 			{
 				// Make it opaque
 				gameObject.GetComponent<SpriteRenderer>().color = Color.white;
@@ -66,10 +69,13 @@ public class AppManager : MonoBehaviour
 	{
 		foreach (List<int> faceBox in manager.faces_box)
 		{
-			if (IsOverlapping(faceBox))
-			{
-				return true;
-			}
+			// Commentd for Test purpose only:
+			//if (IsOverlapping(faceBox))
+			//{
+			//	return true;
+			//}
+			// uncommentd for Test purpose only:
+			return true;
 		}
 		return false;
 	}
