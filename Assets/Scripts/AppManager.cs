@@ -13,7 +13,7 @@ public class AppManager : MonoBehaviour
 
 	// Each App's vars
 	public GameObject otherGO;
-	int timeSinceCurrentTranslucency;
+	int frameSinceCurrentTranslucency;
 	public TextMesh msgBlocking;
 	bool isTranslucent;
 
@@ -23,7 +23,7 @@ public class AppManager : MonoBehaviour
 		manager = GameObject.Find("Manager").GetComponent<Manager>();
 		cam = Camera.main;
 		isTranslucent = false;
-		timeSinceCurrentTranslucency = 0;
+		frameSinceCurrentTranslucency = 0;
 	}
 
 
@@ -31,7 +31,7 @@ public class AppManager : MonoBehaviour
 	{
 		
 		UpdateTranslucency();	
-		timeSinceCurrentTranslucency++;
+		frameSinceCurrentTranslucency++;
 	}
 
 
@@ -42,12 +42,12 @@ public class AppManager : MonoBehaviour
 		if (!blocking)
 		{
 			// wait 3 seconds before making it opaque again
-			if (isTranslucent && timeSinceCurrentTranslucency > 3 * fpsRate)
+			if (isTranslucent && frameSinceCurrentTranslucency > 3 * fpsRate)
 			{
 				// Make it opaque
 				gameObject.GetComponent<SpriteRenderer>().color = Color.white;
 				GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
-				timeSinceCurrentTranslucency = 0;
+				frameSinceCurrentTranslucency = 0;
 				isTranslucent = false;
 			}
 		}
@@ -59,7 +59,7 @@ public class AppManager : MonoBehaviour
 				gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 				GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 				isTranslucent = true;
-				timeSinceCurrentTranslucency = 0;
+				frameSinceCurrentTranslucency = 0;
 			}
 		}
 	}
@@ -134,7 +134,7 @@ public class AppManager : MonoBehaviour
 		AppManager otherGOAppManager = otherGO.GetComponent<AppManager>();
 		otherGOAppManager.manager = GameObject.Find("Manager").GetComponent<Manager>();
 		otherGOAppManager.cam = Camera.main;
-		otherGOAppManager.timeSinceCurrentTranslucency = timeSinceCurrentTranslucency;
+		otherGOAppManager.frameSinceCurrentTranslucency = frameSinceCurrentTranslucency;
 		otherGOAppManager.msgBlocking.text = msgBlocking.text;
 		otherGOAppManager.isTranslucent = isTranslucent;
 		otherGOAppManager.otherGO = gameObject;
