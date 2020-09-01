@@ -4,61 +4,155 @@ using UnityEngine;
 
 public class AppManager : MonoBehaviour
 {
-	public bool test;
-	//public GameObject facego;
-	// all start as head fixed
-	// when started, other is the worldFixed Game Object
-
-	public GameObject otherGO;
-	bool is_trans;
-	public TextMesh msgBlocking;
-	ContextDetection contextDetection;
+	Manager manager;
 	private Camera cam;
-	photoCapture pc;
+	public GameObject otherGO;
+
+	bool isTranslucent;
+	int timeSinceCurrentTranslucency;
+	public TextMesh msgBlocking;
+
 
 	private void Start()
 	{
+		manager = GameObject.Find("Manager").GetComponent<Manager>();
 		cam = Camera.main;
-		contextDetection = GameObject.Find("Manager").GetComponent<ContextDetection>();
-		is_trans = false;
-
-		// test and extra
-		test = true;
-		pc = Camera.main.GetComponent<photoCapture>();
+		isTranslucent = false;
+		timeSinceCurrentTranslucency = 0;
 	}
+
 
 	private void Update()
 	{
-		bool blocking = BlockingFace();
-		msgBlocking.text = "Is Blocking a Face: " + blocking;
-
-		if (!blocking) 
+		if (timeSinceCurrentTranslucency > 3)
 		{
-			// make it opaque
-			gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
-			is_trans = false;
+			UpdateTranslucency();
+			timeSinceCurrentTranslucency = 0;
 		}
-		else if (contextDetection.InConversation())
+		timeSinceCurrentTranslucency++;
+	}
+
+
+	private void UpdateTranslucency()
+	{
+		bool blocking = IsBlockingAnyFaces();
+		msgBlocking.text = "Is Blocking a Face: " + blocking;
+		if (!blocking)
 		{
-			//change game object's to transparent
-			gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-			is_trans = true;			
+			if (isTranslucent)
+			{
+				// Make it opaque
+				gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+				GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
+				timeSinceCurrentTranslucency = 0;
+				isTranslucent = false;
+			}
+		}
+		else if (manager.InConversation())
+		{
+			if (!isTranslucent)
+			{
+				// Make it translucent
+				gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+				GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+				isTranslucent = true;
+				timeSinceCurrentTranslucency = 0;
+			}
 		}
 	}
 
-	private bool BlockingFace()
+
+	private bool IsBlockingAnyFaces()
 	{
-		foreach (List<int> faceBox in contextDetection.faces_box)
+		foreach (List<int> faceBox in manager.faces_box)
 		{
-			if (Overlapping(faceBox))
+			if (IsOverlapping(faceBox))
 			{
 				return true;
 			}
 		}
 		return false;
 	}
+
+
+	private bool IsOverlapping(List<int> faceBox)
+	{
+		float minX1, minY1, maxX1, maxY1, minX2, minY2, maxX2, maxY2;
+		// App
+		List<int> corners = Corners(gameObject);
+		minX1 = corners[0];
+		minY1 = corners[1];
+		maxX1 = corners[2];
+		maxY1 = corners[3];
+		Vector3 cam_app_min = manager.cameraToWorldMatrix.inverse * new Vector3(minX1, minY1, 1.0f);
+		Vector3 cam_app_max = manager.cameraToWorldMatrix.inverse * new Vector3(maxX1, maxY1, 1.0f);
+
+		// Face
+		minX2 = faceBox[0];
+		minY2 = faceBox[1];
+		maxX2 = faceBox[2] - minX2;
+		maxY2 = faceBox[3] - minY2;
+		Vector3 faceInRW_min = photoCapture.UnProjectVector(manager.projectionMatrix, new Vector3(minX2, minY2, 1.0f));
+		Vector3 faceInRW_max = photoCapture.UnProjectVector(manager.projectionMatrix, new Vector3(maxX2, maxY2, 1.0f));
+		Vector3 cam_face_min = manager.cameraToWorldMatrix.inverse * faceInRW_min;
+		Vector3 cam_face_max = manager.cameraToWorldMatrix.inverse * faceInRW_max;
+		Rect faceBoxOnCam = new Rect(cam_face_min.x, cam_face_min.y, cam_face_max.x, cam_face_max.y);
+
+		/*
+		if (test)
+		{
+			print("RW_face: " + faceInRW_min.x + ", " + faceInRW_min.y + ", " + faceInRW_max.x + ", " + faceInRW_max.y);
+			print("camera_face: " + cam_face_min.x + ", " + cam_face_min.y + ", " + cam_face_max.x + ", " + cam_face_max.y);
+			print("camera_ " + gameObject.name + ": " + cam_app_min.x + ", " + cam_app_min.y + ", " + cam_app_max.x + ", " + cam_app_max.y);
+			print(gameObject.name + ": " + minX1 + ", " + minY1 + ", " + maxX1 + ", " + maxY1);
+		}
+		bool r = faceRectcam.Overlaps(new Rect(minX1, minY1, maxX1, maxY1));
+		print("Camera face overlapps " + gameObject.name + ": " + r);
+		////////////////////////////////////////////////////////////////////ACTUAL
+		Debug.DrawLine(cam.WorldToViewportPoint(new Vector3(minX1, minY1, 15.0f)), cam.WorldToViewportPoint(new Vector3(maxX1, maxY1, 15.0f)), Color.blue);
+		Debug.DrawLine(cam.ScreenToWorldPoint(new Vector3(minX2, minY2, 15.0f)), cam.ScreenToWorldPoint(new Vector3(maxX2, maxY2, 15.0f)), Color.green);
+		Debug.DrawLine(new Vector3(0.0f, 0.0f, 2.0f), new Vector3(0.0f, 0.0f, 2.0f), Color.green);
+		*/
+		return faceBoxOnCam.Overlaps(new Rect(minX1, minY1, maxX1, maxY1));
+
+	}
+
+
+	public void ChangeFixation()
+	{
+		print(gameObject.name + " changing fixation!");
+		
+		otherGO.transform.position = transform.position;
+		otherGO.transform.rotation = transform.rotation;
+
+		AppManager otherGOAppManager = otherGO.GetComponent<AppManager>();
+		otherGOAppManager.manager = GameObject.Find("Manager").GetComponent<Manager>();
+		otherGOAppManager.cam = Camera.main;
+		otherGOAppManager.timeSinceCurrentTranslucency = timeSinceCurrentTranslucency;
+		otherGOAppManager.msgBlocking.text = msgBlocking.text;
+		otherGOAppManager.isTranslucent = isTranslucent;
+		otherGOAppManager.otherGO = gameObject;
+
+		otherGO.SetActive(true);
+		gameObject.SetActive(false);
+	}
+
+
+	public static GameObject GetChildWithName(GameObject obj, string name)
+	{
+		foreach (Transform eachChild in obj.transform)
+		{
+			if (eachChild.name == name)
+			{
+				return eachChild.gameObject;
+			}
+			else if (eachChild.transform.Find(name))
+				return eachChild.transform.Find(name).gameObject;
+		}
+
+		return null;
+	}
+
 
 	private List<int> Corners(GameObject go)
 	{
@@ -115,57 +209,8 @@ public class AppManager : MonoBehaviour
 
 	}
 
-	private bool Overlapping(List<int> faceBox)
-	{
-		float minX1, minY1, maxX1, maxY1, minX2, minY2, maxX2, maxY2;
-		List<int> corners = Corners(gameObject);
-		minX1 = corners[0];
-		minY1 = corners[1];
-		maxX1 = corners[2];
-		maxY1 = corners[3];
 
-
-		////////////////////////////////////////////////////for test//////////////////////////
-		minX2 = faceBox[0];
-		minY2 = faceBox[1];
-		maxX2 = faceBox[2] - minX2;
-		maxY2 = faceBox[3] - minY2;
-
-		// Form Lee
-		// Transform the projected clip space position back into real world web camera space
-		Vector3 faceInRW_min = photoCapture.UnProjectVector(pc.projectionMatrix, new Vector3(minX2, minY2, 1.0f));
-		Vector3 faceInRW_max = photoCapture.UnProjectVector(pc.projectionMatrix, new Vector3(maxX2, maxY2, 1.0f));
-
-		// Transform the captured image's pixel location that is in the real world space of the 
-		// physical web camera back into our virtual world space.
-		Vector3 cam_face_min = pc.cameraToWorldMatrix.inverse * faceInRW_min;
-		Vector3 cam_face_max = pc.cameraToWorldMatrix.inverse * faceInRW_max;
-
-		Rect faceRectcam = new Rect(cam_face_min.x, cam_face_min.y, cam_face_max.x, cam_face_max.y);
-
-		Vector3 cam_app_min = pc.cameraToWorldMatrix.inverse * new Vector3(minX1, minY1, 1.0f);
-		Vector3 cam_app_max = pc.cameraToWorldMatrix.inverse * new Vector3(maxX1, maxY1, 1.0f);
-		if (test)
-		{
-			print("RW_face: " + faceInRW_min.x + ", " + faceInRW_min.y + ", " + faceInRW_max.x + ", " + faceInRW_max.y);
-			print("camera_face: " + cam_face_min.x + ", " + cam_face_min.y + ", " + cam_face_max.x + ", " + cam_face_max.y);
-			print("camera_ " + gameObject.name + ": " + cam_app_min.x + ", " + cam_app_min.y + ", " + cam_app_max.x + ", " + cam_app_max.y);
-			print(gameObject.name + ": " + minX1 + ", " + minY1 + ", " + maxX1 + ", " + maxY1);
-
-		}
-		bool r = faceRectcam.Overlaps(new Rect(minX1, minY1, maxX1, maxY1));
-		print("Camera face overlapps " + gameObject.name + ": " + r);
-
-		return r;
-	
-		//////////////////////////////////////////////////////////////////////ACTUAL
-
-		//Debug.DrawLine(cam.WorldToViewportPoint(new Vector3(minX1, minY1, 15.0f)), cam.WorldToViewportPoint(new Vector3(maxX1, maxY1, 15.0f)), Color.blue);
-		//Debug.DrawLine(cam.ScreenToWorldPoint(new Vector3(minX2, minY2, 15.0f)), cam.ScreenToWorldPoint(new Vector3(maxX2, maxY2, 15.0f)), Color.green);
-		//Debug.DrawLine(new Vector3(0.0f, 0.0f, 2.0f), new Vector3(0.0f, 0.0f, 2.0f), Color.green);
-
-	}
-
+	/*
 	private void DrawLine(Vector3 start, Vector3 end, Color color)
 	{
 		GameObject myLine = new GameObject();
@@ -181,34 +226,6 @@ public class AppManager : MonoBehaviour
 		lr.SetPosition(1, end);
 	}
 
-	public void ChangeFixation()
-	{
-		print(gameObject.name + " changing fixation!");
-		
-		otherGO.transform.position = transform.position;
-		otherGO.transform.rotation = transform.rotation;
-		otherGO.GetComponent<AppManager>().msgBlocking.text = msgBlocking.text;
-		otherGO.GetComponent<AppManager>().is_trans = is_trans;
-		otherGO.GetComponent<AppManager>().otherGO = gameObject;
-
-		otherGO.SetActive(true);
-		gameObject.SetActive(false);
-	}
-
-	public static GameObject GetChildWithName(GameObject obj, string name)
-	{
-		foreach (Transform eachChild in obj.transform)
-		{
-			if (eachChild.name == name)
-			{
-				return eachChild.gameObject;
-			}
-			else if (eachChild.transform.Find(name))
-				return eachChild.transform.Find(name).gameObject;
-		}
-
-		return null;
-	}
 
 	private void OnGUI()
 	{
@@ -226,7 +243,7 @@ public class AppManager : MonoBehaviour
 		GUI.Box(new Rect(minX1, minY1, maxX1, maxY1), GUIContent.none);
 
 		// FACES
-		foreach (List<int> fb in contextDetection.faces_box)
+		foreach (List<int> fb in manager.faces_box)
 		{
 			Texture2D texture2 = new Texture2D(1, 1);
 			texture2.SetPixel(0, 0, Color.green);
@@ -235,5 +252,5 @@ public class AppManager : MonoBehaviour
 			GUI.Box(new Rect(fb[0], fb[1], -(fb[2]- fb[0]), -(fb[3] - fb[1])), GUIContent.none);
 		}
 	}
-
+	*/
 }

@@ -12,11 +12,11 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
     private int samplingRate;
     private const int messageLength = 15;
     private StringBuilder textSoFar;
-    ContextDetection contextDetection;
+	Manager manager;
  
     private void Awake()
     {
-        contextDetection = gameObject.GetComponent<ContextDetection>();
+		manager = gameObject.GetComponent<Manager>();
        
         dictationRecognizer = new DictationRecognizer();
 
@@ -36,7 +36,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
         //currentlySaying = new StringBuilder();
         textSoFar = new StringBuilder("");
 
-        Debug.Log(" contextAwareManager.isTalking: " + contextDetection.isTalking);
+        Debug.Log(" contextAwareManager.isTalking: " + manager.isTalking);
 
         PhraseRecognitionSystem.Shutdown();
         dictationRecognizer.Start();
@@ -57,7 +57,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
     private void DictationRecognizer_DictationHypothesis(string text)
     {
         if (text != null && text.Length != 0)
-            contextDetection.isTalking = true;
+			manager.isTalking = true;
         //currentlySaying.Append(text);
         textSoFar.Append(text);
     }
@@ -71,7 +71,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
     {
         // 3.a: Append textSoFar with latest text
         if (text != null && text.Length != 0)
-            contextDetection.isTalking = true;
+			manager.isTalking = true;
         textSoFar.Append(text + ". ");
     }
 
@@ -88,7 +88,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
         if (cause == DictationCompletionCause.TimeoutExceeded)
         {
             Microphone.End(deviceName);
-            contextDetection.isTalking = false;
+			manager.isTalking = false;
             //currentlySaying = new StringBuilder();
             textSoFar = new StringBuilder("");
         }
@@ -117,8 +117,8 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
     private void Update()
     {
         if (textSoFar != null && textSoFar.Length != 0)
-            contextDetection.isTalking = true;
-        if (!contextDetection.isTalking)
+            manager.isTalking = true;
+        if (!manager.isTalking)
         {
             dictationRecognizer.Start();
         }
@@ -139,7 +139,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
     void IMixedRealitySpeechHandler.OnSpeechKeywordRecognized(SpeechEventData eventData)
     {
         //contextAwareManager.isTalking = true;
-        Debug.Log("OnSpeechKeywordRecognized: " + contextDetection.isTalking);
+        Debug.Log("OnSpeechKeywordRecognized: " + manager.isTalking);
 
     }
 }
