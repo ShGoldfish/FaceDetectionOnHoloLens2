@@ -4,8 +4,9 @@ using UnityEngine;
 public class Manager : MonoBehaviour
 {
 	// Textbox Management
-	TextMesh msgFace;
+	public string ipEndPoint;
 	TextMesh msgVoice;
+	TextMesh msgFace;
 	bool showIP;
 
 	// Context Management
@@ -27,7 +28,7 @@ public class Manager : MonoBehaviour
 		showIP = true;
 		msgFace = GameObject.Find("MessageFace").GetComponent<TextMesh>();
 		msgVoice = GameObject.Find("MessageVoice").GetComponent<TextMesh>();
-		msgFace.text = "Connect Face detection to the IP Address: " + GetComponent<NetworkCon>().ipEndPoint;
+		msgFace.text = "Connect Face detection to the IP Address: " + ipEndPoint;
 
 		// Context Management
 		faces_box = new List<List<int>>();
@@ -49,7 +50,7 @@ public class Manager : MonoBehaviour
 		{
 			if (num_faces == 0)
 			{
-				msgFace.text = "Connect Face detection to the IP Address: " + GetComponent<NetworkCon>().ipEndPoint.Substring(0, GetComponent<NetworkCon>().ipEndPoint.Length - 5);
+				msgFace.text = "Connect Face detection to the IP Address: " + ipEndPoint.Substring(0, ipEndPoint.Length - 5);
 			}
 			else
 			{
