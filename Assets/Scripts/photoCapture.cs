@@ -138,11 +138,11 @@ public class photoCapture : MonoBehaviour
 			else
 			{
 				string dataReceived = webRequest.downloadHandler.text;
-				print("dataReceived from python is: " + dataReceived);
+				print("dataReceived from python is: _" + dataReceived + "_");
 
 				manager.num_faces = 0;
 				manager.faces_box = new List<List<int>>();
-				if (dataReceived != null && dataReceived != " ")
+				if (dataReceived != null && dataReceived != "")
 				{
 					List<float> numbers = Array.ConvertAll(dataReceived.Split(','), float.Parse).ToList();
 					for (int i = 0; i < numbers.Count; i += 4)
