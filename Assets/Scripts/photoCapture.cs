@@ -111,7 +111,7 @@ public class photoCapture : MonoBehaviour
 			new MultipartFormFileSection("myImage", manager.imageBufferBytesArray, "test.jpg", "image/jpg")
 		};
 
-		using (UnityWebRequest webRequest = UnityWebRequest.Post(manager.ipEndPoint + "/detect-faces", data))
+		using (UnityWebRequest webRequest = UnityWebRequest.Post(manager.ipEndPoint + "/receive-image", data))
 		{
 			webRequest.SendWebRequest();
 
@@ -127,7 +127,7 @@ public class photoCapture : MonoBehaviour
 	/// </summary>
 	private IEnumerator GetFaces()
 	{
-		using (UnityWebRequest webRequest = UnityWebRequest.Get(manager.ipEndPoint + "/detection-result"))
+		using (UnityWebRequest webRequest = UnityWebRequest.Get(manager.ipEndPoint + "/detect-faces"))
 		{
 			yield return webRequest.SendWebRequest();
 			
@@ -152,7 +152,6 @@ public class photoCapture : MonoBehaviour
 					}
 				}
 				print("Num-Faces: " + manager.num_faces);
-
 			}
 		}
 	}
