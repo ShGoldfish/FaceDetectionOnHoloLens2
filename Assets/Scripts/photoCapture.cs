@@ -65,7 +65,8 @@ public class photoCapture : MonoBehaviour
 			photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
 
 			// Write to file
-			manager.imageBufferBytesArray = targetTexture.EncodeToJPG(25); // pass a low num 25
+			//manager.imageBufferBytesArray = targetTexture.EncodeToJPG(25); // pass a low num 25
+			manager.imageBufferBytesArray = targetTexture.EncodeToJPG(3); // pass a low num 25
 
 			// Communications to Server:
 			StartCoroutine("PostPhoto");
@@ -116,7 +117,7 @@ public class photoCapture : MonoBehaviour
 			webRequest.SendWebRequest();
 
 			// WaitForSeconds(0.1f) helps preventing multiple GETs without POST:
-			yield return new WaitForSeconds(0.1f);
+			yield return new WaitForSeconds(0.5f);
 		}
 	}
 
