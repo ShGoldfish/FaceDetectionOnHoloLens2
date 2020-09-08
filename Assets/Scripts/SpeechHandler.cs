@@ -36,8 +36,6 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
         //currentlySaying = new StringBuilder();
         textSoFar = new StringBuilder("");
 
-        Debug.Log(" contextAwareManager.isTalking: " + manager.isTalking);
-
         PhraseRecognitionSystem.Shutdown();
         dictationRecognizer.Start();
         // Query the maximum frequency of the default microphone. Use 'unused' to ignore the minimum frequency.

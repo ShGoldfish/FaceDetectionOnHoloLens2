@@ -28,6 +28,7 @@ public class Manager : MonoBehaviour
 		showIP = true;
 		msgFace = GameObject.Find("MessageFace").GetComponent<TextMesh>();
 		msgVoice = GameObject.Find("MessageVoice").GetComponent<TextMesh>();
+		ipEndPoint = "http://192.168.0.7:9005";
 		msgFace.text = "Connect Face detection to the IP Address: " + ipEndPoint;
 
 		// Context Management

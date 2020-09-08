@@ -1,5 +1,9 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.XR.WSA.WebCam;
 
 public class photoCapture : MonoBehaviour
@@ -63,6 +67,11 @@ public class photoCapture : MonoBehaviour
 			// Write to file
 			manager.imageBufferBytesArray = targetTexture.EncodeToJPG(25); // pass a low num 25
 
+			// Communications to Server:
+			StartCoroutine("PostPhoto");
+			StartCoroutine("GetFaces");
+			//StartCoroutine("HelloWorld");
+
 			// Taken from https://forum.unity.com/threads/implementing-locatable-camera-shader-code.417261/
 			photoCaptureFrame.TryGetCameraToWorldMatrix(out manager.cameraToWorldMatrix);
 			photoCaptureFrame.TryGetProjectionMatrix(out manager.projectionMatrix);
@@ -89,5 +98,85 @@ public class photoCapture : MonoBehaviour
 		world.y = (to.y - (world.z * axsY.z)) / axsY.y;
 		world.x = (to.x - (world.z * axsX.z)) / axsX.x;
 		return world;
+	}
+
+
+	/// <summary>
+	/// Network Connection Coroutines
+	/// Sends a photo through HTTP Request which can be handles by Flask on Python.
+	/// </summary>
+	private IEnumerator PostPhoto()
+	{
+		var data = new List<IMultipartFormSection> {
+			new MultipartFormFileSection("myImage", manager.imageBufferBytesArray, "test.jpg", "image/jpg")
+		};
+
+		using (UnityWebRequest webRequest = UnityWebRequest.Post(manager.ipEndPoint + "/detect-faces", data))
+		{
+			webRequest.SendWebRequest();
+
+			// WaitForSeconds(0.1f) helps preventing multiple GETs without POST:
+			yield return new WaitForSeconds(0.1f);
+		}
+	}
+
+
+	/// <summary>
+	/// Network Connection Coroutines
+	/// Recieves the number of faces detected from the image sent by POST above through HTTP Request (Flask on Python).
+	/// </summary>
+	private IEnumerator GetFaces()
+	{
+		using (UnityWebRequest webRequest = UnityWebRequest.Get(manager.ipEndPoint + "/detection-result"))
+		{
+			yield return webRequest.SendWebRequest();
+			
+			if (webRequest.isNetworkError)
+			{
+				Debug.Log("Error: " + webRequest.error);
+			}
+			else
+			{
+				string dataReceived = webRequest.downloadHandler.text;
+				print("dataReceived from python is: " + dataReceived);
+
+				manager.num_faces = 0;
+				manager.faces_box = new List<List<int>>();
+				if (dataReceived != null && dataReceived != " ")
+				{
+					List<float> numbers = Array.ConvertAll(dataReceived.Split(','), float.Parse).ToList();
+					for (int i = 0; i < numbers.Count; i += 4)
+					{
+						manager.faces_box.Add(new List<int> { Convert.ToInt32(numbers[i]), Convert.ToInt32(numbers[i + 1]), Convert.ToInt32(numbers[i + 2]), Convert.ToInt32(numbers[i + 3]) });
+						manager.num_faces++;
+					}
+				}
+				print("Num-Faces: " + manager.num_faces);
+
+			}
+		}
+	}
+
+
+	/// <summary>
+	/// Network Connection Coroutines
+	/// For the purpose of testing the connection: Recieves a "Hello World string "through HTTP Request which was send by by Flask on Python.
+	/// </summary>
+	/// <returns></returns>
+	private IEnumerator HelloWorld()
+	{
+		using (UnityWebRequest webRequest = UnityWebRequest.Get(manager.ipEndPoint + "/"))
+		{
+			yield return webRequest.SendWebRequest();
+			if (webRequest.isNetworkError)
+			{
+				Debug.Log("Error: " + webRequest.error);
+			}
+			else
+			{
+				string dataReceived = webRequest.downloadHandler.text;
+				print("dataReceived from python is: " + dataReceived);
+			}
+		}
 	}
 }
