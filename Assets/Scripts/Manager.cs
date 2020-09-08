@@ -7,7 +7,6 @@ public class Manager : MonoBehaviour
 	public string ipEndPoint;
 	TextMesh msgVoice;
 	TextMesh msgFace;
-	bool showIP;
 
 	// Context Management
 	public bool isTalking;
@@ -19,18 +18,14 @@ public class Manager : MonoBehaviour
 	public Matrix4x4 cameraToWorldMatrix;
 	public Matrix4x4 projectionMatrix;
 
-	// Test
-	bool test;
-
 	private void Start()
 	{
 		// Textbox Management
-		showIP = true;
 		msgFace = GameObject.Find("MessageFace").GetComponent<TextMesh>();
 		msgVoice = GameObject.Find("MessageVoice").GetComponent<TextMesh>();
 		ipEndPoint = "http://192.168.0.12:9005";
 		ipEndPoint = "http://192.168.0.7:9005";
-		ipEndPoint = "http://45.3.120.11:9005";
+		ipEndPoint = "http://45.3.120.227:9005";
 		msgFace.text = "Connect Face detection to the IP Address: " + ipEndPoint;
 
 		// Context Management
@@ -38,45 +33,25 @@ public class Manager : MonoBehaviour
 		isTalking = false;
 		num_faces = 0;
 
-		// Test
-		test = true;
 	}
 
 	private void Update()
 	{
-		UpdateTestboxes();
-	}
-
-	private void UpdateTestboxes()
-	{
-		if (showIP)
-		{
-			if (num_faces == 0)
-			{
-				msgFace.text = "Connect Face detection to the IP Address: " + ipEndPoint.Substring(0, ipEndPoint.Length - 5);
-			}
-			else
-			{
-				msgFace.text = "Number of faces: " + num_faces.ToString();
-				showIP = false;
-			}
-		}
-		// Update text 
-		else
-			msgFace.text = "Number of faces: " + num_faces.ToString();
+		// Update the text boxes
+		msgFace.text = "Number of faces: " + num_faces.ToString();
 		msgVoice.text = "Ongoing conversation: " + isTalking;
 	}
 
 
 	// Used in App manager
-	public bool InConversation()
-	{
-		if (num_faces > 0 && isTalking)
-		{
-			return true;
-		}
-		return false;
-	}
+	//public bool InConversation()
+	//{
+	//	if (num_faces > 0 && isTalking)
+	//	{
+	//		return true;
+	//	}
+	//	return false;
+	//}
 
 	//private void drawLineRenderer()
 	//{

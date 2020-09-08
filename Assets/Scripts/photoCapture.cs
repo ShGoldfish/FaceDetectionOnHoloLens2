@@ -1,10 +1,11 @@
-﻿using System;
+﻿using System.Collections.Generic;
+using UnityEngine.XR.WSA.WebCam;
+using UnityEngine.Networking;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Networking;
-using UnityEngine.XR.WSA.WebCam;
+using System;
+
 
 public class photoCapture : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class photoCapture : MonoBehaviour
 	Renderer m_CanvasRenderer = null;
 	CameraParameters m_CameraParameters;
 
+	// Constants
+	const float WAIT_TIME4POST = 0.25f;
+	const int JPG_QUALITY = 3;
 
 	void Start()
 	{
@@ -66,7 +70,7 @@ public class photoCapture : MonoBehaviour
 
 			// Write to file
 			//manager.imageBufferBytesArray = targetTexture.EncodeToJPG(25); // pass a low num 25
-			manager.imageBufferBytesArray = targetTexture.EncodeToJPG(3); // pass a low num 25
+			manager.imageBufferBytesArray = targetTexture.EncodeToJPG(JPG_QUALITY); // pass a low num 25
 
 			// Communications to Server:
 			StartCoroutine("PostPhoto");
@@ -117,7 +121,7 @@ public class photoCapture : MonoBehaviour
 			webRequest.SendWebRequest();
 
 			// WaitForSeconds(0.1f) helps preventing multiple GETs without POST:
-			yield return new WaitForSeconds(0.5f);
+			yield return new WaitForSeconds(WAIT_TIME4POST);
 		}
 	}
 
