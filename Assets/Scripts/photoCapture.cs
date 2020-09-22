@@ -18,9 +18,12 @@ public class photoCapture : MonoBehaviour
 	Renderer m_CanvasRenderer = null;
 	CameraParameters m_CameraParameters;
 
+	// Debugging
+	float time_before_send;
+
 	// Constants
-	const float WAIT_TIME4POST = 0.25f;
-	const int JPG_QUALITY = 3;
+	const float WAIT_TIME4POST = 0.2f;
+	const int JPG_QUALITY = 20;
 
 	void Start()
 	{
@@ -36,6 +39,9 @@ public class photoCapture : MonoBehaviour
 		m_CameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
 
 		PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
+
+		// Debugging
+		time_before_send = 0.0f;
 	}
 
 	private void OnPhotoCaptureCreated(PhotoCapture captureObject)
@@ -112,15 +118,15 @@ public class photoCapture : MonoBehaviour
 	/// </summary>
 	private IEnumerator PostPhoto()
 	{
+		// Debugging
+		time_before_send = Time.time;
+
 		var data = new List<IMultipartFormSection> {
 			new MultipartFormFileSection("myImage", manager.imageBufferBytesArray, "test.jpg", "image/jpg")
 		};
-
 		using (UnityWebRequest webRequest = UnityWebRequest.Post(manager.ipEndPoint + "/receive-image", data))
 		{
 			webRequest.SendWebRequest();
-
-			// WaitForSeconds(0.1f) helps preventing multiple GETs without POST:
 			yield return new WaitForSeconds(WAIT_TIME4POST);
 		}
 	}
@@ -143,7 +149,10 @@ public class photoCapture : MonoBehaviour
 			else
 			{
 				string dataReceived = webRequest.downloadHandler.text;
-				print("dataReceived from python is: _" + dataReceived + "_");
+
+				// Debugging
+				//print("dataReceived from python is: _" + dataReceived + "_");
+				print("Network Connection took " + (Time.time - time_before_send) + " seconds.");    // ~0.065seconds
 
 				manager.num_faces = 0;
 				manager.faces_box = new List<List<int>>();
@@ -156,7 +165,9 @@ public class photoCapture : MonoBehaviour
 						manager.num_faces++;
 					}
 				}
-				print("Num-Faces: " + manager.num_faces);
+
+				// Debugging
+				//print("Num-Faces: " + manager.num_faces);
 			}
 		}
 	}

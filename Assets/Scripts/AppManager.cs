@@ -2,6 +2,7 @@
 using System.Collections;
 using UnityEngine;
 using System;
+using UnityEditor;
 
 public class AppManager : MonoBehaviour
 {
@@ -30,6 +31,7 @@ public class AppManager : MonoBehaviour
 		StartCoroutine( UpdateTranslucency(blocking));
 		msgBlocking.text = "Is Blocking a Face: " + blocking;
 		frameSinceTranslucency++;
+
 	}
 
 
@@ -81,26 +83,31 @@ public class AppManager : MonoBehaviour
 		minY1 = corners[1];
 		maxX1 = corners[2];
 		maxY1 = corners[3];
-		Vector3 cam_app_min = manager.cameraToWorldMatrix.inverse * new Vector3(minX1, minY1, 1.0f);
-		Vector3 cam_app_max = manager.cameraToWorldMatrix.inverse * new Vector3(maxX1, maxY1, 1.0f);
+		Vector3 cam_app_min = manager.cameraToWorldMatrix.inverse * new Vector3(minX1, minY1);
+		Vector3 cam_app_max = manager.cameraToWorldMatrix.inverse * new Vector3(maxX1, maxY1);
 
 		// Face
 		minX2 = faceBox[0];
 		minY2 = faceBox[1];
 		maxX2 = faceBox[2] - minX2;
 		maxY2 = faceBox[3] - minY2;
-		Vector3 faceInRW_min = photoCapture.UnProjectVector(manager.projectionMatrix, new Vector3(minX2, minY2, 1.0f));
-		Vector3 faceInRW_max = photoCapture.UnProjectVector(manager.projectionMatrix, new Vector3(maxX2, maxY2, 1.0f));
+		Vector3 faceInRW_min = photoCapture.UnProjectVector(manager.projectionMatrix, new Vector3(minX2, minY2));
+		Vector3 faceInRW_max = photoCapture.UnProjectVector(manager.projectionMatrix, new Vector3(maxX2, maxY2));
 		Vector3 cam_face_min = manager.cameraToWorldMatrix.inverse * faceInRW_min;
 		Vector3 cam_face_max = manager.cameraToWorldMatrix.inverse * faceInRW_max;
 		Rect faceBoxOnCam = new Rect(cam_face_min.x, cam_face_min.y, cam_face_max.x, cam_face_max.y);
+
+		//Vector3 pts0 = manager.cameraToWorldMatrix.inverse * photoCapture.UnProjectVector(manager.projectionMatrix, new Vector3(faceBox[0], faceBox[1]));
+		//Vector3 pts1 = manager.cameraToWorldMatrix.inverse * photoCapture.UnProjectVector(manager.projectionMatrix, new Vector3(faceBox[0] + faceBox[2], faceBox[1] + faceBox[3]));
+		//Rect faceBoxOnCam = new Rect(pts0.x, pts0.y, pts1.x - pts0.x, pts1.y - pts0.y);
+
 		return faceBoxOnCam.Overlaps(new Rect(minX1, minY1, maxX1, maxY1));
 	}
 
 
 	public void ChangeFixation()
 	{
-		print(gameObject.name + " changing fixation!");
+		//print(gameObject.name + " changing fixation!");
 		
 		otherGO.transform.position = transform.position;
 		otherGO.transform.rotation = transform.rotation;
