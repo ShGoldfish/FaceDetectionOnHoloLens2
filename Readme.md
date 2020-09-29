@@ -1,44 +1,57 @@
 # Face Detection on HoloLens2 
 
-Connection over server to do openCV section in python on PC.
-
 ### Unity 2018.4
 ### Code is on VS 2017
 ### Build is on VS 2019
 
 ## Scene:
 Make sure name of the game objects (Specially the ones in "" are Exactly the same)
-* Add MRTK 2.4
+* Add MRTK 2.4 (Foundation)
 	* Add to scene
 		* Clone Profile/Input/Speech
 * GameObject: "Manager"
-	* NetworkCon.cs
-		* Connection Port: 9005
-	* Context Detection
-		* Num_faces: 0
-		Is Talking: false
-	* Speech Handler
-* Main Camera
-	* PhotoCapture.cs 
-	* it's Children:
-		* Application
-			* SpriteRenderer
-			* AppManager.cs
-		* "MessageFace" [is a 3D object -> 3DText] Anchor/alignment: Lower Right/Left
-		* "MessageVoice" [is a 3D object -> 3DText] Anchor/alignment: Upper right/Right
+	* Manager (Script)
+	* Speech Handler (Script)
+* MixedRealityPlayspace
+	* Main Camera
+		* Photo Capture (Script) 
+		* it's Children:
+			* GameObject: HeadFixedApplications
+				* GameObject: App1
+					* SpriteRenderer
+					* Box Collider
+					* App Manager (Script) 
+						* attribute: other GO :(WorldFixedApplications/App1)
+						* attribute: MsgBlocking -> its child
+					* Input Action Handler:
+						* attribute: isFocusRequired: true
+						* attribute: InputAction: Select
+						* attribute: OnInputActionStarted
+							* attribute: -> App 1
+							* attribute: AppManager.ChangeFixation
+					* Children:
+						* GameObject: "MsgBlocking1" [is a 3D object -> 3DText] Anchor/alignment: Lower Right/Left
+						* GameObject: "FxationIcon"
+							* Box Collider
+							* Sprite Renderer
+				* GameObject: App 2 : same as App1
+				* GameObject: App 3 : same as App1
+				* GameObject: Notes
+					* GameObject: "MessageFace" [is a 3D object -> 3DText] Anchor/alignment: Lower Right/Left
+					* GameObject: "MessageVoice" [is a 3D object -> 3DText] Anchor/alignment: Upper right/Right
+* GameObject: WorldFixedApplications
+	* GameObject: App 1 [disable]
+		* Copy HeadFixedApplications/App1
+		* App Manager (Script) 
+			* Attr: other GO :(HeadFixedApplications/App1)
+	* GameObject: App 2 [disable] : same as App1
+	* GameObject: App 3 [disable] : same as App1
 
-## After Build:  
-* Make sure you do [this](https://stackoverflow.com/questions/62314810/on-a-hololens-1-when-creating-tcpclient-object-with-default-constructor-argume)
 
-# Python Code
-* make sure the other 2 files are in thesame dir
-* make sure in the python code:
-	* ip is the same as HoloLens 2's IP
-	* conf is set as desired
-* Do not change the port # [9005 looks to be the only working one!]
+## Requirements:
+* Run faceDetection.py on the server.
+* Make sure the in ipEndPoint in Manager.cs matches your server's ip
 
 
 Probably urelated:
 * Project Settings -> Graphics -> Always-included Shaders: increase the num and add the shader (AR/HolographicImageBlendShader)
-
-
