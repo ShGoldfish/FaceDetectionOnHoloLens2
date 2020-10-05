@@ -21,8 +21,8 @@ public class RenderBox : MonoBehaviour
 		axisRenderer = gameObject.GetComponent<LineRenderer>();
 		axisRenderer.material = new Material(Shader.Find("Custom/lrShader"));
 		axisRenderer.enabled = true;
-		axisRenderer.startWidth = 0.002f;
-		axisRenderer.endWidth = 0.002f;
+		axisRenderer.startWidth = 0.1f; //0.002f;
+		axisRenderer.endWidth = 0.1f; //0.002f;
 		axisRenderer.material.color = c2;
 		axisRenderer.startColor = c2;
 		axisRenderer.endColor = c2;
@@ -36,24 +36,19 @@ public class RenderBox : MonoBehaviour
 	void DrawCurrentApp()
 	{
 		List<int> corners = AppManager.Corners(gameObject);
-
+		float z = gameObject.transform.position.z;
 		pt0 = Camera.main.ScreenToWorldPoint(	new Vector3(	corners[0], 
 																corners[1],
-																Camera.main.nearClipPlane));
+																z));
 		pt1 = Camera.main.ScreenToWorldPoint(	new Vector3(	corners[0] + corners[2],
 																corners[1],
-																Camera.main.nearClipPlane));
+																z)); //Camera.main.nearClipPlane));
 		pt2 = Camera.main.ScreenToWorldPoint(	new Vector3(	corners[0] + corners[2],
 																corners[1] + corners[3],
-																Camera.main.nearClipPlane));
+																z));
 		pt3 = Camera.main.ScreenToWorldPoint(	new Vector3(	corners[0],
 																corners[1] + corners[3],
-																Camera.main.nearClipPlane));
-
-		//pt0 = Manager.cameraToWorldMatrix * new Vector3(corners[0], corners[1], Camera.main.nearClipPlane);
-		//pt1 = Manager.cameraToWorldMatrix * new Vector3(corners[0] + corners[2], corners[1], Camera.main.nearClipPlane);
-		//pt2 = Manager.cameraToWorldMatrix * new Vector3(corners[0] + corners[2], corners[1] + corners[3], Camera.main.nearClipPlane);
-		//pt3 = Manager.cameraToWorldMatrix * new Vector3(corners[0], corners[1] + corners[3], Camera.main.nearClipPlane);
+																z));
 
 		axisRenderer.positionCount = 5;
 		axisRenderer.SetPosition(0, pt0);
@@ -65,16 +60,19 @@ public class RenderBox : MonoBehaviour
 
 	void DrawFaceBox()
 	{
+		float z = gameObject.transform.position.z;
 		// Get minX, minY, maxX and maxY of the face in RW
 		List<int> corners = gameObject.GetComponent<AppManager>().faceBoxToShow;
 		if (corners == null)
 		{
 			return;
 		}
-		pt0 = new Vector3(corners[0], corners[1], Camera.main.nearClipPlane);
-		pt1 = new Vector3(corners[2], corners[1], Camera.main.nearClipPlane);
-		pt2 = new Vector3(corners[2], corners[3], Camera.main.nearClipPlane);
-		pt3 = new Vector3(corners[0], corners[3], Camera.main.nearClipPlane);
+
+
+		pt0 = Camera.main.ScreenToWorldPoint(new Vector3(corners[0], corners[1], z));
+		pt1 = Camera.main.ScreenToWorldPoint(new Vector3(corners[2], corners[1], z));
+		pt2 = Camera.main.ScreenToWorldPoint(new Vector3(corners[2], corners[3], z));
+		pt3 = Camera.main.ScreenToWorldPoint(new Vector3(corners[0], corners[3], z));
 
 		axisRenderer.positionCount = 5;
 		axisRenderer.SetPosition(0, pt0);

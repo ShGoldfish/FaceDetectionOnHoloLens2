@@ -88,46 +88,31 @@ public class AppManager : MonoBehaviour
 		appY_onScreen = corners[1];
 		appW_onScreen = corners[2];
 		appH_onScreen = corners[3];
-		//Vector3 cam_app_min = Manager.cameraToWorldMatrix.inverse * new Vector3(minX1, minY1, Camera.main.nearClipPlane);
-		//Vector3 cam_app_max = Manager.cameraToWorldMatrix.inverse * new Vector3(maxX1, maxY1, Camera.main.nearClipPlane);
 
 		// Face
 		// On Camera startX, startY, endX, endY of the face
 		faceStartX_onCam = faceBox[0];
 		faceStartY_onCam = faceBox[1];
-		faceEndX_onCam = faceBox[2];// - faceStartX_onCam;
-		faceEndY_onCam = faceBox[3];// - faceStartY_onCam;
+		faceEndX_onCam = faceBox[2];
+		faceEndY_onCam = faceBox[3];
 
 		// Unproject the 2D points in the image to get the points in the world 
 		Vector3 faceInRW_pt0 = Manager.UnProjectVector(new Vector3(faceStartX_onCam,
-																	faceStartY_onCam));		//, Camera.main.nearClipPlane));
+																	faceStartY_onCam));		
 		Vector3 faceInRW_pt2 = Manager.UnProjectVector(new Vector3(faceEndX_onCam,
-																	faceEndY_onCam)); // , Camera.main.nearClipPlane));
-		//Vector3 faceInRW_pt0 = Manager.cameraToWorldMatrix * new Vector3(faceStartX_onCam,
-		//															faceStartY_onCam);
-		//Vector3 faceInRW_pt2 = Manager.cameraToWorldMatrix * new Vector3(faceEndX_onCam,
-		//															faceEndY_onCam);
+																	faceEndY_onCam)); 
+
 
 
 		// Translate the points from world space to camera space
 		Vector3 cam_face_pt0 = Manager.cameraToWorldMatrix.inverse * faceInRW_pt0;
 		Vector3 cam_face_pt2 = Manager.cameraToWorldMatrix.inverse * faceInRW_pt2;
-		//// Translate the points from world space to Screen space
-		//Vector3 cam_face_pt0 = Camera.main.WorldToScreenPoint(faceInRW_pt0);
-		//Vector3 cam_face_pt2 = Camera.main.WorldToScreenPoint(faceInRW_pt2);
-
 
 		Rect faceBoxOnScreen = new Rect(cam_face_pt0.x,
 										cam_face_pt0.y,
 										cam_face_pt2.x - cam_face_pt0.x,
 										cam_face_pt2.y - cam_face_pt0.y);
 
-		// Renderer purposes
-		// Sends Xmin, ymin, xmax, ymax on RW
-		//faceBoxToShow = new List<int>() {   Convert.ToInt32(faceInRW_pt0.x),
-		//									Convert.ToInt32(faceInRW_pt0.y),
-		//									Convert.ToInt32(faceInRW_pt2.x),
-		//									Convert.ToInt32(faceInRW_pt2.y) };
 		faceBoxToShow = new List<int>() {   Convert.ToInt32(cam_face_pt0.x),
 											Convert.ToInt32(cam_face_pt0.y),
 											Convert.ToInt32(cam_face_pt2.x),
