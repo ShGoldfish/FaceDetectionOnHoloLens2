@@ -1,11 +1,11 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
 using System.Net.Sockets;
+using System.Threading;
 using System.Text;
 using UnityEngine;
-using System.Threading;
-using System.Collections.Generic;
-using System;
 using System.Linq;
+using System.Net;
+using System;
 
 /// <summary>
 /// ORIGINAL Working code: here Hololens is as the Server. Idealy we want it ro be client
@@ -21,6 +21,7 @@ public class NetworkCon : MonoBehaviour
 	// Shared date over Server and Client connection
 	Manager manager;
 
+
 	private void Start()
 	{
 		manager = gameObject.GetComponent<Manager>();
@@ -32,8 +33,8 @@ public class NetworkCon : MonoBehaviour
 		mThread_get = new Thread(ts_get);
 		mThread_get.Start();
 		//Debug.Log("Shakiba's app trying net connection.");
-
 	}
+
 
 	public static IPAddress GetLocalIPAddress()
 	{
@@ -48,6 +49,7 @@ public class NetworkCon : MonoBehaviour
 		throw new Exception("No network adapters with an IPv4 address in the system!");
 	}
 
+
 	void GetInfo()
 	{
 		Socket listenerSoc = new Socket(GetLocalIPAddress().AddressFamily,
@@ -60,6 +62,7 @@ public class NetworkCon : MonoBehaviour
 		while (true)
 			ConnectionRec();
 	}
+
 
 	void ConnectionRec()
 	{
@@ -82,6 +85,7 @@ public class NetworkCon : MonoBehaviour
 			}
 		}
 	}
+
 
 	void OnDestroy()
 	{

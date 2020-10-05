@@ -84,8 +84,8 @@ public class photoCapture : MonoBehaviour
 			//StartCoroutine("HelloWorld");
 
 			// Taken from https://forum.unity.com/threads/implementing-locatable-camera-shader-code.417261/
-			photoCaptureFrame.TryGetCameraToWorldMatrix(out manager.cameraToWorldMatrix);
-			photoCaptureFrame.TryGetProjectionMatrix(out manager.projectionMatrix);
+			print(photoCaptureFrame.TryGetCameraToWorldMatrix(out Manager.cameraToWorldMatrix));
+			print(photoCaptureFrame.TryGetProjectionMatrix(out Manager.projectionMatrix));
 			// print("/////////////////////TryGetProjectionMatrix" );
 		}
 	}
@@ -95,22 +95,6 @@ public class photoCapture : MonoBehaviour
 		photoCaptureObject.Dispose();
 		photoCaptureObject = null;
 	}
-
-
-	// Taken from https://docs.microsoft.com/en-us/windows/mixed-reality/locatable-camera
-	// Helper method to convert hololens application space to world space
-	public static Vector3 UnProjectVector(Matrix4x4 proj, Vector3 to)
-	{
-		Vector3 world = new Vector3(0, 0, 0);
-		var axsX = proj.GetRow(0);
-		var axsY = proj.GetRow(1);
-		var axsZ = proj.GetRow(2);
-		world.z = to.z / axsZ.z;
-		world.y = (to.y - (world.z * axsY.z)) / axsY.y;
-		world.x = (to.x - (world.z * axsX.z)) / axsX.x;
-		return world;
-	}
-
 
 	/// <summary>
 	/// Network Connection Coroutines

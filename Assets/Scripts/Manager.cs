@@ -15,9 +15,8 @@ public class Manager : MonoBehaviour
 
 	// PhotoCapture Variables
 	public byte[] imageBufferBytesArray;
-	public Matrix4x4 cameraToWorldMatrix;
-	public Matrix4x4 projectionMatrix;
-
+	public static Matrix4x4 cameraToWorldMatrix;
+	public static Matrix4x4 projectionMatrix;
 
 	private void Start()
 	{
@@ -40,6 +39,25 @@ public class Manager : MonoBehaviour
 		// Update the text boxes
 		msgFace.text = "Number of faces: " + num_faces.ToString();
 		msgVoice.text = "Ongoing conversation: " + isTalking;
+	}
+
+
+	// Taken from https://docs.microsoft.com/en-us/windows/mixed-reality/locatable-camera
+	/// <summary>
+	/// Helper method to convert hololens application space to world space
+	/// </summary>
+	/// <param name="to"></param>
+	/// <returns></returns>
+	public static Vector3 UnProjectVector(Vector3 img)
+	{
+		Vector3 world = new Vector3(0, 0, 0);
+		var axsX = projectionMatrix.GetRow(0);
+		var axsY = projectionMatrix.GetRow(1);
+		var axsZ = projectionMatrix.GetRow(2);
+		world.z = img.z / axsZ.z;
+		world.y = (img.y - (world.z * axsY.z)) / axsY.y;
+		world.x = (img.x - (world.z * axsX.z)) / axsX.x;
+		return world;
 	}
 }
 

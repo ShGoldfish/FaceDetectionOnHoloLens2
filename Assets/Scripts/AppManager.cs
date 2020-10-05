@@ -2,24 +2,24 @@
 using System.Collections;
 using UnityEngine;
 using System;
-using UnityEditor;
 
 public class AppManager : MonoBehaviour
 {
 	// General 
 	Manager manager;
-	private Camera cam;
 
 	// Each App's vars
 	public GameObject otherGO;
 	public TextMesh msgBlocking;
 	int frameSinceTranslucency;
 
+	// Renderer purposes
+	public List<int> faceBoxToShow = null;
+
 
 	private void Start()
 	{
 		manager = GameObject.Find("Manager").GetComponent<Manager>();
-		cam = Camera.main;
 		frameSinceTranslucency = 0;
 	}
 
@@ -31,7 +31,6 @@ public class AppManager : MonoBehaviour
 		StartCoroutine( UpdateTranslucency(blocking));
 		msgBlocking.text = "Is Blocking a Face: " + blocking;
 		frameSinceTranslucency++;
-
 	}
 
 
@@ -60,6 +59,9 @@ public class AppManager : MonoBehaviour
 
 	private bool IsBlockingAnyFaces()
 	{
+		// Renderer purposes
+		faceBoxToShow = null;
+
 		foreach (List<int> faceBox in manager.faces_box)
 		{
 			// Commentd for Test purpose only:
@@ -70,38 +72,67 @@ public class AppManager : MonoBehaviour
 			// uncommentd for Test purpose only:
 			//return true;
 		}
+
 		return false;
 	}
 
 
 	private bool IsOverlapping(List<int> faceBox)
 	{
-		float minX1, minY1, maxX1, maxY1, minX2, minY2, maxX2, maxY2;
+		float	appX_onScreen, appY_onScreen, appW_onScreen, appH_onScreen,
+				faceStartX_onCam, faceStartY_onCam, faceEndX_onCam, faceEndY_onCam;
 		// App
 		List<int> corners = Corners(gameObject);
-		minX1 = corners[0];
-		minY1 = corners[1];
-		maxX1 = corners[2];
-		maxY1 = corners[3];
-		Vector3 cam_app_min = manager.cameraToWorldMatrix.inverse * new Vector3(minX1, minY1);
-		Vector3 cam_app_max = manager.cameraToWorldMatrix.inverse * new Vector3(maxX1, maxY1);
+		// onScreen x, y, w, h
+		appX_onScreen = corners[0];
+		appY_onScreen = corners[1];
+		appW_onScreen = corners[2];
+		appH_onScreen = corners[3];
+		//Vector3 cam_app_min = Manager.cameraToWorldMatrix.inverse * new Vector3(minX1, minY1, Camera.main.nearClipPlane);
+		//Vector3 cam_app_max = Manager.cameraToWorldMatrix.inverse * new Vector3(maxX1, maxY1, Camera.main.nearClipPlane);
 
 		// Face
-		minX2 = faceBox[0];
-		minY2 = faceBox[1];
-		maxX2 = faceBox[2] - minX2;
-		maxY2 = faceBox[3] - minY2;
-		Vector3 faceInRW_min = photoCapture.UnProjectVector(manager.projectionMatrix, new Vector3(minX2, minY2));
-		Vector3 faceInRW_max = photoCapture.UnProjectVector(manager.projectionMatrix, new Vector3(maxX2, maxY2));
-		Vector3 cam_face_min = manager.cameraToWorldMatrix.inverse * faceInRW_min;
-		Vector3 cam_face_max = manager.cameraToWorldMatrix.inverse * faceInRW_max;
-		Rect faceBoxOnCam = new Rect(cam_face_min.x, cam_face_min.y, cam_face_max.x, cam_face_max.y);
+		// On Camera startX, startY, endX, endY of the face
+		faceStartX_onCam = faceBox[0];
+		faceStartY_onCam = faceBox[1];
+		faceEndX_onCam = faceBox[2];
+		faceEndY_onCam = faceBox[3];
 
-		//Vector3 pts0 = manager.cameraToWorldMatrix.inverse * photoCapture.UnProjectVector(manager.projectionMatrix, new Vector3(faceBox[0], faceBox[1]));
-		//Vector3 pts1 = manager.cameraToWorldMatrix.inverse * photoCapture.UnProjectVector(manager.projectionMatrix, new Vector3(faceBox[0] + faceBox[2], faceBox[1] + faceBox[3]));
-		//Rect faceBoxOnCam = new Rect(pts0.x, pts0.y, pts1.x - pts0.x, pts1.y - pts0.y);
+		// Unproject the 2D points in the image to get the points in the world 
+		Vector3 faceInRW_pt0 = Manager.UnProjectVector(new Vector3(faceStartX_onCam,
+																	faceStartY_onCam));
+		Vector3 faceInRW_pt2 = Manager.UnProjectVector(new Vector3(faceEndX_onCam,
+																	faceEndY_onCam));
 
-		return faceBoxOnCam.Overlaps(new Rect(minX1, minY1, maxX1, maxY1));
+		//Vector3 faceInRW_pt0 = Manager.cameraToWorldMatrix * new Vector3(faceStartX_onCam,
+		//															faceStartY_onCam);
+		//Vector3 faceInRW_pt2 = Manager.cameraToWorldMatrix * new Vector3(faceEndX_onCam,
+		//															faceEndY_onCam);
+
+		// Translate the points from world space to camera space
+		//Vector3 cam_face_pt0 = Manager.cameraToWorldMatrix.inverse * faceInRW_pt0;
+		//Vector3 cam_face_pt2 = Manager.cameraToWorldMatrix.inverse * faceInRW_pt2;
+
+		//// Translate the points from world space to Screen space
+		Vector3 cam_face_pt0 = Camera.main.WorldToScreenPoint(faceInRW_pt0);
+		Vector3 cam_face_pt2 = Camera.main.WorldToScreenPoint(faceInRW_pt2);
+
+		Rect faceBoxOnScreen = new Rect(cam_face_pt0.x,
+										cam_face_pt0.y, 
+										cam_face_pt2.x - cam_face_pt0.x,
+										cam_face_pt2.y - cam_face_pt0.y);
+
+		// Renderer purposes
+		
+		faceBoxToShow = new List<int>() {	Convert.ToInt32(faceInRW_pt0.x),
+											Convert.ToInt32(faceInRW_pt0.y),
+											Convert.ToInt32(faceInRW_pt2.x),
+											Convert.ToInt32(faceInRW_pt2.y) };
+
+		return faceBoxOnScreen.Overlaps(new Rect(	appX_onScreen, 
+													appY_onScreen,
+													appW_onScreen,
+													appH_onScreen));
 	}
 
 
@@ -116,7 +147,6 @@ public class AppManager : MonoBehaviour
 		otherGOAppManager.manager = GameObject.Find("Manager").GetComponent<Manager>();
 		otherGOAppManager.frameSinceTranslucency = frameSinceTranslucency;
 		//otherGOAppManager.isTranslucent = isTranslucent;
-		otherGOAppManager.cam = Camera.main;
 		otherGOAppManager.msgBlocking.text = msgBlocking.text;
 		otherGOAppManager.otherGO = gameObject;
 
@@ -140,13 +170,18 @@ public class AppManager : MonoBehaviour
 		return null;
 	}
 
-
-	private List<int> Corners(GameObject go)
+	/// <summary>
+	/// Returns the on screen x, y, w, h of the GameObject go's collider
+	/// </summary>
+	/// <param name="go"></param>
+	/// <returns></returns>
+	public static List<int> Corners(GameObject go)
 	{
 		Bounds bounds = go.GetComponent<Collider>().bounds;
 		Vector3 cen = bounds.center;
 		Vector3 ext = bounds.extents;
 		float screenheight = Screen.height;
+		Camera cam = Camera.main;
 		Vector2 min = cam.WorldToScreenPoint(new Vector3(cen.x - ext.x, cen.y - ext.y, cen.z - ext.z));
 		Vector2 max = min;
 
@@ -193,6 +228,5 @@ public class AppManager : MonoBehaviour
 
 		List<int> ret = new List<int> { Convert.ToInt32(min.x), Convert.ToInt32(min.y), Convert.ToInt32(max.x - min.x), Convert.ToInt32(max.y - min.y) };
 		return ret;
-
 	}
 }
