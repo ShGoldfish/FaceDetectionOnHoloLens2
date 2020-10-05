@@ -37,15 +37,23 @@ public class RenderBox : MonoBehaviour
 	{
 		List<int> corners = AppManager.Corners(gameObject);
 
-		pt0 = Camera.main.ScreenToWorldPoint(new Vector3(corners[0]					, corners[1]				, Camera.main.nearClipPlane));
-		pt1 = Camera.main.ScreenToWorldPoint(new Vector3(corners[0] + corners[2]	, corners[1]				, Camera.main.nearClipPlane));
-		pt2 = Camera.main.ScreenToWorldPoint(new Vector3(corners[0] + corners[2]	, corners[1] + corners[3]	, Camera.main.nearClipPlane));
-		pt3 = Camera.main.ScreenToWorldPoint(new Vector3(corners[0]					, corners[1] + corners[3]	, Camera.main.nearClipPlane));
+		pt0 = Camera.main.ScreenToWorldPoint(	new Vector3(	corners[0], 
+																corners[1],
+																Camera.main.nearClipPlane));
+		pt1 = Camera.main.ScreenToWorldPoint(	new Vector3(	corners[0] + corners[2],
+																corners[1],
+																Camera.main.nearClipPlane));
+		pt2 = Camera.main.ScreenToWorldPoint(	new Vector3(	corners[0] + corners[2],
+																corners[1] + corners[3],
+																Camera.main.nearClipPlane));
+		pt3 = Camera.main.ScreenToWorldPoint(	new Vector3(	corners[0],
+																corners[1] + corners[3],
+																Camera.main.nearClipPlane));
 
-		//pt0 = new Vector3(r.xMin, r.yMin);
-		//pt1 = new Vector3(r.xMax, r.yMin);
-		//pt2 = new Vector3(r.xMax, r.yMax);
-		//pt3 = new Vector3(r.xMin, r.yMax);
+		//pt0 = Manager.cameraToWorldMatrix * new Vector3(corners[0], corners[1], Camera.main.nearClipPlane);
+		//pt1 = Manager.cameraToWorldMatrix * new Vector3(corners[0] + corners[2], corners[1], Camera.main.nearClipPlane);
+		//pt2 = Manager.cameraToWorldMatrix * new Vector3(corners[0] + corners[2], corners[1] + corners[3], Camera.main.nearClipPlane);
+		//pt3 = Manager.cameraToWorldMatrix * new Vector3(corners[0], corners[1] + corners[3], Camera.main.nearClipPlane);
 
 		axisRenderer.positionCount = 5;
 		axisRenderer.SetPosition(0, pt0);
@@ -63,12 +71,10 @@ public class RenderBox : MonoBehaviour
 		{
 			return;
 		}
-		//List<int> corners = c();
-		pt0 = new Vector3(corners[0]				, corners[1], Camera.main.nearClipPlane);
-		pt1 = new Vector3(corners[2]				, corners[1], Camera.main.nearClipPlane);
-		pt2 = new Vector3(corners[2]				, corners[3], Camera.main.nearClipPlane);
-		pt3 = new Vector3(corners[0]				, corners[3], Camera.main.nearClipPlane);
-		//pt3 = Camera.main.ScreenToWorldPoint(new Vector3(corners[0], corners[1] + corners[3], Camera.main.nearClipPlane));
+		pt0 = new Vector3(corners[0], corners[1], Camera.main.nearClipPlane);
+		pt1 = new Vector3(corners[2], corners[1], Camera.main.nearClipPlane);
+		pt2 = new Vector3(corners[2], corners[3], Camera.main.nearClipPlane);
+		pt3 = new Vector3(corners[0], corners[3], Camera.main.nearClipPlane);
 
 		axisRenderer.positionCount = 5;
 		axisRenderer.SetPosition(0, pt0);
