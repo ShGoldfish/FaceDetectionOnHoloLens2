@@ -91,13 +91,13 @@ public class AppManager : MonoBehaviour
 		// On Camera startX, startY, endX, endY of the face
 		float faceStartX_onCam, faceStartY_onCam, faceEndX_onCam, faceEndY_onCam;
 		faceStartX_onCam = faceBox[0];
-		faceStartY_onCam = Screen.height - faceBox[1];
+		faceStartY_onCam = faceBox[1];
 		faceEndX_onCam = faceBox[2];
-		faceEndY_onCam = Screen.height - faceBox[3];
+		faceEndY_onCam = faceBox[3];
 
 		// Unproject the 2D points in the image to get the points in the world 
-		Vector3 faceInRW_pt0 = Manager.UnProjectVector(new Vector3(faceStartX_onCam, faceStartY_onCam));
-		Vector3 faceInRW_pt2 = Manager.UnProjectVector(new Vector3(faceEndX_onCam, faceEndY_onCam));
+		Vector3 faceInRW_pt0 = Manager.UnProjectVector(new Vector3(faceStartX_onCam, faceEndY_onCam));
+		Vector3 faceInRW_pt2 = Manager.UnProjectVector(new Vector3(faceEndX_onCam, faceStartY_onCam));
 		//faceInRW_pt0 = Camera.main.cameraToWorldMatrix * new Vector3(faceStartX_onCam, faceStartY_onCam);
 		//faceInRW_pt2 = Camera.main.cameraToWorldMatrix * new Vector3(faceEndX_onCam, faceEndY_onCam);
 
@@ -105,8 +105,8 @@ public class AppManager : MonoBehaviour
 		// Translate the points from world space to camera space
 		Vector3 cam_face_pt0 = Manager.cameraToWorldMatrix.inverse * faceInRW_pt0;
 		Vector3 cam_face_pt2 = Manager.cameraToWorldMatrix.inverse * faceInRW_pt2;
-		cam_face_pt0 = Manager.projectionMatrix * faceInRW_pt0;
-		cam_face_pt2 = Manager.projectionMatrix * faceInRW_pt2;
+		//cam_face_pt0 = Manager.projectionMatrix * faceInRW_pt0;
+		//cam_face_pt2 = Manager.projectionMatrix * faceInRW_pt2;
 
 		print("Before" + rect_faceBoxOnScreen.width);
 		rect_faceBoxOnScreen = new Rect(cam_face_pt0.x,
