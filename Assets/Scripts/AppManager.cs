@@ -14,7 +14,7 @@ public class AppManager : MonoBehaviour
 	int frameSinceTranslucency;
 
 	// Renderer purposes
-	public List<int> faceBoxToShow = null;
+	public Rect rect_faceBoxOnScreen, rect_app;
 
 
 	private void Start()
@@ -60,7 +60,7 @@ public class AppManager : MonoBehaviour
 	private bool IsBlockingAnyFaces()
 	{
 		// Renderer purposes
-		faceBoxToShow = null;
+		rect_faceBoxOnScreen = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
 
 		foreach (List<int> faceBox in manager.faces_box)
 		{
@@ -79,66 +79,55 @@ public class AppManager : MonoBehaviour
 
 	private bool IsOverlapping(List<int> faceBox)
 	{
-		float	appX_onScreen, appY_onScreen, appW_onScreen, appH_onScreen,
-				faceStartX_onCam, faceStartY_onCam, faceEndX_onCam, faceEndY_onCam;
-		// App
+		// *********************************App 
+		// OnScreen x, y, w, h
 		List<int> corners = Corners(gameObject);
-		// onScreen x, y, w, h
-		appX_onScreen = corners[0];
-		appY_onScreen = corners[1];
-		appW_onScreen = corners[2];
-		appH_onScreen = corners[3];
+		rect_app = new Rect(corners[0],
+							corners[1],
+							corners[2],
+							corners[3]);
 
-		// Face
+		// *********************************Face
 		// On Camera startX, startY, endX, endY of the face
+		float faceStartX_onCam, faceStartY_onCam, faceEndX_onCam, faceEndY_onCam;
 		faceStartX_onCam = faceBox[0];
-		faceStartY_onCam = faceBox[1];
+		faceStartY_onCam = Screen.height - faceBox[1];
 		faceEndX_onCam = faceBox[2];
-		faceEndY_onCam = faceBox[3];
+		faceEndY_onCam = Screen.height - faceBox[3];
 
 		// Unproject the 2D points in the image to get the points in the world 
-		Vector3 faceInRW_pt0 = Manager.UnProjectVector(new Vector3(faceStartX_onCam,
-																	faceStartY_onCam));		
-		Vector3 faceInRW_pt2 = Manager.UnProjectVector(new Vector3(faceEndX_onCam,
-																	faceEndY_onCam)); 
-
+		Vector3 faceInRW_pt0 = Manager.UnProjectVector(new Vector3(faceStartX_onCam, faceStartY_onCam));
+		Vector3 faceInRW_pt2 = Manager.UnProjectVector(new Vector3(faceEndX_onCam, faceEndY_onCam));
+		//faceInRW_pt0 = Camera.main.cameraToWorldMatrix * new Vector3(faceStartX_onCam, faceStartY_onCam);
+		//faceInRW_pt2 = Camera.main.cameraToWorldMatrix * new Vector3(faceEndX_onCam, faceEndY_onCam);
 
 
 		// Translate the points from world space to camera space
 		Vector3 cam_face_pt0 = Manager.cameraToWorldMatrix.inverse * faceInRW_pt0;
 		Vector3 cam_face_pt2 = Manager.cameraToWorldMatrix.inverse * faceInRW_pt2;
+		cam_face_pt0 = Manager.projectionMatrix * faceInRW_pt0;
+		cam_face_pt2 = Manager.projectionMatrix * faceInRW_pt2;
 
-		Rect faceBoxOnScreen = new Rect(cam_face_pt0.x,
+		print("Before" + rect_faceBoxOnScreen.width);
+		rect_faceBoxOnScreen = new Rect(cam_face_pt0.x,
 										cam_face_pt0.y,
 										cam_face_pt2.x - cam_face_pt0.x,
 										cam_face_pt2.y - cam_face_pt0.y);
-
-		faceBoxToShow = new List<int>() {   Convert.ToInt32(cam_face_pt0.x),
-											Convert.ToInt32(cam_face_pt0.y),
-											Convert.ToInt32(cam_face_pt2.x),
-											Convert.ToInt32(cam_face_pt2.y) };
-
-		return faceBoxOnScreen.Overlaps(new Rect(	appX_onScreen, 
-													appY_onScreen,
-													appW_onScreen,
-													appH_onScreen));
+		print("After" + rect_faceBoxOnScreen.width);
+		return rect_faceBoxOnScreen.Overlaps(rect_app);
 	}
 
 
 	public void ChangeFixation()
 	{
-		//print(gameObject.name + " changing fixation!");
-		
 		otherGO.transform.position = transform.position;
 		otherGO.transform.rotation = transform.rotation;
 
 		AppManager otherGOAppManager = otherGO.GetComponent<AppManager>();
 		otherGOAppManager.manager = GameObject.Find("Manager").GetComponent<Manager>();
 		otherGOAppManager.frameSinceTranslucency = frameSinceTranslucency;
-		//otherGOAppManager.isTranslucent = isTranslucent;
 		otherGOAppManager.msgBlocking.text = msgBlocking.text;
 		otherGOAppManager.otherGO = gameObject;
-
 		otherGO.SetActive(true);
 		gameObject.SetActive(false);
 	}
@@ -158,6 +147,7 @@ public class AppManager : MonoBehaviour
 
 		return null;
 	}
+
 
 	/// <summary>
 	/// Returns the on screen x, y, w, h of the GameObject go's collider

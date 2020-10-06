@@ -606,9 +606,9 @@ PlayerSettings:
       RemovableStorage: False
       SharedUserCertificates: False
       SpatialPerception: True
-      SystemManagement: False
+      SystemManagement: True
       UserAccountInformation: True
-      UserDataTasks: False
+      UserDataTasks: True
       UserNotificationListener: True
       VideosLibrary: False
       VoipCall: False

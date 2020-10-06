@@ -11,8 +11,7 @@ public class RenderBox : MonoBehaviour
 	public const float xOffset = 0f;
 	public const float yOffset = 0f;
 	LineRenderer axisRenderer;
-	Vector3 pt0, pt1, pt2, pt3;
-	// Use this for initialization
+
 
 	private void Start()
 	{
@@ -27,52 +26,30 @@ public class RenderBox : MonoBehaviour
 		axisRenderer.startColor = c2;
 		axisRenderer.endColor = c2;
 	}
+
+
 	void Update()
 	{
-		DrawCurrentApp();
-		DrawFaceBox();
+		Draw();
 	}
 
-	void DrawCurrentApp()
-	{
-		List<int> corners = AppManager.Corners(gameObject);
-		float z = gameObject.transform.position.z;
-		pt0 = Camera.main.ScreenToWorldPoint(	new Vector3(	corners[0], 
-																corners[1],
-																z));
-		pt1 = Camera.main.ScreenToWorldPoint(	new Vector3(	corners[0] + corners[2],
-																corners[1],
-																z)); //Camera.main.nearClipPlane));
-		pt2 = Camera.main.ScreenToWorldPoint(	new Vector3(	corners[0] + corners[2],
-																corners[1] + corners[3],
-																z));
-		pt3 = Camera.main.ScreenToWorldPoint(	new Vector3(	corners[0],
-																corners[1] + corners[3],
-																z));
 
-		axisRenderer.positionCount = 5;
-		axisRenderer.SetPosition(0, pt0);
-		axisRenderer.SetPosition(1, pt1);
-		axisRenderer.SetPosition(2, pt2);
-		axisRenderer.SetPosition(3, pt3);
-		axisRenderer.SetPosition(4, pt0);
-	}
-
-	void DrawFaceBox()
+	void Draw()
 	{
 		float z = gameObject.transform.position.z;
-		// Get minX, minY, maxX and maxY of the face in RW
-		List<int> corners = gameObject.GetComponent<AppManager>().faceBoxToShow;
-		if (corners == null)
+		Vector3 pt0, pt1, pt2, pt3;
+
+		Rect rect = gameObject.GetComponent<AppManager>().rect_faceBoxOnScreen;
+
+		if (rect.width <= 1.0f)
 		{
-			return;
+			rect = gameObject.GetComponent<AppManager>().rect_app;
 		}
 
-
-		pt0 = Camera.main.ScreenToWorldPoint(new Vector3(corners[0], corners[1], z));
-		pt1 = Camera.main.ScreenToWorldPoint(new Vector3(corners[2], corners[1], z));
-		pt2 = Camera.main.ScreenToWorldPoint(new Vector3(corners[2], corners[3], z));
-		pt3 = Camera.main.ScreenToWorldPoint(new Vector3(corners[0], corners[3], z));
+		pt0 = Camera.main.ScreenToWorldPoint(new Vector3(rect.xMin, rect.yMin, z));
+		pt1 = Camera.main.ScreenToWorldPoint(new Vector3(rect.xMax, rect.yMin, z));
+		pt2 = Camera.main.ScreenToWorldPoint(new Vector3(rect.xMax, rect.yMax, z));
+		pt3 = Camera.main.ScreenToWorldPoint(new Vector3(rect.xMin, rect.yMax, z));
 
 		axisRenderer.positionCount = 5;
 		axisRenderer.SetPosition(0, pt0);
