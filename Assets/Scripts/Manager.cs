@@ -47,6 +47,7 @@ public class Manager : MonoBehaviour
 	/// Helper method to convert hololens application space to world space
 	/// </summary>
 	/// <param name="to"></param>
+	/// 
 	/// <returns></returns>
 	public static Vector3 UnProjectVector(Vector3 img)
 	{
