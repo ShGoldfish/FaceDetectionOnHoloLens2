@@ -96,14 +96,14 @@ public class AppManager : MonoBehaviour
 		float faceStartY_onCam = faceBox[3];
 		float faceEndY_onCam = faceBox[1];
 
-		// Unproject the 2D points in the image to get the points in the world 
-		faceInRW_pt0 = Manager.UnProjectVector(new Vector3(faceStartX_onCam, faceStartY_onCam));
-		faceInRW_pt2 = Manager.UnProjectVector(new Vector3(faceEndX_onCam, faceEndY_onCam));
-
+		// Unproject the 2D points in the image to get the points in the world using the ph.frame's projectionMatrix
+		// Manager.cameraToWorldMatrix Works best so far
+		faceInRW_pt0 = Manager.cameraToWorldMatrix * new Vector3(faceStartX_onCam, faceStartY_onCam);
+		faceInRW_pt2 = Manager.cameraToWorldMatrix * new Vector3(faceEndX_onCam, faceEndY_onCam);
 
 		// Translate the points from world space to camera space
-		cam_face_pt0 = Camera.main.cameraToWorldMatrix.inverse * faceInRW_pt0;
-		cam_face_pt2 = Camera.main.cameraToWorldMatrix.inverse * faceInRW_pt2;
+		cam_face_pt0 = Manager.cameraToWorldMatrix.inverse * faceInRW_pt0;
+		cam_face_pt2 = Manager.cameraToWorldMatrix.inverse * faceInRW_pt2;
 
 		//print("Before" + rect_faceBoxOnScreen.width);
 		rect_faceBoxOnScreen = new Rect(cam_face_pt0.x,
