@@ -75,7 +75,6 @@ public class photoCapture : MonoBehaviour
 			photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
 
 			// Write to file
-			//manager.imageBufferBytesArray = targetTexture.EncodeToJPG(25); // pass a low num 25
 			manager.imageBufferBytesArray = targetTexture.EncodeToJPG(JPG_QUALITY); // pass a low num 25
 
 			// Communications to Server:
@@ -83,10 +82,6 @@ public class photoCapture : MonoBehaviour
 			StartCoroutine("GetFaces");
 			//StartCoroutine("HelloWorld");
 
-			// Taken from https://forum.unity.com/threads/implementing-locatable-camera-shader-code.417261/
-			print(photoCaptureFrame.TryGetCameraToWorldMatrix(out Manager.cameraToWorldMatrix));
-			print(photoCaptureFrame.TryGetProjectionMatrix(Camera.main.nearClipPlane, Camera.main.farClipPlane, out Manager.projectionMatrix));
-			// print("/////////////////////TryGetProjectionMatrix" );
 		}
 	}
 
@@ -102,7 +97,6 @@ public class photoCapture : MonoBehaviour
 	/// </summary>
 	private IEnumerator PostPhoto()
 	{
-		// Debugging
 		time_before_send = Time.time;
 
 		var data = new List<IMultipartFormSection> {
@@ -133,9 +127,6 @@ public class photoCapture : MonoBehaviour
 			else
 			{
 				string dataReceived = webRequest.downloadHandler.text;
-
-				// Debugging
-				//print("dataReceived from python is: _" + dataReceived + "_");
 				print("Network Connection took " + (Time.time - time_before_send) + " seconds.");    // ~0.065seconds
 
 				manager.num_faces = 0;
@@ -149,9 +140,6 @@ public class photoCapture : MonoBehaviour
 						manager.num_faces++;
 					}
 				}
-
-				// Debugging
-				//print("Num-Faces: " + manager.num_faces);
 			}
 		}
 	}

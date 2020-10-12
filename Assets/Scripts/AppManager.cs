@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections;
 using UnityEngine;
 using System;
 
@@ -46,7 +45,7 @@ public class AppManager : MonoBehaviour
 		}
 		else if (frameSinceTranslucency < 3 * 60)
 		{
-			//yield return null;
+			return;
 		}
 		else
 		{
@@ -55,45 +54,19 @@ public class AppManager : MonoBehaviour
 			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
 		}
 	}
-	//private IEnumerator UpdateTranslucency(bool blocking)
-	//{
-	//	if (blocking && manager.isTalking)
-	//	{
-	//		// Make it translucent
-	//		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-	//		GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-	//		frameSinceTranslucency = 0;
-
-	//	}
-	//	else if (frameSinceTranslucency < 3 * 60)
-	//	{
-	//		yield return null ;
-	//	}
-	//	else
-	//	{
-	//		// Make it opaque
-	//		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-	//		GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
-	//	}
-	//}
 
 
 	private bool IsBlockingAnyFaces()
 	{
 		// Renderer purposes
 		rect_faceBoxOnScreen = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
-
 		foreach (List<int> faceBox in manager.faces_box)
 		{
-			// Commentd for Test purpose only:
 			if (IsOverlapping(faceBox))
 			{
 				return true;
 			}
-			// uncommentd for Test purpose only:
-			//return true;
 		}
-
 		return false;
 	}
 
@@ -109,11 +82,9 @@ public class AppManager : MonoBehaviour
 							corners[3]);
 
 		// *********************************Face
-		//Vector3 faceCamSpace_pt0, faceCamSpace_pt2, faceInRW_pt0, faceInRW_pt2, OnScreen_face_pt0, OnScreen_face_pt2;
-		// On Camera startX, startY, endX, endY of the face
 		float faceStartX_onCam = Math.Min(faceBox[0], faceBox[2]),
 				faceEndX_onCam = Math.Max(faceBox[0], faceBox[2]);
-		// Min y from py is Max y in unity
+		// Min y in py is Max y in unity
 		float faceStartY_onCam = Math.Min(Screen.height - faceBox[1], Screen.height - faceBox[3]),
 				faceEndY_onCam = Math.Max(Screen.height - faceBox[1], Screen.height - faceBox[3]);
 
@@ -121,49 +92,6 @@ public class AppManager : MonoBehaviour
 										faceStartY_onCam + Screen.height / 2, 
 										faceEndX_onCam - faceStartX_onCam,
 										faceEndY_onCam - faceStartY_onCam);
-
-
-		// Unproject the 2D points in the image to get the points in the world using the ph.frame's projectionMatrix
-		// Manager.cameraToWorldMatrix Works best so far
-		// https://gist.github.com/tarukosu/e2aa45945f38717cf6f54b043939c9ba
-		//Vector2 imagePosZeroToOne0 = new Vector2(faceStartX_onCam / Screen.width, faceStartY_onCam / Screen.height),
-		//		imagePosZeroToOne2 = new Vector2(faceEndX_onCam / Screen.width, faceEndY_onCam / Screen.height);
-
-		//var imagePosProjected0 = (imagePosZeroToOne0 * 2) - new Vector2(1, 1);
-		//var imagePosProjected2 = (imagePosZeroToOne2 * 2) - new Vector2(1, 1);
-		//OnScreen_face_pt0 = Camera.main.ViewportToScreenPoint(new Vector3(imagePosZeroToOne0.x, imagePosZeroToOne0.y, 0));
-		//OnScreen_face_pt2 = Camera.main.ViewportToScreenPoint(new Vector3(imagePosZeroToOne2.x, imagePosZeroToOne2.y, 0));
-		//var cameraSpacePos0 = Manager.UnProjectVector(new Vector3(imagePosProjected0.x, imagePosProjected0.y, 1.0f), Camera.main.projectionMatrix);
-		//var cameraSpacePos2 = Manager.UnProjectVector(new Vector3(imagePosProjected2.x, imagePosProjected2.y, 1.0f), Camera.main.projectionMatrix);
-		//var cameraSpacePos0 = Manager.UnProjectVector(new Vector3(faceStartX_onCam, faceStartY_onCam, 1), Manager.projectionMatrix);
-		//var cameraSpacePos2 = Manager.UnProjectVector(new Vector3(faceEndX_onCam, faceEndY_onCam, 1), Manager.projectionMatrix);
-
-		//var worldSpaceCameraPos = Camera.main.cameraToWorldMatrix.MultiplyPoint(Vector3.zero);     // camera location in world space
-
-		//var worldSpaceBoxPos0 = Camera.main.cameraToWorldMatrix.MultiplyPoint(cameraSpacePos0) ;// - 2 * (new Vector3(worldSpaceCameraPos.x, worldSpaceCameraPos.y, 0.0f));   
-		//var worldSpaceBoxPos2 = Camera.main.cameraToWorldMatrix.MultiplyPoint(cameraSpacePos2) ;// - 2 * (new Vector3(worldSpaceCameraPos.x, worldSpaceCameraPos.y, 0.0f));
-
-		//OnScreen_face_pt0 = Camera.main.WorldToScreenPoint(worldSpaceBoxPos0);
-		//OnScreen_face_pt2 = Camera.main.WorldToScreenPoint(worldSpaceBoxPos2);
-
-
-
-		// Method 1:
-		//faceCamSpace_pt0 = Manager.UnProjectVector(new Vector3(faceStartX_onCam, faceStartY_onCam), Camera.main.projectionMatrix);
-		//faceCamSpace_pt2 = Manager.UnProjectVector(new Vector3(faceEndX_onCam, faceEndY_onCam), Camera.main.projectionMatrix);
-
-		//// Translate the points from camera space to world
-		//faceInRW_pt0 = Camera.main.cameraToWorldMatrix.MultiplyPoint(faceCamSpace_pt0);
-		//faceInRW_pt2 = Camera.main.cameraToWorldMatrix.MultiplyPoint(faceCamSpace_pt2);
-
-		//OnScreen_face_pt0 = Camera.main.WorldToScreenPoint(faceInRW_pt0);
-		//OnScreen_face_pt2 = Camera.main.WorldToScreenPoint(faceInRW_pt2);
-
-		//rect_faceBoxOnScreen = new Rect(OnScreen_face_pt0.x,
-		//								OnScreen_face_pt0.y,
-		//								OnScreen_face_pt2.x - OnScreen_face_pt0.x,
-		//								OnScreen_face_pt2.y - OnScreen_face_pt0.y);
-
 		return rect_faceBoxOnScreen.Overlaps(rect_app);
 	}
 
