@@ -109,7 +109,7 @@ public class AppManager : MonoBehaviour
 							corners[3]);
 
 		// *********************************Face
-		Vector3 faceCamSpace_pt0, faceCamSpace_pt2, faceInRW_pt0, faceInRW_pt2, OnScreen_face_pt0, OnScreen_face_pt2;
+		//Vector3 faceCamSpace_pt0, faceCamSpace_pt2, faceInRW_pt0, faceInRW_pt2, OnScreen_face_pt0, OnScreen_face_pt2;
 		// On Camera startX, startY, endX, endY of the face
 		float faceStartX_onCam = Math.Min(faceBox[0], faceBox[2]),
 				faceEndX_onCam = Math.Max(faceBox[0], faceBox[2]);
@@ -117,12 +117,11 @@ public class AppManager : MonoBehaviour
 		float faceStartY_onCam = Math.Min(Screen.height - faceBox[1], Screen.height - faceBox[3]),
 				faceEndY_onCam = Math.Max(Screen.height - faceBox[1], Screen.height - faceBox[3]);
 
-		var worldSpaceCameraPos = Manager.UnProjectVector(Vector3.zero , Manager.projectionMatrix);     // camera location in world space
-
-		rect_faceBoxOnScreen = new Rect(faceStartX_onCam - Screen.width / 2,
+		rect_faceBoxOnScreen = new Rect(faceStartX_onCam - Screen.width / 3,
 										faceStartY_onCam + Screen.height / 2, 
 										faceEndX_onCam - faceStartX_onCam,
 										faceEndY_onCam - faceStartY_onCam);
+
 
 		// Unproject the 2D points in the image to get the points in the world using the ph.frame's projectionMatrix
 		// Manager.cameraToWorldMatrix Works best so far
