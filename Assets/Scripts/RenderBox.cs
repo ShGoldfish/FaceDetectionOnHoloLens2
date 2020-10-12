@@ -38,11 +38,11 @@ public class RenderBox : MonoBehaviour
 	{
 		float z = gameObject.transform.position.z;
 		Vector3 pt0, pt1, pt2, pt3;
-
 		Rect rect = gameObject.GetComponent<AppManager>().rect_faceBoxOnScreen;
 
 		if (rect.width <= 1.0f)
 		{
+			// if no face then draw the app 
 			rect = gameObject.GetComponent<AppManager>().rect_app;
 		}
 
@@ -50,7 +50,6 @@ public class RenderBox : MonoBehaviour
 		pt1 = Camera.main.ScreenToWorldPoint(new Vector3(rect.xMax, rect.yMin, z));
 		pt2 = Camera.main.ScreenToWorldPoint(new Vector3(rect.xMax, rect.yMax, z));
 		pt3 = Camera.main.ScreenToWorldPoint(new Vector3(rect.xMin, rect.yMax, z));
-
 		axisRenderer.positionCount = 5;
 		axisRenderer.SetPosition(0, pt0);
 		axisRenderer.SetPosition(1, pt1);

@@ -21,9 +21,9 @@ public class photoCapture : MonoBehaviour
 	// Debugging
 	float time_before_send;
 
-	// Constants
-	const float WAIT_TIME4POST = 0.2f;
-	const int JPG_QUALITY = 20;
+	// Constants was 0.2 and 20
+	const float WAIT_TIME4POST = 0.3f;
+	const int JPG_QUALITY = 15;
 
 	void Start()
 	{
@@ -85,7 +85,7 @@ public class photoCapture : MonoBehaviour
 
 			// Taken from https://forum.unity.com/threads/implementing-locatable-camera-shader-code.417261/
 			print(photoCaptureFrame.TryGetCameraToWorldMatrix(out Manager.cameraToWorldMatrix));
-			print(photoCaptureFrame.TryGetProjectionMatrix(out Manager.projectionMatrix));
+			print(photoCaptureFrame.TryGetProjectionMatrix(Camera.main.nearClipPlane, Camera.main.farClipPlane, out Manager.projectionMatrix));
 			// print("/////////////////////TryGetProjectionMatrix" );
 		}
 	}

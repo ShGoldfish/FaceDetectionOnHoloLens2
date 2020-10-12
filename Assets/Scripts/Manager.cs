@@ -49,6 +49,17 @@ public class Manager : MonoBehaviour
 	/// <param name="to"></param>
 	/// 
 	/// <returns></returns>
+	public static Vector3 UnProjectVector(Vector3 img, Matrix4x4 proj_m)
+	{
+		Vector3 world = new Vector3(0, 0, 0);
+		var axsX = proj_m.GetRow(0);
+		var axsY = proj_m.GetRow(1);
+		var axsZ = proj_m.GetRow(2);
+		world.z = img.z / axsZ.z;
+		world.y = (img.y - (world.z * axsY.z)) / axsY.y;
+		world.x = (img.x - (world.z * axsX.z)) / axsX.x;
+		return world;
+	}
 	public static Vector3 UnProjectVector(Vector3 img)
 	{
 		Vector3 world = new Vector3(0, 0, 0);
