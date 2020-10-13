@@ -111,6 +111,7 @@ public class AppManager : MonoBehaviour
 	{
 		otherGO.transform.position = transform.position;
 		otherGO.transform.rotation = transform.rotation;
+		otherGO.GetComponent<RenderBox>().enabled = GetComponent<RenderBox>().enabled;
 
 		AppManager otherGOAppManager = otherGO.GetComponent<AppManager>();
 		otherGOAppManager.manager = GameObject.Find("Manager").GetComponent<Manager>();
