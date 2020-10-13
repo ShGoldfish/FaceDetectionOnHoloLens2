@@ -82,16 +82,27 @@ public class AppManager : MonoBehaviour
 							corners[3]);
 
 		// *********************************Face
+		// HoloLens 1
 		float faceStartX_onCam = Math.Min(faceBox[0], faceBox[2]),
 				faceEndX_onCam = Math.Max(faceBox[0], faceBox[2]);
-		// Min y in py is Max y in unity
 		float faceStartY_onCam = Math.Min(Screen.height - faceBox[1], Screen.height - faceBox[3]),
 				faceEndY_onCam = Math.Max(Screen.height - faceBox[1], Screen.height - faceBox[3]);
-
 		rect_faceBoxOnScreen = new Rect(faceStartX_onCam - Screen.width / 3,
-										faceStartY_onCam + Screen.height / 2, 
+										faceStartY_onCam + Screen.height / 2,
 										faceEndX_onCam - faceStartX_onCam,
 										faceEndY_onCam - faceStartY_onCam);
+
+		// For HL 2 roughly 
+		//float faceStartX_onCam = Math.Min(faceBox[0], faceBox[2]),
+		//		faceEndX_onCam = Math.Max(faceBox[0], faceBox[2]);
+		//float faceStartY_onCam = Math.Min(Screen.height - faceBox[1], Screen.height - faceBox[3]),
+		//		faceEndY_onCam = Math.Max(Screen.height - faceBox[1], Screen.height - faceBox[3]);
+
+		//rect_faceBoxOnScreen = new Rect(faceStartX_onCam - Screen.width / 2,
+		//								faceStartY_onCam - Screen.height / 2,
+		//								(faceEndX_onCam - faceStartX_onCam) / 2.0f,
+		//								(faceEndY_onCam - faceStartY_onCam) / 2.0f);
+
 		return rect_faceBoxOnScreen.Overlaps(rect_app);
 	}
 
