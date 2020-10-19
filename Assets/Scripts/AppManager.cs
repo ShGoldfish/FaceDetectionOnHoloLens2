@@ -8,7 +8,7 @@ public class AppManager : MonoBehaviour
 	Manager manager;
 
 	// Each App's vars
-	public GameObject otherGO;
+	//public GameObject otherGO;
 	public TextMesh msgBlocking;
 	int frameSinceTranslucency;
 
@@ -109,17 +109,19 @@ public class AppManager : MonoBehaviour
 
 	public void ChangeFixation()
 	{
-		otherGO.transform.position = transform.position;
-		otherGO.transform.rotation = transform.rotation;
-		otherGO.GetComponent<RenderBox>().enabled = GetComponent<RenderBox>().enabled;
+		bool bodyFixed = GetComponent<BodyFixed>().enabled;
+		if (bodyFixed)
+		{
+			// switching to world fixed:
+			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("WorldZone");
 
-		AppManager otherGOAppManager = otherGO.GetComponent<AppManager>();
-		otherGOAppManager.manager = GameObject.Find("Manager").GetComponent<Manager>();
-		otherGOAppManager.frameSinceTranslucency = frameSinceTranslucency;
-		otherGOAppManager.msgBlocking.text = msgBlocking.text;
-		otherGOAppManager.otherGO = gameObject;
-		otherGO.SetActive(true);
-		gameObject.SetActive(false);
+		}
+		else
+		{
+			// switching to body fixed:
+			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BodyZone");
+		}
+		GetComponent<BodyFixed>().enabled = !bodyFixed;
 	}
 
 
