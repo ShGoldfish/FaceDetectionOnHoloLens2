@@ -36,7 +36,7 @@ public class Manager : MonoBehaviour
 	{
 		// Update the text boxes
 		msgFace.text = "Number of faces: " + num_faces.ToString();
-		msgVoice.text = "Ongoing conversation: " + isTalking;
+		msgVoice.text = "Speech: " + isTalking;
 	}
 }
 

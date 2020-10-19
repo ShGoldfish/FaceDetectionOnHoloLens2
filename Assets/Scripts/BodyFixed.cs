@@ -37,7 +37,7 @@ public class BodyFixed : MonoBehaviour
 		app_y = 0.0f;
 		app_z = 1.0f;
 		if (app_num == 2)
-			app_z = 1.07f;
+			app_z = 1.05f;
 		position = new Vector3(app_x, app_y, app_z);
 		rotation = transform.rotation;
 	}
