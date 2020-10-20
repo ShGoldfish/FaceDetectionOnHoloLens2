@@ -10,7 +10,7 @@ using System;
 public class photoCapture : MonoBehaviour
 {
 	Manager manager;
-
+	
 	// Photo Capture Variables
 	PhotoCapture photoCaptureObject = null;
 	Texture2D targetTexture;

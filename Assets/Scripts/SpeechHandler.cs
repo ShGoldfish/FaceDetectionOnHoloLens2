@@ -6,20 +6,22 @@ using Microsoft.MixedReality.Toolkit.Input;
 
 public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 {
+	Manager manager;
+	const int TIMEOUT = 5;
+
     [SerializeField]
     private DictationRecognizer dictationRecognizer;
     private static string deviceName = string.Empty;
     private int samplingRate;
     private const int messageLength = 15;
     private StringBuilder textSoFar;
-	Manager manager;
- 
+	
     private void Awake()
     {
 		manager = gameObject.GetComponent<Manager>();
        
         dictationRecognizer = new DictationRecognizer();
-
+		dictationRecognizer.AutoSilenceTimeoutSeconds = TIMEOUT;
         // 3.a: Register for dictationRecognizer.DictationHypothesis and implement DictationHypothesis below
         // This event is fired while the user is talking. As the recognizer listens, it provides text of what it's heard so far.
         dictationRecognizer.DictationHypothesis += DictationRecognizer_DictationHypothesis;
@@ -136,8 +138,6 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 
     void IMixedRealitySpeechHandler.OnSpeechKeywordRecognized(SpeechEventData eventData)
     {
-        //contextAwareManager.isTalking = true;
         Debug.Log("OnSpeechKeywordRecognized: " + manager.isTalking);
-
     }
 }

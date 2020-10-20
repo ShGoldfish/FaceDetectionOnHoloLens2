@@ -8,9 +8,8 @@ public class AppManager : MonoBehaviour
 	Manager manager;
 
 	// Each App's vars
-	//public GameObject otherGO;
-	public TextMesh msgBlocking;
 	int frameSinceTranslucency;
+	public TextMesh msgBlocking;
 
 	// Renderer purposes
 	public Rect rect_faceBoxOnScreen, rect_app;
@@ -110,6 +109,7 @@ public class AppManager : MonoBehaviour
 	public void ChangeFixation()
 	{
 		bool bodyFixed = GetComponent<BodyFixed>().enabled;
+		// Change the icon
 		if (bodyFixed)
 		{
 			// switching to world fixed:
