@@ -33,11 +33,11 @@ public class BodyFixed : MonoBehaviour
 		int app_num;
 		float app_x, app_y, app_z;
 		app_num = Convert.ToInt16(gameObject.name.Substring(gameObject.name.Length - 1));
-		app_x = 0.2f * (app_num - 2);
+		app_x = 0.14f * (app_num - 2);
 		app_y = 0.0f;
 		app_z = 1.0f;
 		if (app_num == 2)
-			app_z = 1.05f;
+			app_z = 1.04f;
 		position = new Vector3(app_x, app_y, app_z);
 		rotation = transform.rotation;
 	}
