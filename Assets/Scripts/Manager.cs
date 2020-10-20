@@ -28,6 +28,7 @@ public class Manager : MonoBehaviour
 		faces_box = new List<List<int>>();
 		isTalking = false;
 		num_faces = 0;
+		imageBufferBytesArray = null;
 
 	}
 

@@ -5,51 +5,61 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using System;
-
+//using System.Threading;
 
 public class photoCapture : MonoBehaviour
 {
 	Manager manager;
-	
+	// Constants (were 0.3 and 15)
+	const float WAIT_TIME4POST = 0.1f;
+	const int JPG_QUALITY = 25;
 	// Photo Capture Variables
 	PhotoCapture photoCaptureObject = null;
 	Texture2D targetTexture;
-	GameObject m_Canvas = null;
-	Renderer m_CanvasRenderer = null;
 	CameraParameters m_CameraParameters;
-
+	Resolution cameraResolution;
+	// Thread
+	//Thread mThread_get; 
 	// Debugging
 	float time_before_send;
 
-	// Constants was 0.2 and 20
-	const float WAIT_TIME4POST = 0.3f;
-	const int JPG_QUALITY = 15;
-
+// ############################################# UNITY
 	void Start()
 	{
 		manager = GameObject.Find("Manager").GetComponent<Manager>();
 
 		// Photo Capture 
-		Resolution cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).First();
+		cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).First();
 		targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height, TextureFormat.BGRA32, false);
 		m_CameraParameters = new CameraParameters(WebCamMode.PhotoMode);
 		m_CameraParameters.hologramOpacity = 0.0f;
 		m_CameraParameters.cameraResolutionWidth = cameraResolution.width;
 		m_CameraParameters.cameraResolutionHeight = cameraResolution.height;
 		m_CameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
-
 		PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
+		
+		// Thread
+		//ThreadStart ts_get = new ThreadStart(ThreadingStart);
+		//mThread_get = new Thread(ts_get);
+		//mThread_get.Start();
 
 		// Debugging
 		time_before_send = 0.0f;
 	}
+	private void Update()
+	{
+		if (manager.imageBufferBytesArray == null)
+			return;
+		StartCoroutine("PostPhoto");
+		StartCoroutine("GetFaces");
+	}
 
+	// ############################################# PHOTO CAPTURE
 	private void OnPhotoCaptureCreated(PhotoCapture captureObject)
 	{
 		photoCaptureObject = captureObject;
 		captureObject.StartPhotoModeAsync(m_CameraParameters, OnPhotoModeStarted);
 	}
-
 	// Capture a Photo to a Texture2D
 	private void OnPhotoModeStarted(PhotoCapture.PhotoCaptureResult result)
 	{
@@ -62,7 +72,6 @@ public class photoCapture : MonoBehaviour
 			Debug.LogError("Unable to start photo mode!");
 		}
 	}
-
 	private void OnCapturedPhotoToMemory(PhotoCapture.PhotoCaptureResult result, PhotoCaptureFrame photoCaptureFrame)
 	{
 		if (result.success)
@@ -75,22 +84,27 @@ public class photoCapture : MonoBehaviour
 			photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
 
 			// Write to file
-			manager.imageBufferBytesArray = targetTexture.EncodeToJPG(JPG_QUALITY); // pass a low num 25
+			manager.imageBufferBytesArray = targetTexture.EncodeToJPG(JPG_QUALITY);
 
-			// Communications to Server:
-			StartCoroutine("PostPhoto");
-			StartCoroutine("GetFaces");
+			//StartCoroutine("PostPhoto");
+			//StartCoroutine("GetFaces");
 			//StartCoroutine("HelloWorld");
-
 		}
 	}
-
 	void OnStoppedPhotoMode(PhotoCapture.PhotoCaptureResult result)
 	{
 		photoCaptureObject.Dispose();
 		photoCaptureObject = null;
 	}
 
+
+// ############################################# THREAD
+	//void ThreadingStart()
+	//{
+	//}
+
+
+	// ############################################# NETWORK CONNECTION
 	/// <summary>
 	/// Network Connection Coroutines
 	/// Sends a photo through HTTP Request which can be handles by Flask on Python.
@@ -108,8 +122,6 @@ public class photoCapture : MonoBehaviour
 			yield return new WaitForSeconds(WAIT_TIME4POST);
 		}
 	}
-
-
 	/// <summary>
 	/// Network Connection Coroutines
 	/// Recieves the number of faces detected from the image sent by POST above through HTTP Request (Flask on Python).
@@ -143,8 +155,6 @@ public class photoCapture : MonoBehaviour
 			}
 		}
 	}
-
-
 	/// <summary>
 	/// Network Connection Coroutines
 	/// For the purpose of testing the connection: Recieves a "Hello World string "through HTTP Request which was send by by Flask on Python.
