@@ -22,7 +22,6 @@ public class photoCapture : MonoBehaviour
 	//Thread mThread_get; 
 	// Debugging
 	float time_before_send;
-
 // ############################################# UNITY
 	void Start()
 	{
@@ -46,15 +45,9 @@ public class photoCapture : MonoBehaviour
 		// Debugging
 		time_before_send = 0.0f;
 	}
-	private void Update()
-	{
-		if (manager.imageBufferBytesArray == null)
-			return;
-		StartCoroutine("PostPhoto");
-		StartCoroutine("GetFaces");
-	}
 
-	// ############################################# PHOTO CAPTURE
+
+// ############################################# PHOTO CAPTURE
 	private void OnPhotoCaptureCreated(PhotoCapture captureObject)
 	{
 		photoCaptureObject = captureObject;
@@ -86,8 +79,8 @@ public class photoCapture : MonoBehaviour
 			// Write to file
 			manager.imageBufferBytesArray = targetTexture.EncodeToJPG(JPG_QUALITY);
 
-			//StartCoroutine("PostPhoto");
-			//StartCoroutine("GetFaces");
+			StartCoroutine("PostPhoto");
+			StartCoroutine("GetFaces");
 			//StartCoroutine("HelloWorld");
 		}
 	}

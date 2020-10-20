@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 public class Manager : MonoBehaviour
@@ -15,7 +16,15 @@ public class Manager : MonoBehaviour
 
 	// PhotoCapture Variables
 	public byte[] imageBufferBytesArray;
-
+#if UNITY_EDITOR
+	private void Awake()
+	{
+		PlayerSettings.MTRendering = true;
+		PlayerSettings.graphicsJobs = true;
+		PlayerSettings.graphicsJobMode = GraphicsJobMode.Legacy;
+		//SystemInfo.renderingthread
+	}
+#endif
 	private void Start()
 	{
 		// Textbox Management
