@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.Windows.Speech;
 using Microsoft.MixedReality.Toolkit.Input;
 
+public enum MySpeechContext { Weather = 1, Gmail = 2, Fitbit = 3, None = 4 };
+
 public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 {
 	Manager manager;
@@ -49,12 +51,21 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
         //Microphone.GetDeviceCaps(deviceName, out unused, out samplingRate);
         //Microphone.Start(deviceName, false, messageLength, samplingRate);
     }
+	private void Update()
+	{
+		if (textSoFar != null && textSoFar.Length != 0)
+			manager.isTalking = true;
+		if (!manager.isTalking)
+		{
+			dictationRecognizer.Start();
+		}
+	}
 
-    /// <summary>
-    /// This event is fired while the user is talking. As the recognizer listens, it provides text of what it's heard so far.
-    /// </summary>
-    /// <param name="text">The currently hypothesized recognition.</param>
-    private void DictationRecognizer_DictationHypothesis(string text)
+	/// <summary>
+	/// This event is fired while the user is talking. As the recognizer listens, it provides text of what it's heard so far.
+	/// </summary>
+	/// <param name="text">The currently hypothesized recognition.</param>
+	private void DictationRecognizer_DictationHypothesis(string text)
     {
         if (text != null && text.Length != 0)
 			manager.isTalking = true;
@@ -114,15 +125,6 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
         // Start recording from the microphone for 10 seconds.
         return Microphone.Start(deviceName, false, messageLength, samplingRate);
     }
-    private void Update()
-    {
-        if (textSoFar != null && textSoFar.Length != 0)
-            manager.isTalking = true;
-        if (!manager.isTalking)
-        {
-            dictationRecognizer.Start();
-        }
-    }
 
     /// <summary>
     /// The dictation recognizer may not turn off immediately, so this call blocks on
@@ -140,4 +142,5 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
     {
         Debug.Log("OnSpeechKeywordRecognized: " + manager.isTalking);
     }
+
 }

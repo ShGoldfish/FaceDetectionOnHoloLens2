@@ -11,22 +11,25 @@ public class Manager : MonoBehaviour
 
 	// Context Management
 	public bool isTalking;
+	private MySpeechContext speechContext;
 	public int num_faces;
 	public List<List<int>> faces_box;
 
 	// PhotoCapture Variables
 	public byte[] imageBufferBytesArray;
-#if UNITY_EDITOR
-	private void Awake()
-	{
-		PlayerSettings.MTRendering = true;
-		PlayerSettings.graphicsJobs = true;
-		PlayerSettings.graphicsJobMode = GraphicsJobMode.Legacy;
+//#if UNITY_EDITOR
+	//private void Awake()
+	//{
+
+		//PlayerSettings.MTRendering = true;
+		//PlayerSettings.graphicsJobs = true;
+		//PlayerSettings.graphicsJobMode = GraphicsJobMode.Legacy;
 		//SystemInfo.renderingthread
-	}
-#endif
+	//}
+//#endif
 	private void Start()
 	{
+		speechContext = MySpeechContext.None;
 		// Textbox Management
 		msgFace = GameObject.Find("MessageFace").GetComponent<TextMesh>();
 		msgVoice = GameObject.Find("MessageVoice").GetComponent<TextMesh>();
@@ -47,6 +50,12 @@ public class Manager : MonoBehaviour
 		// Update the text boxes
 		msgFace.text = "Number of faces: " + num_faces.ToString();
 		msgVoice.text = "Speech: " + isTalking;
+	}
+
+
+	public void Set_SpeechContext(int context)
+	{
+		speechContext = (MySpeechContext)context;
 	}
 }
 
