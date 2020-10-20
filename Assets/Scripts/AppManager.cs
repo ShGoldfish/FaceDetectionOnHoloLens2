@@ -26,31 +26,38 @@ public class AppManager : MonoBehaviour
 	{
 		Time.timeScale = 0.5f;
 		bool blocking = IsBlockingAnyFaces();
-		//StartCoroutine( UpdateTranslucency(blocking));
-		UpdateTranslucency(blocking);
 		msgBlocking.text = "Is Blocking a Face: " + blocking;
+		UpdateTranslucency(blocking);
 		frameSinceTranslucency++;
 	}
 
+	private void MakeTranslusent()
+	{
+		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		frameSinceTranslucency = 0;
+	}
+	private void MakeOpaque()
+	{
+
+		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+		GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
+	}
 
 	private void UpdateTranslucency(bool blocking)
 	{
-		if (blocking && manager.isTalking)
-		{
-			// Make it translucent
-			gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-			frameSinceTranslucency = 0;
-		}
-		else if (frameSinceTranslucency < 3 * 60)
+		if ( manager.isTalking && frameSinceTranslucency < 3 * 60)
 		{
 			return;
 		}
-		else
+		if (manager.isTalking && manager.num_faces > 0)
+			if (manager.Get_SpeechContext() == gameObject.name && !blocking)
+				MakeOpaque();
+			else
+				MakeTranslusent();
+		else if (manager.Get_SpeechContext() == gameObject.name)
 		{
-			// Make it opaque
-			gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
+			MakeOpaque();
 		}
 	}
 

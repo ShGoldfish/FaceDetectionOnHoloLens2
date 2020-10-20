@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Windows.Speech;
 using Microsoft.MixedReality.Toolkit.Input;
 
-public enum MySpeechContext { Weather = 1, Gmail = 2, Fitbit = 3, None = 4 };
+public enum MySpeechContext { Weather = 1, Email = 2, Fitbit = 3, None = 4 };
 
 public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 {

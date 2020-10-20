@@ -48,14 +48,29 @@ public class Manager : MonoBehaviour
 	private void Update()
 	{
 		// Update the text boxes
+		if (num_faces > 0)
+			AppManager.GetChildWithName(Camera.main.gameObject, "incommingConvo").SetActive( true);
+		else
+			AppManager.GetChildWithName(Camera.main.gameObject, "incommingConvo").SetActive(false);
+
 		msgFace.text = "Number of faces: " + num_faces.ToString();
-		msgVoice.text = "Speech: " + isTalking;
+		if(!isTalking || speechContext == MySpeechContext.None)
+			msgVoice.text = "Speech: " + isTalking;
+		else 
+			msgVoice.text = "Speech about " + speechContext;
+
 	}
 
 
 	public void Set_SpeechContext(int context)
 	{
 		speechContext = (MySpeechContext)context;
+	}
+	public string Get_SpeechContext()
+	{
+		int n = (int)speechContext;
+		//print(speechContext + n.ToString());
+		return speechContext + n.ToString();
 	}
 }
 
