@@ -7,36 +7,47 @@ using UnityEngine;
 using System;
 //using System.Threading;
 
-public class photoCapture : MonoBehaviour
+public class MyPhotoCapture : MonoBehaviour
 {
 	Manager manager;
+	private string ipEndPoint;
+
 	// Constants (were 0.3 and 15)
-	const float WAIT_TIME4POST = 0.1f;
+	//const float WAIT_TIME4POST = 0.1f;
+	const float WAIT_TIME4POST = 0.50f;
 	const int JPG_QUALITY = 25;
+
 	// Photo Capture Variables
 	PhotoCapture photoCaptureObject = null;
 	Texture2D targetTexture;
 	CameraParameters m_CameraParameters;
 	Resolution cameraResolution;
+	byte[] imageBufferBytesArray;
+	
 	// Thread
 	//Thread mThread_get; 
 	// Debugging
 	float time_before_send;
+
 // ############################################# UNITY
 	void Start()
 	{
 		manager = GameObject.Find("Manager").GetComponent<Manager>();
+		ipEndPoint = "http://128.173.236.208:9005";
+		imageBufferBytesArray = null;
 
 		// Photo Capture 
 		cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).First();
 		targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height, TextureFormat.BGRA32, false);
-		m_CameraParameters = new CameraParameters(WebCamMode.PhotoMode);
-		m_CameraParameters.hologramOpacity = 0.0f;
-		m_CameraParameters.cameraResolutionWidth = cameraResolution.width;
-		m_CameraParameters.cameraResolutionHeight = cameraResolution.height;
-		m_CameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
+		m_CameraParameters = new CameraParameters(WebCamMode.PhotoMode)
+		{
+			hologramOpacity = 0.0f,
+			cameraResolutionWidth = cameraResolution.width,
+			cameraResolutionHeight = cameraResolution.height,
+			pixelFormat = CapturePixelFormat.BGRA32
+		};
 		PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
-		
+
 		// Thread
 		//ThreadStart ts_get = new ThreadStart(ThreadingStart);
 		//mThread_get = new Thread(ts_get);
@@ -77,8 +88,10 @@ public class photoCapture : MonoBehaviour
 			photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
 
 			// Write to file
-			manager.imageBufferBytesArray = targetTexture.EncodeToJPG(JPG_QUALITY);
+			//print("take ohoto");
+			imageBufferBytesArray = targetTexture.EncodeToJPG(JPG_QUALITY);
 
+			//StartCoroutine("PostPhoto");
 			StartCoroutine("PostPhoto");
 			StartCoroutine("GetFaces");
 			//StartCoroutine("HelloWorld");
@@ -105,11 +118,10 @@ public class photoCapture : MonoBehaviour
 	private IEnumerator PostPhoto()
 	{
 		time_before_send = Time.time;
-
 		var data = new List<IMultipartFormSection> {
-			new MultipartFormFileSection("myImage", manager.imageBufferBytesArray, "test.jpg", "image/jpg")
+			new MultipartFormFileSection("myImage", imageBufferBytesArray, "test.jpg", "image/jpg")
 		};
-		using (UnityWebRequest webRequest = UnityWebRequest.Post(manager.ipEndPoint + "/receive-image", data))
+		using (UnityWebRequest webRequest = UnityWebRequest.Post(ipEndPoint + "/receive-image", data))
 		{
 			webRequest.SendWebRequest();
 			yield return new WaitForSeconds(WAIT_TIME4POST);
@@ -121,10 +133,10 @@ public class photoCapture : MonoBehaviour
 	/// </summary>
 	private IEnumerator GetFaces()
 	{
-		using (UnityWebRequest webRequest = UnityWebRequest.Get(manager.ipEndPoint + "/detect-faces"))
+		using (UnityWebRequest webRequest = UnityWebRequest.Get(ipEndPoint + "/detect-faces"))
 		{
 			yield return webRequest.SendWebRequest();
-			
+
 			if (webRequest.isNetworkError)
 			{
 				Debug.Log("Error: " + webRequest.error);
@@ -132,19 +144,23 @@ public class photoCapture : MonoBehaviour
 			else
 			{
 				string dataReceived = webRequest.downloadHandler.text;
-				//print("Network Connection took " + (Time.time - time_before_send) + " seconds.");    // ~0.065seconds
-
-				manager.num_faces = 0;
-				manager.faces_box = new List<List<int>>();
+				print("Network Connection took " + (Time.time - time_before_send) + " seconds.");    // ~0.065seconds
+				int n_faces = 0;
+				List<List<int>> faces = new List<List<int>>();
 				if (dataReceived != null && dataReceived != "")
 				{
 					List<float> numbers = Array.ConvertAll(dataReceived.Split(','), float.Parse).ToList();
 					for (int i = 0; i < numbers.Count; i += 4)
 					{
-						manager.faces_box.Add(new List<int> { Convert.ToInt32(numbers[i]), Convert.ToInt32(numbers[i + 1]), Convert.ToInt32(numbers[i + 2]), Convert.ToInt32(numbers[i + 3]) });
-						manager.num_faces++;
+						faces.Add(new List<int> {	Convert.ToInt32(numbers[i]),
+													Convert.ToInt32(numbers[i + 1]),
+													Convert.ToInt32(numbers[i + 2]),
+													Convert.ToInt32(numbers[i + 3]) });
+						n_faces++;
 					}
+					print(n_faces);
 				}
+				manager.SetFaces(n_faces, faces);
 			}
 		}
 	}
@@ -155,7 +171,7 @@ public class photoCapture : MonoBehaviour
 	/// <returns></returns>
 	private IEnumerator HelloWorld()
 	{
-		using (UnityWebRequest webRequest = UnityWebRequest.Get(manager.ipEndPoint + "/"))
+		using (UnityWebRequest webRequest = UnityWebRequest.Get(ipEndPoint + "/"))
 		{
 			yield return webRequest.SendWebRequest();
 			if (webRequest.isNetworkError)
@@ -165,7 +181,7 @@ public class photoCapture : MonoBehaviour
 			else
 			{
 				string dataReceived = webRequest.downloadHandler.text;
-				//print("dataReceived from python is: " + dataReceived);
+				print("dataReceived from python is: " + dataReceived);
 			}
 		}
 	}

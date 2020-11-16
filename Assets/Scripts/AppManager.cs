@@ -28,7 +28,7 @@ public class AppManager : MonoBehaviour
 		bool blocking = IsBlockingAnyFaces();
 		msgBlocking.text = "Is Blocking a Face: " + blocking;
 		UpdateTranslucency(blocking);
-		frameSinceTranslucency++;
+		//frameSinceTranslucency++;
 	}
 
 	private void MakeTranslusent()
@@ -46,19 +46,22 @@ public class AppManager : MonoBehaviour
 
 	private void UpdateTranslucency(bool blocking)
 	{
-		if ( manager.isTalking && frameSinceTranslucency < 3 * 60)
-		{
-			return;
-		}
-		if (manager.isTalking && manager.num_faces > 0)
-			if (manager.Get_SpeechContext() == gameObject.name && !blocking)
-				MakeOpaque();
-			else
-				MakeTranslusent();
-		else if (manager.Get_SpeechContext() == gameObject.name)
+		if (!manager.isTalking || (manager.Get_SpeechContext() == gameObject.name && !blocking))
 		{
 			MakeOpaque();
+			return;
 		}
+		// is talking about something other than this app
+		if (frameSinceTranslucency < 3 * 60)
+		{
+			frameSinceTranslucency++;
+			return;
+		}
+		if (manager.num_faces > 0)
+			MakeTranslusent();
+		else
+			MakeOpaque();
+
 	}
 
 

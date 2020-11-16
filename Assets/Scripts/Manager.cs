@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -47,13 +48,15 @@ public class Manager : MonoBehaviour
 
 	private void Update()
 	{
+
 		// Update the text boxes
 		if (num_faces > 0)
 			AppManager.GetChildWithName(Camera.main.gameObject, "incommingConvo").SetActive( true);
 		else
 			AppManager.GetChildWithName(Camera.main.gameObject, "incommingConvo").SetActive(false);
-
 		msgFace.text = "Number of faces: " + num_faces.ToString();
+
+		//print(speechContext);
 		if(!isTalking || speechContext == MySpeechContext.None)
 			msgVoice.text = "Speech: " + isTalking;
 		else 
@@ -65,12 +68,19 @@ public class Manager : MonoBehaviour
 	public void Set_SpeechContext(int context)
 	{
 		speechContext = (MySpeechContext)context;
+		int n = (int)speechContext;
+		print(speechContext + n.ToString());
 	}
 	public string Get_SpeechContext()
 	{
 		int n = (int)speechContext;
-		//print(speechContext + n.ToString());
 		return speechContext + n.ToString();
+	}
+
+	internal void SetFaces(int n_faces, List<List<int>> faces)
+	{
+		num_faces = n_faces;
+		faces_box = faces;
 	}
 }
 
