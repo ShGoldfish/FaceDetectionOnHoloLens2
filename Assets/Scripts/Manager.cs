@@ -16,7 +16,7 @@ public class Manager : MonoBehaviour
 	static List<List<int>> faces_box;
 
 	// test
-	//public bool test_talking;
+	public bool test_talking;
 //#if UNITY_EDITOR
 	//private void Awake()
 	//{
@@ -27,7 +27,7 @@ public class Manager : MonoBehaviour
 		//SystemInfo.renderingthread
 	//}
 //#endif
-	private void Start()
+	void Start()
 	{
 		speechContext = MySpeechContext.None;
 		// Textbox Management
@@ -43,7 +43,7 @@ public class Manager : MonoBehaviour
 	}
 
 
-	private void Update()
+	void Update()
 	{
 		// Update the text boxes
 		msgFace.text = "Number of faces: " + num_faces.ToString();
@@ -53,7 +53,7 @@ public class Manager : MonoBehaviour
 		else 
 			msgVoice.text = "Speech about " + speechContext;
 		//test
-		//Set_isTalking(test_talking);
+		Set_isTalking(test_talking);
 
 	}
 
@@ -68,12 +68,15 @@ public class Manager : MonoBehaviour
 			Reset_SpeechContext();
 	}
 
-	internal static void Set_SpeechContext(int context)
+
+	public void Set_SpeechContext(int context)
 	{
 		speechContext = (MySpeechContext)context;
 		int n = (int)speechContext;
 		print(speechContext + n.ToString());
 	}
+
+
 	internal static void Reset_SpeechContext()
 	{
 		speechContext = MySpeechContext.None;

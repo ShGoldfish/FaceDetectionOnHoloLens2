@@ -13,8 +13,8 @@ public class MyPhotoCapture : MonoBehaviour
 	byte[] imageBufferBytesArray;
 
 	// Constants (were 0.3 and 15)
-	const float WAIT_TIME4POST = 0.1f;
-	const int JPG_QUALITY = 25;
+	const float WAIT_TIME4POST = 0.3f;
+	const int JPG_QUALITY = 15;
 
 	// Photo Capture Variables
 	PhotoCapture photoCaptureObject = null;
