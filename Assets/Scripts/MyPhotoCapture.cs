@@ -39,18 +39,13 @@ public class MyPhotoCapture : MonoBehaviour
 		// Photo Capture 
 		cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).First();
 		targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height, TextureFormat.BGRA32, false);
-		//m_CameraParameters = new CameraParameters(WebCamMode.PhotoMode)
-		//{
-		//	hologramOpacity = 0.0f,
-		//	cameraResolutionWidth = cameraResolution.width,
-		//	cameraResolutionHeight = cameraResolution.height,
-		//	pixelFormat = CapturePixelFormat.BGRA32
-		//};
-		m_CameraParameters = new CameraParameters(WebCamMode.PhotoMode);
-		m_CameraParameters.hologramOpacity = 0.0f;
-		m_CameraParameters.cameraResolutionWidth = cameraResolution.width;
-		m_CameraParameters.cameraResolutionHeight = cameraResolution.height;
-		m_CameraParameters.pixelFormat = CapturePixelFormat.BGRA32;
+		m_CameraParameters = new CameraParameters(WebCamMode.PhotoMode)
+		{
+			hologramOpacity = 0.0f,
+			cameraResolutionWidth = cameraResolution.width,
+			cameraResolutionHeight = cameraResolution.height,
+			pixelFormat = CapturePixelFormat.BGRA32
+		};
 		PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
 
 		// Thread

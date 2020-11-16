@@ -6,7 +6,6 @@ using UnityEngine;
 public class Manager : MonoBehaviour
 {
 	// Textbox Management
-	//public string ipEndPoint;
 	TextMesh msgVoice;
 	TextMesh msgFace;
 
@@ -16,8 +15,6 @@ public class Manager : MonoBehaviour
 	public int num_faces;
 	public List<List<int>> faces_box;
 
-	// PhotoCapture Variables
-	//public byte[] imageBufferBytesArray;
 //#if UNITY_EDITOR
 	//private void Awake()
 	//{
@@ -40,8 +37,6 @@ public class Manager : MonoBehaviour
 		faces_box = new List<List<int>>();
 		isTalking = false;
 		num_faces = 0;
-		//ipEndPoint = "http://128.173.236.208:9005";
-		//imageBufferBytesArray = null;
 
 	}
 
@@ -56,7 +51,6 @@ public class Manager : MonoBehaviour
 			AppManager.GetChildWithName(Camera.main.gameObject, "incommingConvo").SetActive(false);
 		msgFace.text = "Number of faces: " + num_faces.ToString();
 
-		//print(speechContext);
 		if(!isTalking || speechContext == MySpeechContext.None)
 			msgVoice.text = "Speech: " + isTalking;
 		else 
