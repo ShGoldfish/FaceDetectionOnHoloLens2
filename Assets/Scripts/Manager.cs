@@ -6,17 +6,17 @@ using UnityEngine;
 public class Manager : MonoBehaviour
 {
 	// Textbox Management
-	TextMesh msgVoice;
-	TextMesh msgFace;
+	static TextMesh msgVoice;
+	static TextMesh msgFace;
 
 	// Context Management
-	bool isTalking;
-	private MySpeechContext speechContext;
-	public int num_faces;
-	public List<List<int>> faces_box;
+	static bool isTalking;
+	static MySpeechContext speechContext;
+	static int num_faces;
+	static List<List<int>> faces_box;
 
 	// test
-	public bool test_talking;
+	//public bool test_talking;
 //#if UNITY_EDITOR
 	//private void Awake()
 	//{
@@ -53,42 +53,49 @@ public class Manager : MonoBehaviour
 		else 
 			msgVoice.text = "Speech about " + speechContext;
 		//test
-		Set_isTalking(test_talking);
+		//Set_isTalking(test_talking);
 
 	}
 
-	public bool Get_isTalking()
+	internal static bool Get_isTalking()
 	{
 		return isTalking;
 	}
-	public void Set_isTalking(bool b)
+	internal static void Set_isTalking(bool b)
 	{
 		isTalking = b;
 		if(!b)
 			Reset_SpeechContext();
-		//test
-		test_talking = b;
 	}
 
-	public void Set_SpeechContext(int context)
+	internal static void Set_SpeechContext(int context)
 	{
 		speechContext = (MySpeechContext)context;
 		int n = (int)speechContext;
 		print(speechContext + n.ToString());
 	}
-	public void Reset_SpeechContext()
+	internal static void Reset_SpeechContext()
 	{
 		speechContext = MySpeechContext.None;
 		int n = (int)speechContext;
 		print(speechContext + n.ToString());
 	}
-	public string Get_SpeechContext()
+	internal static string Get_SpeechContext()
 	{
 		int n = (int)speechContext;
 		return speechContext + n.ToString();
 	}
 
-	internal void SetFaces(int n_faces, List<List<int>> faces)
+	internal static int Get_numFaces()
+	{
+		return num_faces;
+	}
+	internal static List<List<int>> Get_FaceBoxes()
+	{
+		return faces_box;
+	}
+
+	internal static void Set_Faces(int n_faces, List<List<int>> faces)
 	{
 		num_faces = n_faces;
 		faces_box = faces;

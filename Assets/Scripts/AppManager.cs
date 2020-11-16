@@ -4,9 +4,6 @@ using System;
 
 public class AppManager : MonoBehaviour
 {
-	// General 
-	Manager manager;
-
 	// Each App's vars
 	int frameSinceTranslucency;
 	private bool blocking;
@@ -21,7 +18,6 @@ public class AppManager : MonoBehaviour
 
 	private void Start()
 	{
-		manager = GameObject.Find("Manager").GetComponent<Manager>();
 		frameSinceTranslucency = 0;
 		fixationIcon = GetChildWithName(gameObject, "FixationIcon");
 		incommingConvo = GetChildWithName(gameObject, "incommingConvo");
@@ -57,14 +53,14 @@ public class AppManager : MonoBehaviour
 	private void UpdateTranslucency()
 	{
 		// not talking
-		if (!manager.Get_isTalking())
+		if (!Manager.Get_isTalking())
 		{
 			MakeOpaque();
 			return;
 		}
 		// Is talking:
 		// talking about app which is not blocking
-		if (manager.Get_SpeechContext() == gameObject.name && !blocking)
+		if (Manager.Get_SpeechContext() == gameObject.name && !blocking)
 		{
 			MakeOpaque();
 			return;
@@ -74,7 +70,7 @@ public class AppManager : MonoBehaviour
 			frameSinceTranslucency++;
 			return;
 		}
-		if (manager.num_faces > 0)
+		if (Manager.Get_numFaces() > 0)
 			MakeTranslusent();
 	}
 
@@ -83,7 +79,7 @@ public class AppManager : MonoBehaviour
 	{
 		// Renderer purposes
 		rect_faceBoxOnScreen = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
-		foreach (List<int> faceBox in manager.faces_box)
+		foreach (List<int> faceBox in Manager.Get_FaceBoxes())
 		{
 			if (IsOverlapping(faceBox))
 			{

@@ -12,8 +12,6 @@ public class MyPhotoCapture : MonoBehaviour
 	public static string ipEndPoint;
 	byte[] imageBufferBytesArray;
 
-	Manager manager;
-
 	// Constants (were 0.3 and 15)
 	const float WAIT_TIME4POST = 0.1f;
 	const int JPG_QUALITY = 25;
@@ -32,7 +30,6 @@ public class MyPhotoCapture : MonoBehaviour
 // ############################################# UNITY
 	void Start()
 	{
-		manager = GameObject.Find("Manager").GetComponent<Manager>();
 		ipEndPoint = "http://128.173.236.208:9005";
 		imageBufferBytesArray = null;
 
@@ -159,7 +156,7 @@ public class MyPhotoCapture : MonoBehaviour
 						n_faces++;
 					}
 				}
-				manager.SetFaces(n_faces, faces);
+				Manager.Set_Faces(n_faces, faces);
 			}
 		}
 	}

@@ -8,7 +8,6 @@ public enum MySpeechContext { Weather = 1, Email = 2, Fitbit = 3, None = 4 };
 
 public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 {
-	Manager manager;
 	const int TIMEOUT = 5;
 
     [SerializeField]
@@ -19,9 +18,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
     private StringBuilder textSoFar;
 	
     private void Awake()
-    {
-		manager = gameObject.GetComponent<Manager>();
-       
+    {       
         dictationRecognizer = new DictationRecognizer();
 		dictationRecognizer.AutoSilenceTimeoutSeconds = TIMEOUT;
         // 3.a: Register for dictationRecognizer.DictationHypothesis and implement DictationHypothesis below
@@ -54,8 +51,8 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 	private void Update()
 	{
 		if (textSoFar != null && textSoFar.Length != 0)
-			manager.Set_isTalking(true);
-		if (!manager.Get_isTalking())
+			Manager.Set_isTalking(true);
+		if (!Manager.Get_isTalking())
 		{
 			dictationRecognizer.Start();
 		}
@@ -68,7 +65,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 	private void DictationRecognizer_DictationHypothesis(string text)
     {
         if (text != null && text.Length != 0)
-			manager.Set_isTalking(true);
+			Manager.Set_isTalking(true);
 		//currentlySaying.Append(text);
 		textSoFar.Append(text);
     }
@@ -82,7 +79,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
     {
         // 3.a: Append textSoFar with latest text
         if (text != null && text.Length != 0)
-			manager.Set_isTalking(true);
+			Manager.Set_isTalking(true);
 		textSoFar.Append(text + ". ");
     }
 
@@ -99,7 +96,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
         if (cause == DictationCompletionCause.TimeoutExceeded)
         {
             Microphone.End(deviceName);
-			manager.Set_isTalking(false);
+			Manager.Set_isTalking(false);
 			//currentlySaying = new StringBuilder();
 			textSoFar = new StringBuilder("");
         }
@@ -140,7 +137,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 
     void IMixedRealitySpeechHandler.OnSpeechKeywordRecognized(SpeechEventData eventData)
     {
-        Debug.Log("OnSpeechKeywordRecognized: " + manager.Get_isTalking());
+        Debug.Log("OnSpeechKeywordRecognized: " + Manager.Get_isTalking());
     }
 
 }
