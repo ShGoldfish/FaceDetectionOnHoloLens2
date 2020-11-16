@@ -6,7 +6,7 @@ using UnityEngine;
 public class Manager : MonoBehaviour
 {
 	// Textbox Management
-	public string ipEndPoint;
+	//public string ipEndPoint;
 	TextMesh msgVoice;
 	TextMesh msgFace;
 
@@ -17,7 +17,7 @@ public class Manager : MonoBehaviour
 	public List<List<int>> faces_box;
 
 	// PhotoCapture Variables
-	public byte[] imageBufferBytesArray;
+	//public byte[] imageBufferBytesArray;
 //#if UNITY_EDITOR
 	//private void Awake()
 	//{
@@ -34,14 +34,14 @@ public class Manager : MonoBehaviour
 		// Textbox Management
 		msgFace = GameObject.Find("MessageFace").GetComponent<TextMesh>();
 		msgVoice = GameObject.Find("MessageVoice").GetComponent<TextMesh>();
-		ipEndPoint = "http://128.173.236.208:9005";
-		msgFace.text = "Connect Face detection to the IP Address: " + ipEndPoint;
+		msgFace.text = "Connect Face detection to the IP Address: " + MyPhotoCapture.ipEndPoint;
 
 		// Context Management
 		faces_box = new List<List<int>>();
 		isTalking = false;
 		num_faces = 0;
-		imageBufferBytesArray = null;
+		//ipEndPoint = "http://128.173.236.208:9005";
+		//imageBufferBytesArray = null;
 
 	}
 
