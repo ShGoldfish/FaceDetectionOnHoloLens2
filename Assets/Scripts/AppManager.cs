@@ -46,7 +46,7 @@ public class AppManager : MonoBehaviour
 
 	private void UpdateTranslucency(bool blocking)
 	{
-		if (!manager.isTalking || (manager.Get_SpeechContext() == gameObject.name && !blocking))
+		if (!manager.Get_isTalking() || (manager.Get_SpeechContext() == gameObject.name && !blocking))
 		{
 			MakeOpaque();
 			return;

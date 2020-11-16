@@ -10,11 +10,13 @@ public class Manager : MonoBehaviour
 	TextMesh msgFace;
 
 	// Context Management
-	public bool isTalking;
+	bool isTalking;
 	private MySpeechContext speechContext;
 	public int num_faces;
 	public List<List<int>> faces_box;
 
+	// test
+	public bool test_talking;
 //#if UNITY_EDITOR
 	//private void Awake()
 	//{
@@ -43,7 +45,6 @@ public class Manager : MonoBehaviour
 
 	private void Update()
 	{
-
 		// Update the text boxes
 		if (num_faces > 0)
 			AppManager.GetChildWithName(Camera.main.gameObject, "incommingConvo").SetActive( true);
@@ -55,13 +56,33 @@ public class Manager : MonoBehaviour
 			msgVoice.text = "Speech: " + isTalking;
 		else 
 			msgVoice.text = "Speech about " + speechContext;
+		//test
+		Set_isTalking(test_talking);
 
 	}
 
+	public bool Get_isTalking()
+	{
+		return isTalking;
+	}
+	public void Set_isTalking(bool b)
+	{
+		isTalking = b;
+		if(!b)
+			Reset_SpeechContext();
+		//test
+		test_talking = b;
+	}
 
 	public void Set_SpeechContext(int context)
 	{
 		speechContext = (MySpeechContext)context;
+		int n = (int)speechContext;
+		print(speechContext + n.ToString());
+	}
+	public void Reset_SpeechContext()
+	{
+		speechContext = MySpeechContext.None;
 		int n = (int)speechContext;
 		print(speechContext + n.ToString());
 	}

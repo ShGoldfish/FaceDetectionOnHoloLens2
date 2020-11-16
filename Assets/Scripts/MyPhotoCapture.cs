@@ -144,7 +144,7 @@ public class MyPhotoCapture : MonoBehaviour
 			else
 			{
 				string dataReceived = webRequest.downloadHandler.text;
-				print("Network Connection took " + (Time.time - time_before_send) + " seconds.");    // ~0.065seconds
+				//print("Network Connection took " + (Time.time - time_before_send) + " seconds.");    // ~0.065seconds
 				int n_faces = 0;
 				List<List<int>> faces = new List<List<int>>();
 				if (dataReceived != null && dataReceived != "")
@@ -158,7 +158,6 @@ public class MyPhotoCapture : MonoBehaviour
 													Convert.ToInt32(numbers[i + 3]) });
 						n_faces++;
 					}
-					print(n_faces);
 				}
 				manager.SetFaces(n_faces, faces);
 			}

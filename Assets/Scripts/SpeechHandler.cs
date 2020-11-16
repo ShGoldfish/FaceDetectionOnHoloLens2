@@ -54,8 +54,8 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 	private void Update()
 	{
 		if (textSoFar != null && textSoFar.Length != 0)
-			manager.isTalking = true;
-		if (!manager.isTalking)
+			manager.Set_isTalking(true);
+		if (!manager.Get_isTalking())
 		{
 			dictationRecognizer.Start();
 		}
@@ -68,9 +68,9 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 	private void DictationRecognizer_DictationHypothesis(string text)
     {
         if (text != null && text.Length != 0)
-			manager.isTalking = true;
-        //currentlySaying.Append(text);
-        textSoFar.Append(text);
+			manager.Set_isTalking(true);
+		//currentlySaying.Append(text);
+		textSoFar.Append(text);
     }
 
     /// <summary>
@@ -82,8 +82,8 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
     {
         // 3.a: Append textSoFar with latest text
         if (text != null && text.Length != 0)
-			manager.isTalking = true;
-        textSoFar.Append(text + ". ");
+			manager.Set_isTalking(true);
+		textSoFar.Append(text + ". ");
     }
 
     /// <summary>
@@ -99,9 +99,9 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
         if (cause == DictationCompletionCause.TimeoutExceeded)
         {
             Microphone.End(deviceName);
-			manager.isTalking = false;
-            //currentlySaying = new StringBuilder();
-            textSoFar = new StringBuilder("");
+			manager.Set_isTalking(false);
+			//currentlySaying = new StringBuilder();
+			textSoFar = new StringBuilder("");
         }
     }
 
@@ -140,7 +140,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 
     void IMixedRealitySpeechHandler.OnSpeechKeywordRecognized(SpeechEventData eventData)
     {
-        Debug.Log("OnSpeechKeywordRecognized: " + manager.isTalking);
+        Debug.Log("OnSpeechKeywordRecognized: " + manager.Get_isTalking());
     }
 
 }
