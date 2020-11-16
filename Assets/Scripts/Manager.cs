@@ -46,10 +46,6 @@ public class Manager : MonoBehaviour
 	private void Update()
 	{
 		// Update the text boxes
-		if (num_faces > 0)
-			AppManager.GetChildWithName(Camera.main.gameObject, "incommingConvo").SetActive( true);
-		else
-			AppManager.GetChildWithName(Camera.main.gameObject, "incommingConvo").SetActive(false);
 		msgFace.text = "Number of faces: " + num_faces.ToString();
 
 		if(!isTalking || speechContext == MySpeechContext.None)

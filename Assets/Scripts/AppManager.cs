@@ -9,7 +9,11 @@ public class AppManager : MonoBehaviour
 
 	// Each App's vars
 	int frameSinceTranslucency;
+	private bool blocking;
 	public TextMesh msgBlocking;
+	private GameObject fixationIcon;
+	private GameObject incommingConvo;
+
 
 	// Renderer purposes
 	public Rect rect_faceBoxOnScreen, rect_app;
@@ -19,39 +23,52 @@ public class AppManager : MonoBehaviour
 	{
 		manager = GameObject.Find("Manager").GetComponent<Manager>();
 		frameSinceTranslucency = 0;
+		fixationIcon = GetChildWithName(gameObject, "FixationIcon");
+		incommingConvo = GetChildWithName(gameObject, "incommingConvo");
 	}
 
 
 	private void Update()
 	{
 		Time.timeScale = 0.5f;
-		bool blocking = IsBlockingAnyFaces();
+		IsBlockingAnyFaces();
 		msgBlocking.text = "Is Blocking a Face: " + blocking;
-		UpdateTranslucency(blocking);
-		//frameSinceTranslucency++;
+		UpdateTranslucency();
 	}
 
 	private void MakeTranslusent()
 	{
 		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		frameSinceTranslucency = 0;
 	}
 	private void MakeOpaque()
 	{
 
 		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-		GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().color = Color.white;
+		fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
+		if (!blocking)
+			incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		else
+			incommingConvo.GetComponent<SpriteRenderer>().color = Color.white;
 	}
 
-	private void UpdateTranslucency(bool blocking)
+	private void UpdateTranslucency()
 	{
-		if (!manager.Get_isTalking() || (manager.Get_SpeechContext() == gameObject.name && !blocking))
+		// not talking
+		if (!manager.Get_isTalking())
 		{
 			MakeOpaque();
 			return;
 		}
-		// is talking about something other than this app
+		// Is talking:
+		// talking about app which is not blocking
+		if (manager.Get_SpeechContext() == gameObject.name && !blocking)
+		{
+			MakeOpaque();
+			return;
+		}
 		if (frameSinceTranslucency < 3 * 60)
 		{
 			frameSinceTranslucency++;
@@ -59,13 +76,10 @@ public class AppManager : MonoBehaviour
 		}
 		if (manager.num_faces > 0)
 			MakeTranslusent();
-		else
-			MakeOpaque();
-
 	}
 
 
-	private bool IsBlockingAnyFaces()
+	private void IsBlockingAnyFaces()
 	{
 		// Renderer purposes
 		rect_faceBoxOnScreen = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
@@ -73,10 +87,11 @@ public class AppManager : MonoBehaviour
 		{
 			if (IsOverlapping(faceBox))
 			{
-				return true;
+				blocking = true;
+				return;
 			}
 		}
-		return false;
+		blocking = false;
 	}
 
 
@@ -123,13 +138,13 @@ public class AppManager : MonoBehaviour
 		if (bodyFixed)
 		{
 			// switching to world fixed:
-			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("WorldZone");
+			fixationIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("WorldZone");
 
 		}
 		else
 		{
 			// switching to body fixed:
-			GetChildWithName(gameObject, "FixationIcon").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BodyZone");
+			fixationIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BodyZone");
 		}
 		GetComponent<BodyFixed>().enabled = !bodyFixed;
 	}
