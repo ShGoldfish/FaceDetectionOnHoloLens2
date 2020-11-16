@@ -85,7 +85,7 @@ public class MyPhotoCapture : MonoBehaviour
 			photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
 
 			// Write to file
-			//print("take ohoto");
+			//Debug.Log("take ohoto");
 			imageBufferBytesArray = targetTexture.EncodeToJPG(JPG_QUALITY);
 
 			//StartCoroutine("PostPhoto");
@@ -141,7 +141,7 @@ public class MyPhotoCapture : MonoBehaviour
 			else
 			{
 				string dataReceived = webRequest.downloadHandler.text;
-				//print("Network Connection took " + (Time.time - time_before_send) + " seconds.");    // ~0.065seconds
+				Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds.");    // ~0.065seconds
 				int n_faces = 0;
 				List<List<int>> faces = new List<List<int>>();
 				if (dataReceived != null && dataReceived != "")
@@ -177,7 +177,7 @@ public class MyPhotoCapture : MonoBehaviour
 			else
 			{
 				string dataReceived = webRequest.downloadHandler.text;
-				print("dataReceived from python is: " + dataReceived);
+				Debug.Log("dataReceived from python is: " + dataReceived);
 			}
 		}
 	}

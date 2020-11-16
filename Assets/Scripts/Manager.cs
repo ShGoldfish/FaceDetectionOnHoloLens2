@@ -17,7 +17,7 @@ public class Manager : MonoBehaviour
 	static List<List<int>> faces_box;
 
 	// test
-	public bool test_talking;
+	//public bool test_talking;
 //#if UNITY_EDITOR
 	//private void Awake()
 	//{
@@ -63,7 +63,7 @@ public class Manager : MonoBehaviour
 		else 
 			msgVoice.text = "Speech about " + speechContext;
 		//test
-		Set_isTalking(test_talking);
+		//Set_isTalking(test_talking);
 
 	}
 
@@ -83,24 +83,24 @@ public class Manager : MonoBehaviour
 	{
 		speechContext = (MySpeechContext)context;
 		Set_justMentioned(true);
-		// Print purpose
+		// Debug.Log purpose
 		int n = (int)speechContext;
-		print(speechContext + n.ToString());
+		Debug.Log(speechContext + n.ToString());
 	}
 
 	internal static void SpeechContext_TimeOut()
 	{
 		speechContext = MySpeechContext.None;
-		// Print purpose
+		// Debug.Log purpose
 		int n = (int)speechContext;
-		print(speechContext + n.ToString());
+		Debug.Log(speechContext + n.ToString());
 	}
 
 	internal static void Reset_SpeechContext()
 	{
 		speechContext = MySpeechContext.None;
 		int n = (int)speechContext;
-		print(speechContext + n.ToString());
+		Debug.Log(speechContext + n.ToString());
 	}
 	internal static string Get_SpeechContext()
 	{
