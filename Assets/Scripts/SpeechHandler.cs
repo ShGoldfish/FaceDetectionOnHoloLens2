@@ -3,6 +3,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.Windows.Speech;
 using Microsoft.MixedReality.Toolkit.Input;
+using System;
 
 public enum MySpeechContext { Weather = 1, Email = 2, Fitbit = 3, None = 4 };
 
@@ -64,18 +65,41 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 	/// <param name="text">The currently hypothesized recognition.</param>
 	private void DictationRecognizer_DictationHypothesis(string text)
     {
-        if (text != null && text.Length != 0)
+		if (text != null && text.Length != 0)
+		{
 			Manager.Set_isTalking(true);
-		//currentlySaying.Append(text);
+			RecognizeMyKeywords(text.ToLower());
+		}//currentlySaying.Append(text);
 		textSoFar.Append(text);
     }
 
-    /// <summary>
-    /// This event is fired after the user pauses, typically at the end of a sentence. The full recognized string is returned here.
-    /// </summary>
-    /// <param name="text">The text that was heard by the recognizer.</param>
-    /// <param name="confidence">A representation of how confident (rejected, low, medium, high) the recognizer is of this recognition.</param>
-    private void DictationRecognizer_DictationResult(string text, ConfidenceLevel confidence)
+	private void RecognizeMyKeywords(string text)
+	{
+		int context = 4;
+		if (text.Contains("weather") || text.Contains("cloudy") || text.Contains("sunny"))
+		{
+			context = 1;
+		}
+		if (text.Contains("email") || text.Contains("inbox"))
+		{
+			context = 2;
+		}
+		if (text.Contains("activity") || text.Contains("calory") 
+			|| text.Contains("calories") || text.Contains("fitbit") 
+			|| text.Contains("calory") || text.Contains("heart beat") 
+			|| text.Contains("steps"))
+		{
+			context = 3;
+		}
+		Manager.Set_SpeechContext(context);
+	}
+
+	/// <summary>
+	/// This event is fired after the user pauses, typically at the end of a sentence. The full recognized string is returned here.
+	/// </summary>
+	/// <param name="text">The text that was heard by the recognizer.</param>
+	/// <param name="confidence">A representation of how confident (rejected, low, medium, high) the recognizer is of this recognition.</param>
+	private void DictationRecognizer_DictationResult(string text, ConfidenceLevel confidence)
     {
         // 3.a: Append textSoFar with latest text
         if (text != null && text.Length != 0)

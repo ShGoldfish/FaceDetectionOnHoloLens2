@@ -78,8 +78,8 @@ public class Manager : MonoBehaviour
 			Reset_SpeechContext();
 	}
 
-
-	public void Set_SpeechContext(int context)
+	internal static void Set_SpeechContext(int context)
+	//public void Set_SpeechContext(int context)
 	{
 		speechContext = (MySpeechContext)context;
 		Set_justMentioned(true);
