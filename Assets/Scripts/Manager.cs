@@ -12,6 +12,7 @@ public class Manager : MonoBehaviour
 	// Context Management
 	static bool isTalking;
 	static MySpeechContext speechContext;
+	static bool justMentioned;
 	static int num_faces;
 	static List<List<int>> faces_box;
 
@@ -42,6 +43,15 @@ public class Manager : MonoBehaviour
 
 	}
 
+	internal static void Set_justMentioned(bool v)
+	{
+		justMentioned = v;
+	}
+
+	internal static bool Get_justMentioned()
+	{
+		return justMentioned;
+	}
 
 	void Update()
 	{
@@ -72,10 +82,19 @@ public class Manager : MonoBehaviour
 	public void Set_SpeechContext(int context)
 	{
 		speechContext = (MySpeechContext)context;
+		Set_justMentioned(true);
+		// Print purpose
 		int n = (int)speechContext;
 		print(speechContext + n.ToString());
 	}
 
+	internal static void SpeechContext_TimeOut()
+	{
+		speechContext = MySpeechContext.None;
+		// Print purpose
+		int n = (int)speechContext;
+		print(speechContext + n.ToString());
+	}
 
 	internal static void Reset_SpeechContext()
 	{
