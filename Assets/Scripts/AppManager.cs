@@ -136,7 +136,6 @@ public class AppManager : MonoBehaviour
 		}
 	}
 
-
 	private bool IsOverlapping(List<int> faceBox)
 	{
 		// *********************************App 
