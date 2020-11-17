@@ -5,7 +5,7 @@ using System.Collections;
 
 public class AppManager : MonoBehaviour
 {
-	const int MENTION_TIMEOUT = 5 * 60;
+	const int MENTION_TIMEOUT = 7 * 60;
 	const int TRANSLUCENCY_TIMEOUT = 3 * 60;
 	// Each App's vars
 	int frameSinceTranslucency;
@@ -58,7 +58,7 @@ public class AppManager : MonoBehaviour
 			if (frameSinceMentioned >= MENTION_TIMEOUT)
 			{
 				frameSinceMentioned = 0;
-				Manager.SpeechContext_TimeOut();
+				Manager.Reset_SpeechContext();
 				return;
 			}
 		}
@@ -79,11 +79,11 @@ public class AppManager : MonoBehaviour
 		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		frameSinceTranslucency = 0;
+		frameSinceTranslucency = 1;
 	}
 	private void MakeOpaque()
 	{
-
+		frameSinceTranslucency = 0;
 		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
 		fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
 		if (!blocking)
@@ -100,20 +100,30 @@ public class AppManager : MonoBehaviour
 			MakeOpaque();
 			return;
 		}
-		// Is talking:
-		// talking about app which is not blocking
-		if (frameSinceMentioned > 0 && !blocking)
+		if (blocking)
 		{
-			MakeOpaque();
+			MakeTranslusent();
 			return;
 		}
-		if (frameSinceTranslucency < TRANSLUCENCY_TIMEOUT)
+		// Is talking and not blocking:
+		if (frameSinceTranslucency > 0 && frameSinceTranslucency < TRANSLUCENCY_TIMEOUT)
 		{
 			frameSinceTranslucency++;
 			return;
 		}
+		// talking about app which 
+		if (frameSinceMentioned > 0)
+		{
+			MakeOpaque();
+			return;
+		}
 		if (Manager.Get_numFaces() > 0)
+		{
 			MakeTranslusent();
+			return;
+		}
+		// is talking but there is no face
+		MakeOpaque();
 	}
 
 

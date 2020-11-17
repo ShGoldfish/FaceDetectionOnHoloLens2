@@ -9,7 +9,7 @@ public enum MySpeechContext { Weather = 1, Email = 2, Fitbit = 3, None = 4 };
 
 public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 {
-	const int TIMEOUT = 5;
+	const int TIMEOUT = 7;
 
     [SerializeField]
     private DictationRecognizer dictationRecognizer;

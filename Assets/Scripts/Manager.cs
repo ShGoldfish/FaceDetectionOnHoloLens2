@@ -73,7 +73,7 @@ public class Manager : MonoBehaviour
 	internal static void Set_isTalking(bool b)
 	{
 		isTalking = b;
-		if(!b)
+		if(!isTalking)
 			Reset_SpeechContext();
 	}
 
@@ -82,14 +82,6 @@ public class Manager : MonoBehaviour
 	{
 		speechContext = (MySpeechContext)context;
 		Set_justMentioned(true);
-		// Debug.Log purpose
-		int n = (int)speechContext;
-		Debug.Log(speechContext + n.ToString());
-	}
-
-	internal static void SpeechContext_TimeOut()
-	{
-		speechContext = MySpeechContext.None;
 		// Debug.Log purpose
 		int n = (int)speechContext;
 		Debug.Log(speechContext + n.ToString());
