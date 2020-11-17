@@ -100,16 +100,21 @@ public class AppManager : MonoBehaviour
 			MakeOpaque();
 			return;
 		}
-		// Is talking:
-		// talking about app which is not blocking
-		if (frameSinceMentioned > 0 && !blocking)
+		if (blocking)
 		{
-			MakeOpaque();
+			MakeTranslusent();
 			return;
 		}
+		// Is talking and not blocking:
 		if (frameSinceTranslucency < TRANSLUCENCY_TIMEOUT)
 		{
 			frameSinceTranslucency++;
+			return;
+		}
+		// talking about app which 
+		if (frameSinceMentioned > 0)
+		{
+			MakeOpaque();
 			return;
 		}
 		if (Manager.Get_numFaces() > 0)
