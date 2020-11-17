@@ -5,7 +5,7 @@ using System.Collections;
 
 public class AppManager : MonoBehaviour
 {
-	const int MENTION_TIMEOUT = 5 * 60;
+	const int MENTION_TIMEOUT = 7 * 60;
 	const int TRANSLUCENCY_TIMEOUT = 3 * 60;
 	// Each App's vars
 	int frameSinceTranslucency;
@@ -58,7 +58,7 @@ public class AppManager : MonoBehaviour
 			if (frameSinceMentioned >= MENTION_TIMEOUT)
 			{
 				frameSinceMentioned = 0;
-				Manager.SpeechContext_TimeOut();
+				Manager.Reset_SpeechContext();
 				return;
 			}
 		}
@@ -83,7 +83,7 @@ public class AppManager : MonoBehaviour
 	}
 	private void MakeOpaque()
 	{
-
+		frameSinceTranslucency = 0;
 		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
 		fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
 		if (!blocking)
