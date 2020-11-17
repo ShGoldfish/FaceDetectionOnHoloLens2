@@ -4,13 +4,15 @@ using System;
 
 public class AppManager : MonoBehaviour
 {
+	const int MENTION_TIMEOUT = 15 * 60;
+	const int TRANSLUCENCY_TIMEOUT = 3 * 60;
 	// Each App's vars
 	int frameSinceTranslucency;
-	private bool blocking;
-	public TextMesh msgBlocking;
-	private GameObject fixationIcon;
-	private GameObject incommingConvo;
-
+	int frameSinceMentioned;
+	bool blocking;
+	TextMesh msgBlocking;
+	GameObject fixationIcon;
+	GameObject incommingConvo;
 
 	// Renderer purposes
 	public Rect rect_faceBoxOnScreen, rect_app;
@@ -18,19 +20,57 @@ public class AppManager : MonoBehaviour
 
 	private void Start()
 	{
-		frameSinceTranslucency = 0;
+		msgBlocking = GetChildWithName(gameObject, "Msg_Bocking").GetComponent<TextMesh>();
 		fixationIcon = GetChildWithName(gameObject, "FixationIcon");
 		incommingConvo = GetChildWithName(gameObject, "incommingConvo");
+		frameSinceMentioned = 0;
+		frameSinceTranslucency = 0;
 	}
 
 
 	private void Update()
 	{
 		Time.timeScale = 0.5f;
+		UpdateMentioned();
 		IsBlockingAnyFaces();
 		msgBlocking.text = "Is Blocking a Face: " + blocking;
 		UpdateTranslucency();
 	}
+
+	private void UpdateMentioned()
+	{
+		if (!Manager.Get_isTalking())
+		{
+			frameSinceMentioned = 0;
+			return;
+		}
+		if (Manager.Get_SpeechContext() == gameObject.name)
+		{
+			// just mentioned is to make sure if count down already started but is mentioned again
+			if (frameSinceMentioned == 0 || Manager.Get_justMentioned())
+			{
+				frameSinceMentioned = 1;
+				Manager.Set_justMentioned(false);
+				return;
+			}
+			if (frameSinceMentioned >= MENTION_TIMEOUT)
+			{
+				frameSinceMentioned = 0;
+				Manager.SpeechContext_TimeOut();
+				return;
+			}
+		}
+		if (frameSinceMentioned >= MENTION_TIMEOUT)
+		{
+			frameSinceMentioned = 0;
+			return;
+		}
+		if (frameSinceMentioned > 0)
+		{
+			frameSinceMentioned++;
+		}
+	}
+
 
 	private void MakeTranslusent()
 	{
@@ -60,12 +100,12 @@ public class AppManager : MonoBehaviour
 		}
 		// Is talking:
 		// talking about app which is not blocking
-		if (Manager.Get_SpeechContext() == gameObject.name && !blocking)
+		if (frameSinceMentioned > 0 && !blocking)
 		{
 			MakeOpaque();
 			return;
 		}
-		if (frameSinceTranslucency < 3 * 60)
+		if (frameSinceTranslucency < TRANSLUCENCY_TIMEOUT)
 		{
 			frameSinceTranslucency++;
 			return;

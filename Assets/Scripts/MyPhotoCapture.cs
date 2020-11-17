@@ -5,6 +5,7 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using System;
+using System.Threading;
 //using System.Threading;
 
 public class MyPhotoCapture : MonoBehaviour
@@ -13,17 +14,20 @@ public class MyPhotoCapture : MonoBehaviour
 	byte[] imageBufferBytesArray;
 
 	// Constants (were 0.3 and 15)
-	const float WAIT_TIME4POST = 0.1f;
-	const int JPG_QUALITY = 25;
+	const float WAIT_TIME4POST = 0.3f;
+	const int JPG_QUALITY = 15;
 
 	// Photo Capture Variables
 	PhotoCapture photoCaptureObject = null;
 	Texture2D targetTexture;
 	CameraParameters m_CameraParameters;
 	Resolution cameraResolution;
-	
+
 	// Thread
-	//Thread mThread_get; 
+	//const int NUM_THREADS = 5;
+	//Thread[] mThreads_get = new Thread[NUM_THREADS];
+	//int thread_num;
+
 	// Debugging
 	float time_before_send;
 
@@ -46,9 +50,12 @@ public class MyPhotoCapture : MonoBehaviour
 		PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
 
 		// Thread
-		//ThreadStart ts_get = new ThreadStart(ThreadingStart);
-		//mThread_get = new Thread(ts_get);
-		//mThread_get.Start();
+		//thread_num = 0;
+		//for (int i = 0; i < NUM_THREADS; i++)
+		//{
+		//	mThreads_get[i] = new Thread(ThreadingStart);
+		//	mThreads_get[i].Start(i);
+		//}
 
 		// Debugging
 		time_before_send = 0.0f;
@@ -85,13 +92,13 @@ public class MyPhotoCapture : MonoBehaviour
 			photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
 
 			// Write to file
-			//print("take ohoto");
+			//Debug.Log("take ohoto");
 			imageBufferBytesArray = targetTexture.EncodeToJPG(JPG_QUALITY);
 
-			//StartCoroutine("PostPhoto");
+			// Thread
+			//thread_num = (thread_num + 1) % NUM_THREADS;
 			StartCoroutine("PostPhoto");
 			StartCoroutine("GetFaces");
-			//StartCoroutine("HelloWorld");
 		}
 	}
 	void OnStoppedPhotoMode(PhotoCapture.PhotoCaptureResult result)
@@ -101,11 +108,18 @@ public class MyPhotoCapture : MonoBehaviour
 	}
 
 
-// ############################################# THREAD
-	//void ThreadingStart()
+	// ############################################# THREAD
+	//void ThreadingStart(object data)
 	//{
+	//	while (true)
+	//	{
+	//		if (int.Parse(string.Format("{0}", data)) == thread_num)
+	//		{
+	//			StartCoroutine("PostPhoto");
+	//			StartCoroutine("GetFaces");
+	//		}
+	//	}
 	//}
-
 
 	// ############################################# NETWORK CONNECTION
 	/// <summary>
@@ -115,14 +129,17 @@ public class MyPhotoCapture : MonoBehaviour
 	private IEnumerator PostPhoto()
 	{
 		time_before_send = Time.time;
-		var data = new List<IMultipartFormSection> {
+		//if (imageBufferBytesArray != null)
+		//{
+			var data = new List<IMultipartFormSection> {
 			new MultipartFormFileSection("myImage", imageBufferBytesArray, "test.jpg", "image/jpg")
 		};
-		using (UnityWebRequest webRequest = UnityWebRequest.Post(ipEndPoint + "/receive-image", data))
-		{
-			webRequest.SendWebRequest();
-			yield return new WaitForSeconds(WAIT_TIME4POST);
-		}
+			using (UnityWebRequest webRequest = UnityWebRequest.Post(ipEndPoint + "/receive-image", data))
+			{
+				webRequest.SendWebRequest();
+				yield return new WaitForSeconds(WAIT_TIME4POST);
+			}
+		//}
 	}
 	/// <summary>
 	/// Network Connection Coroutines
@@ -141,7 +158,7 @@ public class MyPhotoCapture : MonoBehaviour
 			else
 			{
 				string dataReceived = webRequest.downloadHandler.text;
-				//print("Network Connection took " + (Time.time - time_before_send) + " seconds.");    // ~0.065seconds
+				Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds.");    // ~0.065seconds
 				int n_faces = 0;
 				List<List<int>> faces = new List<List<int>>();
 				if (dataReceived != null && dataReceived != "")
@@ -177,7 +194,7 @@ public class MyPhotoCapture : MonoBehaviour
 			else
 			{
 				string dataReceived = webRequest.downloadHandler.text;
-				print("dataReceived from python is: " + dataReceived);
+				Debug.Log("dataReceived from python is: " + dataReceived);
 			}
 		}
 	}

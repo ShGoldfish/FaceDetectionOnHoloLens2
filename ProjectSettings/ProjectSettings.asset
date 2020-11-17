@@ -579,11 +579,11 @@ PlayerSettings:
       AllJoyn: False
       Appointments: False
       BackgroundMediaPlayback: False
-      BlockedChatMessages: False
+      BlockedChatMessages: True
       Bluetooth: False
-      Chat: False
+      Chat: True
       CodeGeneration: False
-      Contacts: False
+      Contacts: True
       EnterpriseAuthentication: True
       HumanInterfaceDevice: False
       InputInjectionBrokered: False
@@ -600,7 +600,7 @@ PlayerSettings:
       PicturesLibrary: True
       PointOfService: False
       PrivateNetworkClientServer: True
-      Proximity: False
+      Proximity: True
       RecordedCallsFolder: False
       RemoteSystem: True
       RemovableStorage: False

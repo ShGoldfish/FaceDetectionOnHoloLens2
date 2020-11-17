@@ -12,6 +12,7 @@ public class Manager : MonoBehaviour
 	// Context Management
 	static bool isTalking;
 	static MySpeechContext speechContext;
+	static bool justMentioned;
 	static int num_faces;
 	static List<List<int>> faces_box;
 
@@ -27,7 +28,7 @@ public class Manager : MonoBehaviour
 		//SystemInfo.renderingthread
 	//}
 //#endif
-	private void Start()
+	void Start()
 	{
 		speechContext = MySpeechContext.None;
 		// Textbox Management
@@ -42,8 +43,17 @@ public class Manager : MonoBehaviour
 
 	}
 
+	internal static void Set_justMentioned(bool v)
+	{
+		justMentioned = v;
+	}
 
-	private void Update()
+	internal static bool Get_justMentioned()
+	{
+		return justMentioned;
+	}
+
+	void Update()
 	{
 		// Update the text boxes
 		msgFace.text = "Number of faces: " + num_faces.ToString();
@@ -69,16 +79,28 @@ public class Manager : MonoBehaviour
 	}
 
 	internal static void Set_SpeechContext(int context)
+	//public void Set_SpeechContext(int context)
 	{
 		speechContext = (MySpeechContext)context;
+		Set_justMentioned(true);
+		// Debug.Log purpose
 		int n = (int)speechContext;
-		print(speechContext + n.ToString());
+		Debug.Log(speechContext + n.ToString());
 	}
+
+	internal static void SpeechContext_TimeOut()
+	{
+		speechContext = MySpeechContext.None;
+		// Debug.Log purpose
+		int n = (int)speechContext;
+		Debug.Log(speechContext + n.ToString());
+	}
+
 	internal static void Reset_SpeechContext()
 	{
 		speechContext = MySpeechContext.None;
 		int n = (int)speechContext;
-		print(speechContext + n.ToString());
+		Debug.Log(speechContext + n.ToString());
 	}
 	internal static string Get_SpeechContext()
 	{
