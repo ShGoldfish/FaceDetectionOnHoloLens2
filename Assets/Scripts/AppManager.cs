@@ -79,7 +79,7 @@ public class AppManager : MonoBehaviour
 		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		frameSinceTranslucency = 0;
+		frameSinceTranslucency = 1;
 	}
 	private void MakeOpaque()
 	{
@@ -106,7 +106,7 @@ public class AppManager : MonoBehaviour
 			return;
 		}
 		// Is talking and not blocking:
-		if (frameSinceTranslucency < TRANSLUCENCY_TIMEOUT)
+		if (frameSinceTranslucency > 0 && frameSinceTranslucency < TRANSLUCENCY_TIMEOUT)
 		{
 			frameSinceTranslucency++;
 			return;
@@ -118,7 +118,12 @@ public class AppManager : MonoBehaviour
 			return;
 		}
 		if (Manager.Get_numFaces() > 0)
+		{
 			MakeTranslusent();
+			return;
+		}
+		// is talking but there is no face
+		MakeOpaque();
 	}
 
 
