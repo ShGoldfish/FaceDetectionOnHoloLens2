@@ -579,25 +579,25 @@ PlayerSettings:
       AllJoyn: False
       Appointments: False
       BackgroundMediaPlayback: False
-      BlockedChatMessages: True
+      BlockedChatMessages: False
       Bluetooth: False
-      Chat: True
+      Chat: False
       CodeGeneration: False
-      Contacts: True
+      Contacts: False
       EnterpriseAuthentication: True
       HumanInterfaceDevice: False
       InputInjectionBrokered: False
       InternetClient: True
       InternetClientServer: True
       Location: False
-      LowLevelDevices: True
+      LowLevelDevices: False
       Microphone: True
       MusicLibrary: False
       Objects3D: False
       OfflineMapsManagement: False
       PhoneCall: False
       PhoneCallHistoryPublic: False
-      PicturesLibrary: True
+      PicturesLibrary: False
       PointOfService: False
       PrivateNetworkClientServer: True
       Proximity: True
@@ -607,9 +607,9 @@ PlayerSettings:
       SharedUserCertificates: False
       SpatialPerception: True
       SystemManagement: True
-      UserAccountInformation: True
-      UserDataTasks: True
-      UserNotificationListener: True
+      UserAccountInformation: False
+      UserDataTasks: False
+      UserNotificationListener: False
       VideosLibrary: False
       VoipCall: False
       WebCam: True

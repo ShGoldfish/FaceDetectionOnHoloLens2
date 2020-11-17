@@ -42,17 +42,6 @@ public class Manager : MonoBehaviour
 		num_faces = 0;
 
 	}
-
-	internal static void Set_justMentioned(bool v)
-	{
-		justMentioned = v;
-	}
-
-	internal static bool Get_justMentioned()
-	{
-		return justMentioned;
-	}
-
 	void Update()
 	{
 		// Update the text boxes
@@ -64,8 +53,18 @@ public class Manager : MonoBehaviour
 			msgVoice.text = "Speech about " + speechContext;
 		//test
 		//Set_isTalking(test_talking);
-
 	}
+
+	internal static void Set_justMentioned(bool v)
+	{
+		justMentioned = v;
+	}
+
+	internal static bool Get_justMentioned()
+	{
+		return justMentioned;
+	}
+
 
 	internal static bool Get_isTalking()
 	{
