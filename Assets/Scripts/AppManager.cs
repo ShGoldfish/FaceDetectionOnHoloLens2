@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Collections;
 
 public class AppManager : MonoBehaviour
 {
-	const int MENTION_TIMEOUT = 15 * 60;
+	const int MENTION_TIMEOUT = 5 * 60;
 	const int TRANSLUCENCY_TIMEOUT = 3 * 60;
 	// Each App's vars
 	int frameSinceTranslucency;
@@ -32,6 +33,7 @@ public class AppManager : MonoBehaviour
 	{
 		Time.timeScale = 0.5f;
 		UpdateMentioned();
+		//StartCoroutine("IsBlockingAnyFaces");
 		IsBlockingAnyFaces();
 		msgBlocking.text = "Is Blocking a Face: " + blocking;
 		UpdateTranslucency();
@@ -68,9 +70,9 @@ public class AppManager : MonoBehaviour
 		if (frameSinceMentioned > 0)
 		{
 			frameSinceMentioned++;
+			return;
 		}
 	}
-
 
 	private void MakeTranslusent()
 	{
@@ -115,19 +117,23 @@ public class AppManager : MonoBehaviour
 	}
 
 
-	private void IsBlockingAnyFaces()
+	//IEnumerator IsBlockingAnyFaces()
+	void IsBlockingAnyFaces()
 	{
 		// Renderer purposes
 		rect_faceBoxOnScreen = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
-		foreach (List<int> faceBox in Manager.Get_FaceBoxes())
+		List<List<int>> faceboxes = Manager.Get_FaceBoxes();
+		blocking = false;
+		foreach (List<int> faceBox in faceboxes)
 		{
-			if (IsOverlapping(faceBox))
+			bool overlapping = IsOverlapping(faceBox);
+			if (overlapping)
 			{
 				blocking = true;
-				return;
+				break;
 			}
+			//yield return new WaitForEndOfFrame();
 		}
-		blocking = false;
 	}
 
 

@@ -15,7 +15,6 @@ public class MyPhotoCapture : MonoBehaviour
 	bool getting;
 
 	// Constants (were 0.3 and 15)
-	//const float WAIT_TIME4POST = 0.3f;
 	const int JPG_QUALITY = 15;
 
 	// Photo Capture Variables
