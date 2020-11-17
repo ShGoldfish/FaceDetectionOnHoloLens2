@@ -6,15 +6,16 @@ using System.Linq;
 using UnityEngine;
 using System;
 using System.Threading;
-//using System.Threading;
 
 public class MyPhotoCapture : MonoBehaviour
 {
 	public static string ipEndPoint;
 	byte[] imageBufferBytesArray;
+	bool posting;
+	bool getting;
 
 	// Constants (were 0.3 and 15)
-	const float WAIT_TIME4POST = 0.3f;
+	//const float WAIT_TIME4POST = 0.3f;
 	const int JPG_QUALITY = 15;
 
 	// Photo Capture Variables
@@ -22,6 +23,9 @@ public class MyPhotoCapture : MonoBehaviour
 	Texture2D targetTexture;
 	CameraParameters m_CameraParameters;
 	Resolution cameraResolution;
+
+	//UnityWebRequest postWebRequest;
+	//UnityWebRequest getWebRequest;
 
 	// Thread
 	//const int NUM_THREADS = 5;
@@ -31,7 +35,7 @@ public class MyPhotoCapture : MonoBehaviour
 	// Debugging
 	float time_before_send;
 
-// ############################################# UNITY
+	// ############################################# UNITY
 	void Start()
 	{
 		ipEndPoint = "http://128.173.236.208:9005";
@@ -49,6 +53,9 @@ public class MyPhotoCapture : MonoBehaviour
 		};
 		PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
 
+		//postWebRequest = null;
+		//getWebRequest = null;
+
 		// Thread
 		//thread_num = 0;
 		//for (int i = 0; i < NUM_THREADS; i++)
@@ -62,7 +69,7 @@ public class MyPhotoCapture : MonoBehaviour
 	}
 
 
-// ############################################# PHOTO CAPTURE
+	// ############################################# PHOTO CAPTURE
 	private void OnPhotoCaptureCreated(PhotoCapture captureObject)
 	{
 		photoCaptureObject = captureObject;
@@ -96,11 +103,30 @@ public class MyPhotoCapture : MonoBehaviour
 			imageBufferBytesArray = targetTexture.EncodeToJPG(JPG_QUALITY);
 
 			// Thread
-			//thread_num = (thread_num + 1) % NUM_THREADS;
+			//CreateWebRequests();
 			StartCoroutine("PostPhoto");
 			StartCoroutine("GetFaces");
 		}
 	}
+
+	//private void CreateWebRequests()
+	//{
+	//	if (imageBufferBytesArray != null)
+	//	{
+	//		var data = new List<IMultipartFormSection> {
+	//					new MultipartFormFileSection("myImage", imageBufferBytesArray, "test.jpg", "image/jpg")};
+	//		postWebRequest = UnityWebRequest.Post(ipEndPoint + "/receive-image", data);
+	//		getWebRequest = UnityWebRequest.Get(ipEndPoint + "/detect-faces");
+	//		//Thread
+	//		//thread_num = (thread_num + 1) % NUM_THREADS;
+	//	}
+	//	else
+	//	{
+	//		postWebRequest = null;
+	//		getWebRequest = null;
+	//	}
+	//}
+
 	void OnStoppedPhotoMode(PhotoCapture.PhotoCaptureResult result)
 	{
 		photoCaptureObject.Dispose();
@@ -109,14 +135,15 @@ public class MyPhotoCapture : MonoBehaviour
 
 
 	// ############################################# THREAD
-	//void ThreadingStart(object data)
+	//void ThreadingStart(object d)
 	//{
 	//	while (true)
 	//	{
-	//		if (int.Parse(string.Format("{0}", data)) == thread_num)
+	//		if (int.Parse(string.Format("{0}", d)) == thread_num)
 	//		{
-	//			StartCoroutine("PostPhoto");
-	//			StartCoroutine("GetFaces");
+	//			
+	//			PostPhoto();
+	//			GetFaces();
 	//		}
 	//	}
 	//}
@@ -128,18 +155,18 @@ public class MyPhotoCapture : MonoBehaviour
 	/// </summary>
 	private IEnumerator PostPhoto()
 	{
+		while (getting)
+			yield return new WaitForEndOfFrame();
+		posting = true;
 		time_before_send = Time.time;
-		//if (imageBufferBytesArray != null)
-		//{
-			var data = new List<IMultipartFormSection> {
-			new MultipartFormFileSection("myImage", imageBufferBytesArray, "test.jpg", "image/jpg")
-		};
-			using (UnityWebRequest webRequest = UnityWebRequest.Post(ipEndPoint + "/receive-image", data))
-			{
-				webRequest.SendWebRequest();
-				yield return new WaitForSeconds(WAIT_TIME4POST);
-			}
-		//}
+		var data = new List<IMultipartFormSection> {
+						new MultipartFormFileSection("myImage", imageBufferBytesArray, "test.jpg", "image/jpg")};
+		using (UnityWebRequest postWebRequest = UnityWebRequest.Post(ipEndPoint + "/receive-image", data))
+		{
+			yield return postWebRequest.SendWebRequest();
+		}
+		Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds to Post.");    // ~0.065seconds
+		posting = false;
 	}
 	/// <summary>
 	/// Network Connection Coroutines
@@ -147,18 +174,20 @@ public class MyPhotoCapture : MonoBehaviour
 	/// </summary>
 	private IEnumerator GetFaces()
 	{
-		using (UnityWebRequest webRequest = UnityWebRequest.Get(ipEndPoint + "/detect-faces"))
+		while (posting)
+			yield return new WaitForEndOfFrame();
+		getting = true;
+		time_before_send = Time.time;
+		using (UnityWebRequest getWebRequest = UnityWebRequest.Get(ipEndPoint + "/detect-faces"))
 		{
-			yield return webRequest.SendWebRequest();
-
-			if (webRequest.isNetworkError)
+			yield return getWebRequest.SendWebRequest();
+			if (getWebRequest.isNetworkError)
 			{
-				Debug.Log("Error: " + webRequest.error);
+				Debug.Log("Error: " + getWebRequest.error);
 			}
 			else
 			{
-				string dataReceived = webRequest.downloadHandler.text;
-				Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds.");    // ~0.065seconds
+				string dataReceived = getWebRequest.downloadHandler.text;
 				int n_faces = 0;
 				List<List<int>> faces = new List<List<int>>();
 				if (dataReceived != null && dataReceived != "")
@@ -166,16 +195,18 @@ public class MyPhotoCapture : MonoBehaviour
 					List<float> numbers = Array.ConvertAll(dataReceived.Split(','), float.Parse).ToList();
 					for (int i = 0; i < numbers.Count; i += 4)
 					{
-						faces.Add(new List<int> {	Convert.ToInt32(numbers[i]),
-													Convert.ToInt32(numbers[i + 1]),
-													Convert.ToInt32(numbers[i + 2]),
-													Convert.ToInt32(numbers[i + 3]) });
+						faces.Add(new List<int> {   Convert.ToInt32(numbers[i]),
+												Convert.ToInt32(numbers[i + 1]),
+												Convert.ToInt32(numbers[i + 2]),
+												Convert.ToInt32(numbers[i + 3]) });
 						n_faces++;
 					}
 				}
 				Manager.Set_Faces(n_faces, faces);
 			}
 		}
+		Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds to Get.");    // ~0.065seconds
+		getting = false;
 	}
 	/// <summary>
 	/// Network Connection Coroutines
