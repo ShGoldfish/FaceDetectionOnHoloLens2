@@ -93,7 +93,7 @@ public class AppManager : MonoBehaviour
 			{
 				Manager.Reset_SpeechContext();
 			}
-				return;
+			return;
 		}
 	}
 
