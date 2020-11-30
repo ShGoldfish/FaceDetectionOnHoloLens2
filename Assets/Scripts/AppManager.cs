@@ -3,15 +3,24 @@ using UnityEngine;
 using System;
 using System.Collections;
 
+internal class MessageBoxMessages
+{
+	//private MessageBoxMessages(string message) { Message = message; }
+	//public string Message { get; set; }
+	public static string AppMentioned { get { return "Is mentioned in the conversation"; } }
+	public static string AppNotMentioned { get { return "Is not mentioned in the conversation"; } }
+}
+
+
 public class AppManager : MonoBehaviour
 {
-	const int MENTION_TIMEOUT = 5;
+	const int MENTION_TIMEOUT = 7;
 	const int TRANSLUCENCY_TIMEOUT = 3;
 	// Each App's vars
 	float timeWhenTranslucent;
 	float timeWhenMentioned;
 	bool blocking;
-	TextMesh msgBlocking;
+	TextMesh msgBox;
 	GameObject fixationIcon;
 	GameObject incommingConvo;
 
@@ -21,11 +30,11 @@ public class AppManager : MonoBehaviour
 
 	private void Start()
 	{
-		msgBlocking = GetChildWithName(gameObject, "Msg_Bocking").GetComponent<TextMesh>();
+		msgBox = GetChildWithName(gameObject, "Msg_Box").GetComponent<TextMesh>();
 		fixationIcon = GetChildWithName(gameObject, "FixationIcon");
 		incommingConvo = GetChildWithName(gameObject, "incommingConvo");
-		timeWhenMentioned = float.PositiveInfinity;
-		timeWhenTranslucent = float.PositiveInfinity;
+		ResetTimeMentioned();
+		ResetTimeTranslucent();
 	}
 
 
@@ -35,26 +44,45 @@ public class AppManager : MonoBehaviour
 		UpdateMentioned();
 		//StartCoroutine("IsBlockingAnyFaces");
 		IsBlockingAnyFaces();
-		msgBlocking.text = "Is Blocking a Face: " + blocking;
 		UpdateTranslucency();
+	}
+
+	private void ResetTimeMentioned()
+	{
+		timeWhenMentioned = float.PositiveInfinity;
+		msgBox.text = MessageBoxMessages.AppNotMentioned;
+
+	}
+	private void SetTimeMentioned()
+	{
+		timeWhenMentioned = Time.time;
+		msgBox.text = MessageBoxMessages.AppMentioned;
+	}
+	private void ResetTimeTranslucent()
+	{
+		timeWhenTranslucent = float.PositiveInfinity;
+	}
+	private void SetTimeTranslucent()
+	{
+		timeWhenTranslucent = Time.time;
 	}
 
 	private void UpdateMentioned()
 	{
 		if (!Manager.Get_isTalking())
 		{
-			timeWhenMentioned = float.PositiveInfinity;
+			ResetTimeMentioned();
 			return;
 		}
 		if (Manager.Get_justMentioned() && Manager.Get_SpeechContext() == gameObject.name)
 		{
-			timeWhenMentioned = Time.time;
+			SetTimeMentioned();
 			Manager.Set_justMentioned(false);
 			return;
 		}
 		if (Time.time - timeWhenMentioned >= MENTION_TIMEOUT)
 		{
-			timeWhenMentioned = float.PositiveInfinity;
+			ResetTimeMentioned();
 			if (Manager.Get_SpeechContext() == gameObject.name)
 			{
 				Manager.Reset_SpeechContext();
@@ -65,14 +93,14 @@ public class AppManager : MonoBehaviour
 
 	private void MakeTranslusent()
 	{
+		SetTimeTranslucent();
 		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		timeWhenTranslucent = Time.time;
 	}
 	private void MakeOpaque()
 	{
-		timeWhenTranslucent = float.PositiveInfinity;
+		ResetTimeTranslucent();
 		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
 		fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
 		if (!blocking)

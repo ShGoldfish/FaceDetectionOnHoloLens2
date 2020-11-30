@@ -5,7 +5,7 @@ using UnityEngine.Windows.Speech;
 using Microsoft.MixedReality.Toolkit.Input;
 using System;
 
-public enum MySpeechContext { Weather = 1, Email = 2, Fitbit = 3, None = 4 };
+internal enum MySpeechContext { Weather = 1, Email = 2, Fitbit = 3, None = 4 };
 
 public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 {
@@ -76,7 +76,9 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 	private void RecognizeMyKeywords(string text)
 	{
 		int context = 4;
-		if (text.Contains("weather") || text.Contains("cloudy") || text.Contains("sunny"))
+		if (text.Contains("weather") || text.Contains("cloudy") || text.Contains("sunny") ||
+			text.Contains("hot") || text.Contains("cold") ||
+			text.Contains("rainy") || text.Contains("snowing"))
 		{
 			context = 1;
 		}

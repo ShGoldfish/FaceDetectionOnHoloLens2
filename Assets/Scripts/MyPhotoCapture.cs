@@ -5,7 +5,6 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using System;
-using System.Threading;
 
 public class MyPhotoCapture : MonoBehaviour
 {
