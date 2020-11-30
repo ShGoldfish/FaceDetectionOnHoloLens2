@@ -57,7 +57,10 @@ public class Manager : MonoBehaviour
 
 	internal static void Set_justMentioned(bool v)
 	{
-		justMentioned = v;
+		if (v && speechContext == MySpeechContext.None)
+			justMentioned = false;
+		else
+			justMentioned = v;
 	}
 
 	internal static bool Get_justMentioned()
@@ -82,9 +85,10 @@ public class Manager : MonoBehaviour
 	{
 		speechContext = (MySpeechContext)context;
 		Set_justMentioned(true);
+
 		// Debug.Log purpose
-		int n = (int)speechContext;
-		Debug.Log(speechContext + n.ToString());
+		//int n = (int)speechContext;
+		//Debug.Log(speechContext + n.ToString());
 	}
 
 	internal static void Reset_SpeechContext()

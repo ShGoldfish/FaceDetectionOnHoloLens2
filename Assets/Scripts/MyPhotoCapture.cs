@@ -9,7 +9,7 @@ using System;
 public class MyPhotoCapture : MonoBehaviour
 {
 	// Constants (were 0.3 and 15)
-	const int JPG_QUALITY = 15;
+	const int JPG_QUALITY = 25;
 
 	public static string ipEndPoint;
 	byte[] imageBufferBytesArray;

@@ -19,6 +19,8 @@ public class AppManager : MonoBehaviour
 	// Each App's vars
 	float timeWhenTranslucent;
 	float timeWhenMentioned;
+	bool mentioned;
+	bool trans;
 	bool blocking;
 	TextMesh msgBox;
 	GameObject fixationIcon;
@@ -51,20 +53,24 @@ public class AppManager : MonoBehaviour
 	{
 		timeWhenMentioned = float.PositiveInfinity;
 		msgBox.text = MessageBoxMessages.AppNotMentioned;
+		mentioned = false;
 
 	}
 	private void SetTimeMentioned()
 	{
 		timeWhenMentioned = Time.time;
 		msgBox.text = MessageBoxMessages.AppMentioned;
+		mentioned = true;
 	}
 	private void ResetTimeTranslucent()
 	{
 		timeWhenTranslucent = float.PositiveInfinity;
+		trans = false;
 	}
 	private void SetTimeTranslucent()
 	{
 		timeWhenTranslucent = Time.time;
+		trans = true;
 	}
 
 	private void UpdateMentioned()
@@ -124,12 +130,11 @@ public class AppManager : MonoBehaviour
 		}
 		// Is talking and there is a face that is not blocking:
 		// if already translucent, wait til the end of timeOut
-		if (Time.time - timeWhenTranslucent >= 0.0f && Time.time - timeWhenTranslucent < TRANSLUCENCY_TIMEOUT)
-		{
+		if (trans && Time.time - timeWhenTranslucent < TRANSLUCENCY_TIMEOUT){
 			return;
 		} //else
 		// if talking about this app 
-		if (Time.time - timeWhenMentioned > 0.0f)
+		if (mentioned)
 		{
 			MakeOpaque();
 			return;
