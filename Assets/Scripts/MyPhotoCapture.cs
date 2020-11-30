@@ -5,17 +5,16 @@ using System.Collections;
 using System.Linq;
 using UnityEngine;
 using System;
-using System.Threading;
 
 public class MyPhotoCapture : MonoBehaviour
 {
+	// Constants (were 0.3 and 15)
+	const int JPG_QUALITY = 15;
+
 	public static string ipEndPoint;
 	byte[] imageBufferBytesArray;
 	bool posting;
 	bool getting;
-
-	// Constants (were 0.3 and 15)
-	const int JPG_QUALITY = 15;
 
 	// Photo Capture Variables
 	PhotoCapture photoCaptureObject = null;
@@ -95,7 +94,7 @@ public class MyPhotoCapture : MonoBehaviour
 			targetTexture.wrapMode = TextureWrapMode.Clamp;
 
 			// Take another photo
-			photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
+			// photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
 
 			// Write to file
 			//Debug.Log("take ohoto");
@@ -166,6 +165,7 @@ public class MyPhotoCapture : MonoBehaviour
 		}
 		Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds to Post.");    // ~0.065seconds
 		posting = false;
+
 	}
 	/// <summary>
 	/// Network Connection Coroutines
@@ -206,6 +206,10 @@ public class MyPhotoCapture : MonoBehaviour
 		}
 		Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds to Get.");    // ~0.065seconds
 		getting = false;
+
+		// Take another photo
+		photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
+
 	}
 	/// <summary>
 	/// Network Connection Coroutines
