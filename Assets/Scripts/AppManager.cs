@@ -5,11 +5,11 @@ using System.Collections;
 
 public class AppManager : MonoBehaviour
 {
-	const int MENTION_TIMEOUT = 7 * 60;
-	const int TRANSLUCENCY_TIMEOUT = 3 * 60;
+	const int MENTION_TIMEOUT = 5;
+	const int TRANSLUCENCY_TIMEOUT = 3;
 	// Each App's vars
-	int frameSinceTranslucency;
-	int frameSinceMentioned;
+	float timeWhenTranslucent;
+	float timeWhenMentioned;
 	bool blocking;
 	TextMesh msgBlocking;
 	GameObject fixationIcon;
@@ -24,12 +24,12 @@ public class AppManager : MonoBehaviour
 		msgBlocking = GetChildWithName(gameObject, "Msg_Bocking").GetComponent<TextMesh>();
 		fixationIcon = GetChildWithName(gameObject, "FixationIcon");
 		incommingConvo = GetChildWithName(gameObject, "incommingConvo");
-		frameSinceMentioned = 0;
-		frameSinceTranslucency = 0;
+		timeWhenMentioned = float.PositiveInfinity;
+		timeWhenTranslucent = float.PositiveInfinity;
 	}
 
 
-	private void Update()
+	private void FixedUpdate()
 	{
 		Time.timeScale = 0.5f;
 		UpdateMentioned();
@@ -43,34 +43,23 @@ public class AppManager : MonoBehaviour
 	{
 		if (!Manager.Get_isTalking())
 		{
-			frameSinceMentioned = 0;
+			timeWhenMentioned = float.PositiveInfinity;
 			return;
 		}
-		if (Manager.Get_SpeechContext() == gameObject.name)
+		if (Manager.Get_justMentioned() && Manager.Get_SpeechContext() == gameObject.name)
 		{
-			// just mentioned is to make sure if count down already started but is mentioned again
-			if (frameSinceMentioned == 0 || Manager.Get_justMentioned())
+			timeWhenMentioned = Time.time;
+			Manager.Set_justMentioned(false);
+			return;
+		}
+		if (Time.time - timeWhenMentioned >= MENTION_TIMEOUT)
+		{
+			timeWhenMentioned = float.PositiveInfinity;
+			if (Manager.Get_SpeechContext() == gameObject.name)
 			{
-				frameSinceMentioned = 1;
-				Manager.Set_justMentioned(false);
-				return;
-			}
-			if (frameSinceMentioned >= MENTION_TIMEOUT)
-			{
-				frameSinceMentioned = 0;
 				Manager.Reset_SpeechContext();
-				return;
 			}
-		}
-		if (frameSinceMentioned >= MENTION_TIMEOUT)
-		{
-			frameSinceMentioned = 0;
-			return;
-		}
-		if (frameSinceMentioned > 0)
-		{
-			frameSinceMentioned++;
-			return;
+				return;
 		}
 	}
 
@@ -79,11 +68,11 @@ public class AppManager : MonoBehaviour
 		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		frameSinceTranslucency = 1;
+		timeWhenTranslucent = Time.time;
 	}
 	private void MakeOpaque()
 	{
-		frameSinceTranslucency = 0;
+		timeWhenTranslucent = float.PositiveInfinity;
 		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
 		fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
 		if (!blocking)
@@ -95,7 +84,7 @@ public class AppManager : MonoBehaviour
 	private void UpdateTranslucency()
 	{
 		// not talking
-		if (!Manager.Get_isTalking())
+		if (!Manager.Get_isTalking() || Manager.Get_numFaces() < 1)
 		{
 			MakeOpaque();
 			return;
@@ -105,25 +94,19 @@ public class AppManager : MonoBehaviour
 			MakeTranslusent();
 			return;
 		}
-		// Is talking and not blocking:
-		if (frameSinceTranslucency > 0 && frameSinceTranslucency < TRANSLUCENCY_TIMEOUT)
+		// Is talking and there is a face that is not blocking:
+		// if already translucent, wait til the end of timeOut
+		if (Time.time - timeWhenTranslucent >= 0.0f && Time.time - timeWhenTranslucent < TRANSLUCENCY_TIMEOUT)
 		{
-			frameSinceTranslucency++;
 			return;
-		}
-		// talking about app which 
-		if (frameSinceMentioned > 0)
+		} //else
+		// if talking about this app 
+		if (Time.time - timeWhenMentioned > 0.0f)
 		{
 			MakeOpaque();
 			return;
 		}
-		if (Manager.Get_numFaces() > 0)
-		{
-			MakeTranslusent();
-			return;
-		}
-		// is talking but there is no face
-		MakeOpaque();
+		MakeTranslusent();
 	}
 
 
