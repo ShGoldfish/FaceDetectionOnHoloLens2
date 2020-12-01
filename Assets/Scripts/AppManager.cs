@@ -5,8 +5,6 @@ using System.Collections;
 
 internal class MessageBoxMessages
 {
-	//private MessageBoxMessages(string message) { Message = message; }
-	//public string Message { get; set; }
 	public static string AppMentioned { get { return "Is mentioned in the conversation"; } }
 	public static string AppNotMentioned { get { return "Is not mentioned in the conversation"; } }
 }
@@ -14,21 +12,18 @@ internal class MessageBoxMessages
 
 public class AppManager : MonoBehaviour
 {
-	const int MENTION_TIMEOUT = 7;
-	const int TRANSLUCENCY_TIMEOUT = 3;
+	const float MENTION_TIMEOUT = 7.0f;
+	const float BLOCKED_TIMEOUT = 1.5f;
 	// Each App's vars
-	float timeWhenTranslucent;
+	float timeWhenBlocked;
 	float timeWhenMentioned;
 	bool mentioned;
-	bool trans;
 	bool blocking;
 	TextMesh msgBox;
 	GameObject fixationIcon;
 	GameObject incommingConvo;
-
 	// Renderer purposes
 	public Rect rect_faceBoxOnScreen, rect_app;
-
 
 	private void Start()
 	{
@@ -36,7 +31,7 @@ public class AppManager : MonoBehaviour
 		fixationIcon = GetChildWithName(gameObject, "FixationIcon");
 		incommingConvo = GetChildWithName(gameObject, "incommingConvo");
 		ResetTimeMentioned();
-		ResetTimeTranslucent();
+		ResetTimeBlocked();
 	}
 
 
@@ -44,33 +39,8 @@ public class AppManager : MonoBehaviour
 	{
 		Time.timeScale = 0.5f;
 		UpdateMentioned();
-		//StartCoroutine("IsBlockingAnyFaces");
 		IsBlockingAnyFaces();
 		UpdateTranslucency();
-	}
-
-	private void ResetTimeMentioned()
-	{
-		timeWhenMentioned = float.PositiveInfinity;
-		msgBox.text = MessageBoxMessages.AppNotMentioned;
-		mentioned = false;
-
-	}
-	private void SetTimeMentioned()
-	{
-		timeWhenMentioned = Time.time;
-		msgBox.text = MessageBoxMessages.AppMentioned;
-		mentioned = true;
-	}
-	private void ResetTimeTranslucent()
-	{
-		timeWhenTranslucent = float.PositiveInfinity;
-		trans = false;
-	}
-	private void SetTimeTranslucent()
-	{
-		timeWhenTranslucent = Time.time;
-		trans = true;
 	}
 
 	private void UpdateMentioned()
@@ -97,24 +67,6 @@ public class AppManager : MonoBehaviour
 		}
 	}
 
-	private void MakeTranslusent()
-	{
-		SetTimeTranslucent();
-		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-	}
-	private void MakeOpaque()
-	{
-		ResetTimeTranslucent();
-		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-		fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
-		if (!blocking)
-			incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		else
-			incommingConvo.GetComponent<SpriteRenderer>().color = Color.white;
-	}
-
 	private void UpdateTranslucency()
 	{
 		// not talking
@@ -129,10 +81,18 @@ public class AppManager : MonoBehaviour
 			return;
 		}
 		// Is talking and there is a face that is not blocking:
-		// if already translucent, wait til the end of timeOut
-		if (trans && Time.time - timeWhenTranslucent < TRANSLUCENCY_TIMEOUT){
-			return;
-		} //else
+		// But has recently been blocked => wait till timeOut
+		if (Time.time - timeWhenBlocked >= 0.0f)
+		{
+			if (Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)
+			{
+				return;
+			}
+			else
+			{
+				ResetTimeBlocked();
+			}
+		}
 		// if talking about this app 
 		if (mentioned)
 		{
@@ -141,7 +101,6 @@ public class AppManager : MonoBehaviour
 		}
 		MakeTranslusent();
 	}
-
 
 	//IEnumerator IsBlockingAnyFaces()
 	void IsBlockingAnyFaces()
@@ -156,10 +115,47 @@ public class AppManager : MonoBehaviour
 			if (overlapping)
 			{
 				blocking = true;
+				SetTimeBlocked();
 				break;
 			}
 			//yield return new WaitForEndOfFrame();
 		}
+	}
+
+	private void MakeTranslusent()
+	{
+		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+	}
+	private void MakeOpaque()
+	{
+		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+		fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
+		if (!blocking)
+			incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		else
+			incommingConvo.GetComponent<SpriteRenderer>().color = Color.white;
+	}
+	private void ResetTimeMentioned()
+	{
+		timeWhenMentioned = float.PositiveInfinity;
+		msgBox.text = MessageBoxMessages.AppNotMentioned;
+		mentioned = false;
+	}
+	private void SetTimeMentioned()
+	{
+		timeWhenMentioned = Time.time;
+		msgBox.text = MessageBoxMessages.AppMentioned;
+		mentioned = true;
+	}
+	private void ResetTimeBlocked()
+	{
+		timeWhenBlocked = float.PositiveInfinity;
+	}
+	private void SetTimeBlocked()
+	{
+		timeWhenBlocked = Time.time;
 	}
 
 	private bool IsOverlapping(List<int> faceBox)
@@ -196,8 +192,6 @@ public class AppManager : MonoBehaviour
 
 		return rect_faceBoxOnScreen.Overlaps(rect_app);
 	}
-
-
 	public void ChangeFixation()
 	{
 		bool bodyFixed = GetComponent<BodyFixed>().enabled;
@@ -215,23 +209,6 @@ public class AppManager : MonoBehaviour
 		}
 		GetComponent<BodyFixed>().enabled = !bodyFixed;
 	}
-
-
-	public static GameObject GetChildWithName(GameObject obj, string name)
-	{
-		foreach (Transform eachChild in obj.transform)
-		{
-			if (eachChild.name == name)
-			{
-				return eachChild.gameObject;
-			}
-			else if (eachChild.transform.Find(name))
-				return eachChild.transform.Find(name).gameObject;
-		}
-
-		return null;
-	}
-
 
 	/// <summary>
 	/// Returns the on screen x, y, w, h of the GameObject go's collider
@@ -291,5 +268,20 @@ public class AppManager : MonoBehaviour
 
 		List<int> ret = new List<int> { Convert.ToInt32(min.x), Convert.ToInt32(min.y), Convert.ToInt32(max.x - min.x), Convert.ToInt32(max.y - min.y) };
 		return ret;
+	}
+
+	public static GameObject GetChildWithName(GameObject obj, string name)
+	{
+		foreach (Transform eachChild in obj.transform)
+		{
+			if (eachChild.name == name)
+			{
+				return eachChild.gameObject;
+			}
+			else if (eachChild.transform.Find(name))
+				return eachChild.transform.Find(name).gameObject;
+		}
+
+		return null;
 	}
 }
