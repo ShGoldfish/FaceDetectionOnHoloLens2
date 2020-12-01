@@ -5,8 +5,8 @@ using System.Collections;
 
 internal class MessageBoxMessages
 {
-	public static string AppMentioned { get { return "Is mentioned in the conversation"; } }
-	public static string AppNotMentioned { get { return "Is not mentioned in the conversation"; } }
+	public static string AppMentioned { get { return "Mentioned!"; } }
+	public static string AppNotMentioned { get { return "Not mentioned!"; } }
 }
 
 
@@ -22,6 +22,7 @@ public class AppManager : MonoBehaviour
 	TextMesh msgBox;
 	GameObject fixationIcon;
 	GameObject incommingConvo;
+	GameObject mentionedIcon;
 	// Renderer purposes
 	public Rect rect_faceBoxOnScreen, rect_app;
 
@@ -30,6 +31,7 @@ public class AppManager : MonoBehaviour
 		msgBox = GetChildWithName(gameObject, "Msg_Box").GetComponent<TextMesh>();
 		fixationIcon = GetChildWithName(gameObject, "FixationIcon");
 		incommingConvo = GetChildWithName(gameObject, "incommingConvo");
+		mentionedIcon = GetChildWithName(gameObject, "Mentioned");
 		ResetTimeMentioned();
 		ResetTimeBlocked();
 	}
@@ -126,6 +128,7 @@ public class AppManager : MonoBehaviour
 		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 	}
 	private void MakeOpaque()
 	{
@@ -135,17 +138,23 @@ public class AppManager : MonoBehaviour
 			incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		else
 			incommingConvo.GetComponent<SpriteRenderer>().color = Color.white;
+		if(!mentioned)
+			mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		else
+			mentionedIcon.GetComponent<SpriteRenderer>().color = Color.white;
 	}
 	private void ResetTimeMentioned()
 	{
 		timeWhenMentioned = float.PositiveInfinity;
 		msgBox.text = MessageBoxMessages.AppNotMentioned;
+		mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		mentioned = false;
 	}
 	private void SetTimeMentioned()
 	{
 		timeWhenMentioned = Time.time;
 		msgBox.text = MessageBoxMessages.AppMentioned;
+		mentionedIcon.GetComponent<SpriteRenderer>().color = Color.white;
 		mentioned = true;
 	}
 	private void ResetTimeBlocked()
