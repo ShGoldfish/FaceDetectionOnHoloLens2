@@ -18,25 +18,15 @@ public class Manager : MonoBehaviour
 
 	// test
 	// public bool test_talking;
-//#if UNITY_EDITOR
-	//private void Awake()
-	//{
-
-		//PlayerSettings.MTRendering = true;
-		//PlayerSettings.graphicsJobs = true;
-		//PlayerSettings.graphicsJobMode = GraphicsJobMode.Legacy;
-		//SystemInfo.renderingthread
-	//}
-//#endif
 	void Start()
 	{
-		speechContext = MySpeechContext.None;
 		// Textbox Management
 		msgFace = GameObject.Find("MessageFace").GetComponent<TextMesh>();
 		msgVoice = GameObject.Find("MessageVoice").GetComponent<TextMesh>();
 		msgFace.text = "Connect Face detection to the IP Address: " + MyPhotoCapture.ipEndPoint;
 
 		// Context Management
+		speechContext = MySpeechContext.None;
 		faces_box = new List<List<int>>();
 		isTalking = false;
 		num_faces = 0;
@@ -87,17 +77,11 @@ public class Manager : MonoBehaviour
 			return;
 		speechContext = (MySpeechContext)context;
 		Set_justMentioned(true);
-
-		// Debug.Log purpose
-		//int n = (int)speechContext;
-		//Debug.Log(speechContext + n.ToString());
 	}
 
 	internal static void Reset_SpeechContext()
 	{
 		speechContext = MySpeechContext.None;
-		//int n = (int)speechContext;
-		//Debug.Log(speechContext + n.ToString());
 	}
 	internal static string Get_SpeechContext()
 	{
