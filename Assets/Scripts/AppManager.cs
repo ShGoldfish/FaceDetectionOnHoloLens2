@@ -15,18 +15,16 @@ internal class MessageBoxMessages
 public class AppManager : MonoBehaviour
 {
 	const int MENTION_TIMEOUT = 7;
-	const int TRANSLUCENCY_TIMEOUT = 3;
+	const int BLOCKED_TIMEOUT = 3;
 	// Each App's vars
-	float timeWhenTranslucent;
+	float timeWhenBlocked;
 	float timeWhenMentioned;
 	bool blocking;
 	TextMesh msgBox;
 	GameObject fixationIcon;
 	GameObject incommingConvo;
-
 	// Renderer purposes
 	public Rect rect_faceBoxOnScreen, rect_app;
-
 
 	private void Start()
 	{
@@ -34,7 +32,7 @@ public class AppManager : MonoBehaviour
 		fixationIcon = GetChildWithName(gameObject, "FixationIcon");
 		incommingConvo = GetChildWithName(gameObject, "incommingConvo");
 		ResetTimeMentioned();
-		ResetTimeTranslucent();
+		ResetTimeBlocked();
 	}
 
 
@@ -42,29 +40,8 @@ public class AppManager : MonoBehaviour
 	{
 		Time.timeScale = 0.5f;
 		UpdateMentioned();
-		//StartCoroutine("IsBlockingAnyFaces");
 		IsBlockingAnyFaces();
 		UpdateTranslucency();
-	}
-
-	private void ResetTimeMentioned()
-	{
-		timeWhenMentioned = float.PositiveInfinity;
-		msgBox.text = MessageBoxMessages.AppNotMentioned;
-
-	}
-	private void SetTimeMentioned()
-	{
-		timeWhenMentioned = Time.time;
-		msgBox.text = MessageBoxMessages.AppMentioned;
-	}
-	private void ResetTimeTranslucent()
-	{
-		timeWhenTranslucent = float.PositiveInfinity;
-	}
-	private void SetTimeTranslucent()
-	{
-		timeWhenTranslucent = Time.time;
 	}
 
 	private void UpdateMentioned()
@@ -91,24 +68,6 @@ public class AppManager : MonoBehaviour
 		}
 	}
 
-	private void MakeTranslusent()
-	{
-		SetTimeTranslucent();
-		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-	}
-	private void MakeOpaque()
-	{
-		ResetTimeTranslucent();
-		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-		fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
-		if (!blocking)
-			incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		else
-			incommingConvo.GetComponent<SpriteRenderer>().color = Color.white;
-	}
-
 	private void UpdateTranslucency()
 	{
 		// not talking
@@ -123,11 +82,18 @@ public class AppManager : MonoBehaviour
 			return;
 		}
 		// Is talking and there is a face that is not blocking:
-		// if already translucent, wait til the end of timeOut
-		if (Time.time - timeWhenTranslucent >= 0.0f && Time.time - timeWhenTranslucent < TRANSLUCENCY_TIMEOUT)
+		// But has recently been blocked => wait till timeOut
+		if (Time.time - timeWhenBlocked >= 0.0f)
 		{
-			return;
-		} //else
+			if (Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)
+			{
+				return;
+			}
+			else
+			{
+				ResetTimeBlocked();
+			}
+		}
 		// if talking about this app 
 		if (Time.time - timeWhenMentioned > 0.0f)
 		{
@@ -136,7 +102,6 @@ public class AppManager : MonoBehaviour
 		}
 		MakeTranslusent();
 	}
-
 
 	//IEnumerator IsBlockingAnyFaces()
 	void IsBlockingAnyFaces()
@@ -151,10 +116,46 @@ public class AppManager : MonoBehaviour
 			if (overlapping)
 			{
 				blocking = true;
+				SetTimeBlocked();
 				break;
 			}
 			//yield return new WaitForEndOfFrame();
 		}
+	}
+
+	private void MakeTranslusent()
+	{
+		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+	}
+	private void MakeOpaque()
+	{
+		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+		fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
+		if (!blocking)
+			incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		else
+			incommingConvo.GetComponent<SpriteRenderer>().color = Color.white;
+	}
+	private void ResetTimeMentioned()
+	{
+		timeWhenMentioned = float.PositiveInfinity;
+		msgBox.text = MessageBoxMessages.AppNotMentioned;
+
+	}
+	private void SetTimeMentioned()
+	{
+		timeWhenMentioned = Time.time;
+		msgBox.text = MessageBoxMessages.AppMentioned;
+	}
+	private void ResetTimeBlocked()
+	{
+		timeWhenBlocked = float.PositiveInfinity;
+	}
+	private void SetTimeBlocked()
+	{
+		timeWhenBlocked = Time.time;
 	}
 
 	private bool IsOverlapping(List<int> faceBox)
@@ -191,8 +192,6 @@ public class AppManager : MonoBehaviour
 
 		return rect_faceBoxOnScreen.Overlaps(rect_app);
 	}
-
-
 	public void ChangeFixation()
 	{
 		bool bodyFixed = GetComponent<BodyFixed>().enabled;
@@ -210,23 +209,6 @@ public class AppManager : MonoBehaviour
 		}
 		GetComponent<BodyFixed>().enabled = !bodyFixed;
 	}
-
-
-	public static GameObject GetChildWithName(GameObject obj, string name)
-	{
-		foreach (Transform eachChild in obj.transform)
-		{
-			if (eachChild.name == name)
-			{
-				return eachChild.gameObject;
-			}
-			else if (eachChild.transform.Find(name))
-				return eachChild.transform.Find(name).gameObject;
-		}
-
-		return null;
-	}
-
 
 	/// <summary>
 	/// Returns the on screen x, y, w, h of the GameObject go's collider
@@ -286,5 +268,20 @@ public class AppManager : MonoBehaviour
 
 		List<int> ret = new List<int> { Convert.ToInt32(min.x), Convert.ToInt32(min.y), Convert.ToInt32(max.x - min.x), Convert.ToInt32(max.y - min.y) };
 		return ret;
+	}
+
+	public static GameObject GetChildWithName(GameObject obj, string name)
+	{
+		foreach (Transform eachChild in obj.transform)
+		{
+			if (eachChild.name == name)
+			{
+				return eachChild.gameObject;
+			}
+			else if (eachChild.transform.Find(name))
+				return eachChild.transform.Find(name).gameObject;
+		}
+
+		return null;
 	}
 }

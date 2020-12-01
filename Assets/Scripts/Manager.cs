@@ -18,16 +18,7 @@ public class Manager : MonoBehaviour
 
 	// test
 	// public bool test_talking;
-//#if UNITY_EDITOR
-	//private void Awake()
-	//{
 
-		//PlayerSettings.MTRendering = true;
-		//PlayerSettings.graphicsJobs = true;
-		//PlayerSettings.graphicsJobMode = GraphicsJobMode.Legacy;
-		//SystemInfo.renderingthread
-	//}
-//#endif
 	void Start()
 	{
 		speechContext = MySpeechContext.None;
