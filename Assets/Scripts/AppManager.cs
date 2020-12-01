@@ -37,7 +37,6 @@ public class AppManager : MonoBehaviour
 
 	private void FixedUpdate()
 	{
-		Time.timeScale = 0.5f;
 		UpdateMentioned();
 		IsBlockingAnyFaces();
 		UpdateTranslucency();
