@@ -14,8 +14,8 @@ internal class MessageBoxMessages
 
 public class AppManager : MonoBehaviour
 {
-	const int MENTION_TIMEOUT = 7;
-	const int BLOCKED_TIMEOUT = 3;
+	const float MENTION_TIMEOUT = 7.0f;
+	const float BLOCKED_TIMEOUT = 1.5f;
 	// Each App's vars
 	float timeWhenBlocked;
 	float timeWhenMentioned;
