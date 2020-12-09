@@ -56,7 +56,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 		if (!Manager.Get_isTalking())
 		{
 			dictationRecognizer.Start();
-			Microphone.Start(deviceName, false, messageLength, samplingRate);
+			//Microphone.Start(deviceName, false, messageLength, samplingRate);
 		}
 	}
 
@@ -122,7 +122,7 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
         // The default timeout with initial silence is 5 seconds.
         if (cause == DictationCompletionCause.TimeoutExceeded)
         {
-            Microphone.End(deviceName);
+            //Microphone.End(deviceName);
 			Manager.Set_isTalking(false);
 			//currentlySaying = new StringBuilder();
 			//textSoFar = new StringBuilder("");
