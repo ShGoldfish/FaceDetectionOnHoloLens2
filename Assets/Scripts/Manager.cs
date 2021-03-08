@@ -9,7 +9,7 @@ using UnityEngine;
 public class Manager : MonoBehaviour
 {
 	// Interface mode: is it glanceable or ACI?
-	internal static bool is_ACI = false;
+	public static bool is_ACI = true;
 
 	// Textbox Management
 	static TextMesh msgVoice;

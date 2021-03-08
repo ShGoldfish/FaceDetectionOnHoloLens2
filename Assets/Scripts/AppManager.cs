@@ -12,6 +12,7 @@ internal class MessageBoxMessages
 
 public class AppManager : MonoBehaviour
 {
+	bool is_trans = false;
 
 	// CIA Variables 
 	const float MENTION_TIMEOUT = 7.0f;
@@ -30,9 +31,10 @@ public class AppManager : MonoBehaviour
 
 	private void Start()
 	{
+		is_trans = false;
 		if (Manager.is_ACI)
 		{
-			GameObject.Find("Msg_Box").GetComponent<MeshRenderer>().enabled = true;
+			GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = true;
 			GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = true;
 			GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = true;
 
@@ -45,7 +47,7 @@ public class AppManager : MonoBehaviour
 		}
 		else
 		{
-			GameObject.Find("Msg_Box").GetComponent<MeshRenderer>().enabled = false;
+			GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = false;
 			GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = false;
 			GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = false;
 
@@ -60,6 +62,14 @@ public class AppManager : MonoBehaviour
 			IsBlockingAnyFaces();
 			UpdateTranslucency();
 		}
+	}
+
+	private void ClickedToUpdateTranslucency()
+	{
+		if (is_trans)
+			MakeOpaque();
+		else
+			MakeTranslusent();
 	}
 
 	private void UpdateMentioned()
@@ -88,37 +98,41 @@ public class AppManager : MonoBehaviour
 
 	private void UpdateTranslucency()
 	{
-		// not talking
-		if (!Manager.Get_isTalking() || Manager.Get_numFaces() < 1)
+		if (Manager.is_ACI)
 		{
-			MakeOpaque();
-			return;
-		}
-		if (blocking)
-		{
-			MakeTranslusent();
-			return;
-		}
-		// Is talking and there is a face that is not blocking:
-		// But has recently been blocked => wait till timeOut
-		if (Time.time - timeWhenBlocked >= 0.0f)
-		{
-			if (Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)
+			// not talking
+			if (!Manager.Get_isTalking() || Manager.Get_numFaces() < 1)
 			{
+				MakeOpaque();
 				return;
 			}
-			else
+			if (blocking)
 			{
-				ResetTimeBlocked();
+				MakeTranslusent();
+				return;
 			}
+			// Is talking and there is a face that is not blocking:
+			// But has recently been blocked => wait till timeOut
+			if (Time.time - timeWhenBlocked >= 0.0f)
+			{
+				if (Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)
+				{
+					return;
+				}
+				else
+				{
+					ResetTimeBlocked();
+				}
+			}
+			// if talking about this app 
+			if (mentioned)
+			{
+				MakeOpaque();
+				return;
+			}
+			MakeTranslusent();
 		}
-		// if talking about this app 
-		if (mentioned)
-		{
-			MakeOpaque();
-			return;
-		}
-		MakeTranslusent();
+		
 	}
 
 	//IEnumerator IsBlockingAnyFaces()
@@ -145,21 +159,29 @@ public class AppManager : MonoBehaviour
 	{
 		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		//fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		if (Manager.is_ACI)
+		{
+			incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+			mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		}
+		is_trans = true;
 	}
 	private void MakeOpaque()
 	{
 		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
 		//fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
-		if (!blocking)
-			incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		else
-			incommingConvo.GetComponent<SpriteRenderer>().color = Color.white;
-		if(!mentioned)
-			mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		else
-			mentionedIcon.GetComponent<SpriteRenderer>().color = Color.white;
+		if (Manager.is_ACI)
+		{
+			if (!blocking)
+				incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+			else
+				incommingConvo.GetComponent<SpriteRenderer>().color = Color.white;
+			if (!mentioned)
+				mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+			else
+				mentionedIcon.GetComponent<SpriteRenderer>().color = Color.white;
+		}
+		is_trans = false;
 	}
 	private void ResetTimeMentioned()
 	{
@@ -215,9 +237,10 @@ public class AppManager : MonoBehaviour
 
 		return rect_faceBoxOnScreen.Overlaps(rect_app);
 	}
-	public void ChangeFixation()
-	{
-		bool bodyFixed = GetComponent<BodyFixed>().enabled;
+	
+	//public void ChangeFixation()
+	//{
+	//	bool bodyFixed = GetComponent<BodyFixed>().enabled;
 		// Change the icon
 		//if (bodyFixed)
 		//{
@@ -230,8 +253,8 @@ public class AppManager : MonoBehaviour
 			// switching to body fixed:
 			//fixationIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BodyZone");
 		//}
-		GetComponent<BodyFixed>().enabled = !bodyFixed;
-	}
+	//	GetComponent<BodyFixed>().enabled = !bodyFixed;
+	//}
 
 	/// <summary>
 	/// Returns the on screen x, y, w, h of the GameObject go's collider
