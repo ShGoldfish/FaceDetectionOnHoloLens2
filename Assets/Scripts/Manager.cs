@@ -46,7 +46,7 @@ public class Manager : MonoBehaviour
 	}
 
 
-	internal static void Change_SessionMod()
+	internal void Change_SessionMod()
 	{
 		//may get an input from trial manager to set glanceable or non [each has 2 glanceable and 1 intelligent]
 
@@ -66,6 +66,8 @@ public class Manager : MonoBehaviour
 			num_faces = 0;
 
 			GameObject.Find("Main Camera").GetComponent<MyPhotoCapture>().RunPC();
+			gameObject.GetComponent<SpeechHandler>().Run_MySH();
+
 		}
 		else
 		{
