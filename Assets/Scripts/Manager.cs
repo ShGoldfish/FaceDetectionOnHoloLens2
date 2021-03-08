@@ -9,7 +9,7 @@ using UnityEngine;
 public class Manager : MonoBehaviour
 {
 	// Interface mode: is it glanceable or ACI?
-	public static bool is_ACI = false;
+	public static bool is_ACI = true;
 
 	// Textbox Management
 	static TextMesh msgVoice;
@@ -26,7 +26,8 @@ public class Manager : MonoBehaviour
 	// public bool test_talking;
 	void Start()
 	{
-		Change_SessionMod();
+		// TODO: must be called in trail manager: mode must be passed in from there
+		Change_SessionMod(!is_ACI);
 	}
 
 	void Update()
@@ -46,10 +47,15 @@ public class Manager : MonoBehaviour
 	}
 
 
-	internal void Change_SessionMod()
+	internal void Change_SessionMod(bool input_Mod)
 	{
 		//may get an input from trial manager to set glanceable or non [each has 2 glanceable and 1 intelligent]
+		if (is_ACI)
+		{
+			gameObject.GetComponent<SpeechHandler>().End_MySH();
+		}
 
+		is_ACI = input_Mod;
 		if (is_ACI)
 		{
 			// Textbox Management

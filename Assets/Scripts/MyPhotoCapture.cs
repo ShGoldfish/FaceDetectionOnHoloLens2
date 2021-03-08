@@ -35,11 +35,6 @@ public class MyPhotoCapture : MonoBehaviour
 	// ############################################# UNITY
 	void Start()
 	{
-		
-	}
-
-	internal void RunPC()
-	{
 		ipEndPoint = "http://128.173.236.208:9005";
 		imageBufferBytesArray = null;
 
@@ -53,19 +48,23 @@ public class MyPhotoCapture : MonoBehaviour
 			cameraResolutionHeight = cameraResolution.height,
 			pixelFormat = CapturePixelFormat.BGRA32
 		};
+	}
+
+	internal void RunPC()
+	{
+		imageBufferBytesArray = null;
+
+		// Photo Capture 
+		cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).First();
+		targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height, TextureFormat.BGRA32, false);
+		m_CameraParameters = new CameraParameters(WebCamMode.PhotoMode)
+		{
+			hologramOpacity = 0.0f,
+			cameraResolutionWidth = cameraResolution.width,
+			cameraResolutionHeight = cameraResolution.height,
+			pixelFormat = CapturePixelFormat.BGRA32
+		};
 		PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
-
-		//postWebRequest = null;
-		//getWebRequest = null;
-
-		// Thread
-		//thread_num = 0;
-		//for (int i = 0; i < NUM_THREADS; i++)
-		//{
-		//	mThreads_get[i] = new Thread(ThreadingStart);
-		//	mThreads_get[i].Start(i);
-		//}
-
 		// Debugging
 		time_before_send = 0.0f;
 	}
@@ -92,6 +91,10 @@ public class MyPhotoCapture : MonoBehaviour
 	{
 		if (result.success)
 		{
+			if (!Manager.is_ACI)
+			{
+				photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
+			}
 			// Copy the raw image data into our target texture
 			photoCaptureFrame.UploadImageDataToTexture(targetTexture);
 			targetTexture.wrapMode = TextureWrapMode.Clamp;
