@@ -23,6 +23,7 @@ public class AppManager : MonoBehaviour
 	GameObject fixationIcon;
 	GameObject incommingConvo;
 	GameObject mentionedIcon;
+	bool is_manually_trans = false;
 	// Renderer purposes
 	public Rect rect_faceBoxOnScreen, rect_app;
 
@@ -34,8 +35,8 @@ public class AppManager : MonoBehaviour
 		mentionedIcon = GetChildWithName(gameObject, "Mentioned");
 		ResetTimeMentioned();
 		ResetTimeBlocked();
+		is_manually_trans = false;
 	}
-
 
 	private void FixedUpdate()
 	{
@@ -177,24 +178,21 @@ public class AppManager : MonoBehaviour
 							corners[3]);
 
 		// *********************************Face
-		// HoloLens 1
 		float faceStartX_onCam = Math.Min(faceBox[0], faceBox[2]),
 				faceEndX_onCam = Math.Max(faceBox[0], faceBox[2]);
 		float faceStartY_onCam = Math.Min(Screen.height - faceBox[1], Screen.height - faceBox[3]),
 				faceEndY_onCam = Math.Max(Screen.height - faceBox[1], Screen.height - faceBox[3]);
+
+		// HoloLens 1
 		rect_faceBoxOnScreen = new Rect(faceStartX_onCam - Screen.width / 3,
 										faceStartY_onCam + Screen.height / 2,
 										faceEndX_onCam - faceStartX_onCam,
 										faceEndY_onCam - faceStartY_onCam);
 
 		// For HL 2 roughly 
-		//float faceStartX_onCam = Math.Min(faceBox[0], faceBox[2]),
-		//		faceEndX_onCam = Math.Max(faceBox[0], faceBox[2]);
-		//float faceStartY_onCam = Math.Min(Screen.height - faceBox[1], Screen.height - faceBox[3]),
-		//		faceEndY_onCam = Math.Max(Screen.height - faceBox[1], Screen.height - faceBox[3]);
-
+		// Time Scale is  Doubled on HL2
 		//rect_faceBoxOnScreen = new Rect(faceStartX_onCam - Screen.width / 2,
-		//								faceStartY_onCam - Screen.height / 2,
+		//								faceStartY_onCam + Screen.height / 4,
 		//								(faceEndX_onCam - faceStartX_onCam) / 2.0f,
 		//								(faceEndY_onCam - faceStartY_onCam) / 2.0f);
 
