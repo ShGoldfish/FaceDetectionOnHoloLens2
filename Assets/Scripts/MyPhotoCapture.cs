@@ -35,6 +35,11 @@ public class MyPhotoCapture : MonoBehaviour
 	// ############################################# UNITY
 	void Start()
 	{
+		
+	}
+
+	internal void RunPC()
+	{
 		ipEndPoint = "http://128.173.236.208:9005";
 		imageBufferBytesArray = null;
 
@@ -64,7 +69,6 @@ public class MyPhotoCapture : MonoBehaviour
 		// Debugging
 		time_before_send = 0.0f;
 	}
-
 
 	// ############################################# PHOTO CAPTURE
 	private void OnPhotoCaptureCreated(PhotoCapture captureObject)
