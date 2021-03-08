@@ -12,6 +12,8 @@ internal class MessageBoxMessages
 
 public class AppManager : MonoBehaviour
 {
+
+	// CIA Variables 
 	const float MENTION_TIMEOUT = 7.0f;
 	const float BLOCKED_TIMEOUT = 1.5f;
 	// Each App's vars
@@ -23,26 +25,41 @@ public class AppManager : MonoBehaviour
 	GameObject fixationIcon;
 	GameObject incommingConvo;
 	GameObject mentionedIcon;
-	bool is_manually_trans = false;
 	// Renderer purposes
 	public Rect rect_faceBoxOnScreen, rect_app;
 
 	private void Start()
 	{
-		msgBox = GetChildWithName(gameObject, "Msg_Box").GetComponent<TextMesh>();
-		fixationIcon = GetChildWithName(gameObject, "FixationIcon");
-		incommingConvo = GetChildWithName(gameObject, "incommingConvo");
-		mentionedIcon = GetChildWithName(gameObject, "Mentioned");
-		ResetTimeMentioned();
-		ResetTimeBlocked();
-		is_manually_trans = false;
+		if (Manager.is_ACI)
+		{
+			GameObject.Find("Msg_Box").GetComponent<MeshRenderer>().enabled = true;
+			GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = true;
+			GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = true;
+
+			msgBox = GetChildWithName(gameObject, "Msg_Box").GetComponent<TextMesh>();
+			incommingConvo = GetChildWithName(gameObject, "incommingConvo");
+			fixationIcon = GetChildWithName(gameObject, "FixationIcon");
+			mentionedIcon = GetChildWithName(gameObject, "Mentioned");
+			ResetTimeMentioned();
+			ResetTimeBlocked();
+		}
+		else
+		{
+			GameObject.Find("Msg_Box").GetComponent<MeshRenderer>().enabled = false;
+			GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = false;
+			GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = false;
+
+		}
 	}
 
 	private void FixedUpdate()
 	{
-		UpdateMentioned();
-		IsBlockingAnyFaces();
-		UpdateTranslucency();
+		if (Manager.is_ACI)
+		{
+			UpdateMentioned();
+			IsBlockingAnyFaces();
+			UpdateTranslucency();
+		}
 	}
 
 	private void UpdateMentioned()

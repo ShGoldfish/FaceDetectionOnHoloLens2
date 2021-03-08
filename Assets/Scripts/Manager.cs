@@ -9,7 +9,7 @@ using UnityEngine;
 public class Manager : MonoBehaviour
 {
 	// Interface mode: is it glanceable or ACI?
-	private bool is_ACI = false;
+	internal static bool is_ACI = false;
 
 	// Textbox Management
 	static TextMesh msgVoice;
@@ -46,17 +46,11 @@ public class Manager : MonoBehaviour
 	}
 
 
-	internal void Change_SessionMod()
+	internal static void Change_SessionMod()
 	{
 		//may get an input from trial manager to set glanceable or non [each has 2 glanceable and 1 intelligent]
 
-		if (!is_ACI)
-		{
-			GameObject.Find("MessageFace").GetComponent<MeshRenderer>().enabled = false;
-			GameObject.Find("MessageVoice").GetComponent<MeshRenderer>().enabled = false;
-
-		}
-		else
+		if (is_ACI)
 		{
 			// Textbox Management
 			GameObject.Find("MessageFace").GetComponent<MeshRenderer>().enabled = true;
@@ -72,6 +66,12 @@ public class Manager : MonoBehaviour
 			num_faces = 0;
 
 			GameObject.Find("Main Camera").GetComponent<MyPhotoCapture>().RunPC();
+		}
+		else
+		{
+			GameObject.Find("MessageFace").GetComponent<MeshRenderer>().enabled = false;
+			GameObject.Find("MessageVoice").GetComponent<MeshRenderer>().enabled = false;
+
 		}
 	}
 
