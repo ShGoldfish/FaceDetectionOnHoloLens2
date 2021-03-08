@@ -64,7 +64,7 @@ public class AppManager : MonoBehaviour
 		}
 	}
 
-	private void ClickedToUpdateTranslucency()
+	public void ClickedToUpdateTranslucency()
 	{
 		if (is_trans)
 			MakeOpaque();
