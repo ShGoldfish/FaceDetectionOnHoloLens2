@@ -22,7 +22,7 @@ public class AppManager : MonoBehaviour
 	bool mentioned;
 	bool blocking;
 	TextMesh msgBox;
-	GameObject fixationIcon;
+	//GameObject fixationIcon;
 	GameObject incommingConvo;
 	GameObject mentionedIcon;
 	// Renderer purposes
@@ -38,7 +38,7 @@ public class AppManager : MonoBehaviour
 
 			msgBox = GetChildWithName(gameObject, "Msg_Box").GetComponent<TextMesh>();
 			incommingConvo = GetChildWithName(gameObject, "incommingConvo");
-			fixationIcon = GetChildWithName(gameObject, "FixationIcon");
+			//fixationIcon = GetChildWithName(gameObject, "FixationIcon");
 			mentionedIcon = GetChildWithName(gameObject, "Mentioned");
 			ResetTimeMentioned();
 			ResetTimeBlocked();
@@ -144,14 +144,14 @@ public class AppManager : MonoBehaviour
 	private void MakeTranslusent()
 	{
 		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		//fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 	}
 	private void MakeOpaque()
 	{
 		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-		fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
+		//fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
 		if (!blocking)
 			incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		else
@@ -219,17 +219,17 @@ public class AppManager : MonoBehaviour
 	{
 		bool bodyFixed = GetComponent<BodyFixed>().enabled;
 		// Change the icon
-		if (bodyFixed)
-		{
+		//if (bodyFixed)
+		//{
 			// switching to world fixed:
-			fixationIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("WorldZone");
+			//fixationIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("WorldZone");
 
-		}
-		else
-		{
+		//}
+		//else
+		//{
 			// switching to body fixed:
-			fixationIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BodyZone");
-		}
+			//fixationIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BodyZone");
+		//}
 		GetComponent<BodyFixed>().enabled = !bodyFixed;
 	}
 
