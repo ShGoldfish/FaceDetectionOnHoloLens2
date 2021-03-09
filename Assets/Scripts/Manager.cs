@@ -9,7 +9,12 @@ using UnityEngine;
 public class Manager : MonoBehaviour
 {
 	// Interface mode: is it glanceable or ACI?
-	public static bool is_ACI = true;
+	public static bool is_ACI = false;
+	private int trialSetNum = 0;
+	private int questionNum = 0;
+	private float time_to_ask_next_Q;
+	private float time_asked;
+	private FileLog sessionLog;
 
 	// Textbox Management
 	static TextMesh msgVoice;
@@ -26,8 +31,13 @@ public class Manager : MonoBehaviour
 	// public bool test_talking;
 	void Start()
 	{
+		//Text
+		OnClick_NxtSession();
+
 		// TODO: must be called in trail manager: mode must be passed in from there
-		Change_SessionMod(!is_ACI);
+		//Change_SessionMod(is_ACI);
+		time_asked = Time.time;
+		time_to_ask_next_Q = float.NegativeInfinity;
 	}
 
 	void Update()
@@ -44,8 +54,40 @@ public class Manager : MonoBehaviour
 			//test
 			// Set_isTalking(test_talking);
 		}
+		//if time_to_ask_next_Q is -inf that means they are answering so do not continue  Trial set timer to run the next question
+		if (!float.IsNegativeInfinity(time_to_ask_next_Q))
+		{
+			if ( Time.time >= time_to_ask_next_Q)
+			{
+				//TrialSet[trialSetNum][questionNum][1] is 1 or 2 or 3 showing if the question 1 (from app 1) should be asked
+				//ask question type TrialSet[trialSetNum][questionNum][1] 
+				time_asked = Time.time;
+				time_to_ask_next_Q = float.NegativeInfinity;
+			}
+
+			// Speech detection "Answer is:" sets
+			//time_to_ask_next_Q = TrialSet[trialSetNum][questionNum][0] + Time.time;
+			//trialSet is trialSetNum X question num X 3 [= 0: time, 1: App_num, 2: correct_answer_option]
+			//float duration_to_ans = Time.time - time_asked;
+			//sessionLog.WriteLine(questionNum + ", " + duration_to_ans + ", " + TrialSet[trialSetNum][questionNum][1] + ", " + TrialSet[trialSetNum][questionNum][2]);
+			//questionNum++;
+
+		}
 	}
 
+	public void OnClick_NxtSession()
+	{
+		// come with method for the rotation of Change_SessionMod parameter 
+		Change_SessionMod(!is_ACI);
+		sessionLog = new FileLog();
+		trialSetNum = (trialSetNum + 1) % 2;
+		questionNum = 0;
+
+		// time_to_ask_next_Q Changes after a question is answered. Trial set rund based on this [will be -inf to indicate do not run fwd]
+		//time_to_ask_next_Q = TrialSet[trialSetNum][questionNum][0] + Time.time;
+		//trialSet is trialSetNum X question num X 3 [= 0: time, 1: App_num, 2: correct_answer_option]
+		sessionLog.SetHeader( "_SessionFile", trialSetNum + "_" + is_ACI );
+	}
 
 	internal void Change_SessionMod(bool input_Mod)
 	{

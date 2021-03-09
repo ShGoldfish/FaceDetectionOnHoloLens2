@@ -9,23 +9,25 @@ using Windows.Storage;
 
 public class FileLog : MonoBehaviour
 {
-    public string fileName = "log.csv";
+    private string fileName = "log.csv";
     string path;
 
-    // Use this for initialization
-    public void SetHeader(string header) // header is like "time, accuracy, level, ......"
-    {
+	// Use this for initialization
+	public void SetHeader(string fName, string header) // header is like "time, accuracy, level, ......"
+	{
 #if WINDOWS_UWP
         // Get local folder on HoloLense
         path = Windows.Storage.ApplicationData.Current.LocalFolder.Path;
 #else
         path = ".\\";
 #endif
-        File.AppendAllText(path + "\\" + fileName, "\n" + header + "\n");
+		fileName = path + "\\" + fName + ".csv";
+        File.AppendAllText(fileName, "\n" + header + "\n");
     }
 
     public void WriteLine(string line) // you pass in one trial's date "1.1, 1, 4, ..."
     {
-        File.AppendAllText(path + "\\" + fileName, "\n" + line);
+		//Lines are [Question_number, Duration_to_answer, questioned_app, right_answer) 
+		File.AppendAllText(fileName, "\n" + line);
     }
 }
