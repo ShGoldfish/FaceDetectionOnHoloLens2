@@ -62,7 +62,7 @@ public class Manager : MonoBehaviour
 			if ( Time.time >= time_to_ask_next_Q)
 			{
 				//TrialSet[trialSetNum][questionNum][1] is 1 or 2 or 3 showing if the question 1 (from app 1) should be asked
-				//ask (play sound) question type TrialSet[trialSetNum][questionNum][1] 
+				Ask_Question(trialSets[trialSetNum, questionNum, 1]);
 				time_asked = Time.time;
 				time_to_ask_next_Q = float.NegativeInfinity;
 			}
@@ -70,6 +70,16 @@ public class Manager : MonoBehaviour
 			// Speech detection "Answer is:" sets
 			//sessionLog.WriteLine(questionNum + ", " + duration_to_ans + ", " + TrialSet[trialSetNum][questionNum][1] + ", " + TrialSet[trialSetNum][questionNum][2]);
 		}
+	}
+
+	private void Ask_Question(int v)
+	{
+		// Play the audio that asks question 1 [from app 1]
+	}
+
+	private void Set_Answer(int app, int option)
+	{
+		// TODO: Set the questions answer on app to option
 	}
 
 	public void OnClick_NxtSession()
@@ -127,6 +137,8 @@ public class Manager : MonoBehaviour
 		Trial_answered();
 		questionNum++;
 		time_to_ask_next_Q = trialSets[trialSetNum, questionNum, 0] + Time.time;
+		Set_Answer(trialSets[trialSetNum, questionNum, 1], trialSets[trialSetNum, questionNum, 2]);
+
 		// For each app start trial
 		GameObject.Find("Weather1").GetComponent<AppManager>().Start_Trial();
 		GameObject.Find("Email2").GetComponent<AppManager>().Start_Trial();
