@@ -124,11 +124,10 @@ public class MyPhotoCapture : MonoBehaviour
 
 			// Thread
 			//CreateWebRequests();
-			if (Manager.is_ACI)
-			{
-				StartCoroutine("PostPhoto");
-				StartCoroutine("GetFaces");
-			}
+			
+			StartCoroutine("PostPhoto");
+			StartCoroutine("GetFaces");
+
 		}
 	}
 
@@ -178,18 +177,21 @@ public class MyPhotoCapture : MonoBehaviour
 	/// </summary>
 	private IEnumerator PostPhoto()
 	{
-		while (getting)
-			yield return new WaitForEndOfFrame();
-		posting = true;
-		time_before_send = Time.time;
-		var data = new List<IMultipartFormSection> {
-						new MultipartFormFileSection("myImage", imageBufferBytesArray, "test.jpg", "image/jpg")};
-		using (UnityWebRequest postWebRequest = UnityWebRequest.Post(ipEndPoint + "/receive-image", data))
+		if (Manager.is_ACI)
 		{
-			yield return postWebRequest.SendWebRequest();
+			while (getting)
+				yield return new WaitForEndOfFrame();
+			posting = true;
+			time_before_send = Time.time;
+			var data = new List<IMultipartFormSection> {
+						new MultipartFormFileSection("myImage", imageBufferBytesArray, "test.jpg", "image/jpg")};
+			using (UnityWebRequest postWebRequest = UnityWebRequest.Post(ipEndPoint + "/receive-image", data))
+			{
+				yield return postWebRequest.SendWebRequest();
+			}
+			Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds to Post.");    // ~0.065seconds
+			posting = false;
 		}
-		Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds to Post.");    // ~0.065seconds
-		posting = false;
 
 	}
 	/// <summary>
@@ -198,40 +200,43 @@ public class MyPhotoCapture : MonoBehaviour
 	/// </summary>
 	private IEnumerator GetFaces()
 	{
-		while (posting)
-			yield return new WaitForEndOfFrame();
-		getting = true;
-		time_before_send = Time.time;
-		using (UnityWebRequest getWebRequest = UnityWebRequest.Get(ipEndPoint + "/detect-faces"))
+		if (Manager.is_ACI)
 		{
-			yield return getWebRequest.SendWebRequest();
-			if (getWebRequest.isNetworkError)
+			while (posting)
+				yield return new WaitForEndOfFrame();
+			getting = true;
+			time_before_send = Time.time;
+			using (UnityWebRequest getWebRequest = UnityWebRequest.Get(ipEndPoint + "/detect-faces"))
 			{
-				Debug.Log("Error: " + getWebRequest.error);
-			}
-			else
-			{
-				string dataReceived = getWebRequest.downloadHandler.text;
-				int n_faces = 0;
-				List<List<int>> faces = new List<List<int>>();
-				if (dataReceived != null && dataReceived != "")
+				yield return getWebRequest.SendWebRequest();
+				if (getWebRequest.isNetworkError)
 				{
-					List<float> numbers = Array.ConvertAll(dataReceived.Split(','), float.Parse).ToList();
-					for (int i = 0; i < numbers.Count; i += 4)
+					Debug.Log("Error: " + getWebRequest.error);
+				}
+				else
+				{
+					string dataReceived = getWebRequest.downloadHandler.text;
+					int n_faces = 0;
+					List<List<int>> faces = new List<List<int>>();
+					if (dataReceived != null && dataReceived != "")
 					{
-						faces.Add(new List<int> {   Convert.ToInt32(numbers[i]),
+						List<float> numbers = Array.ConvertAll(dataReceived.Split(','), float.Parse).ToList();
+						for (int i = 0; i < numbers.Count; i += 4)
+						{
+							faces.Add(new List<int> {   Convert.ToInt32(numbers[i]),
 												Convert.ToInt32(numbers[i + 1]),
 												Convert.ToInt32(numbers[i + 2]),
 												Convert.ToInt32(numbers[i + 3]) });
-						n_faces++;
+							n_faces++;
+						}
 					}
+					Manager.Set_Faces(n_faces, faces);
 				}
-				Manager.Set_Faces(n_faces, faces);
 			}
-		}
-		Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds to Get.");    // ~0.065seconds
-		getting = false;
+			Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds to Get.");    // ~0.065seconds
+			getting = false;
 
+		}
 		// Take another photo
 		photoCaptureObject.TakePhotoAsync(OnCapturedPhotoToMemory);
 
