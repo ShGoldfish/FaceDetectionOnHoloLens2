@@ -15,6 +15,7 @@ public class Manager : MonoBehaviour
 	private float time_to_ask_next_Q;
 	private float time_asked;
 	private FileLog sessionLog;
+	private int[,,] trialSets;
 
 	// Textbox Management
 	static TextMesh msgVoice;
@@ -31,9 +32,10 @@ public class Manager : MonoBehaviour
 	// public bool test_talking;
 	void Start()
 	{
-		//Text
+		//Test
 		OnClick_NxtSession();
 
+		Create_Trial_Dataset();
 		// TODO: must be called in trail manager: mode must be passed in from there
 		//Change_SessionMod(is_ACI);
 		time_asked = Time.time;
@@ -183,6 +185,49 @@ public class Manager : MonoBehaviour
 	{
 		num_faces = n_faces;
 		faces_box = faces;
+	}
+
+	private void Create_Trial_Dataset()
+	{
+
+		//trialSets is trialSetNum X question num X 3 [= 0: time, 1: App_num, 2: correct_answer_option]
+		trialSets = new int[2, 15, 3] {
+			{
+				{ 10, 1, 4}, // End Trial 1
+				{ 15, 3, 3}, // End Trial 2
+				{ 10, 1, 1}, // End Trial 3
+				{ 45, 3, 2}, // End Trial 4
+				{ 10, 3, 3}, // End Trial 5
+				{ 10, 2, 1}, // End Trial 6
+				{ 30, 2, 3}, // End Trial 7
+				{ 15, 3, 1}, // End Trial 8
+				{ 15, 1, 3}, // End Trial 9
+				{ 20, 2, 1}, // End Trial 10
+				{ 20, 3, 4}, // End Trial 11
+				{ 15, 2, 2}, // End Trial 12
+				{ 10, 1, 2}, // End Trial 13
+				{ 20, 2, 4}, // End Trial 14
+				{ 20, 1, 4} // End Trial 15
+			}, // End Trial Set 1
+			{
+				{ 20, 1, 4} // End Trial 15
+				{ 20, 2, 4}, // End Trial 14
+				{ 10, 1, 2}, // End Trial 13
+				{ 15, 2, 2}, // End Trial 12
+				{ 20, 3, 4}, // End Trial 11
+				{ 20, 2, 1}, // End Trial 10
+				{ 15, 1, 3}, // End Trial 9
+				{ 15, 3, 1}, // End Trial 8
+				{ 30, 2, 3}, // End Trial 7
+				{ 10, 2, 1}, // End Trial 6
+				{ 10, 3, 3}, // End Trial 5
+				{ 45, 3, 2}, // End Trial 4
+				{ 10, 1, 1}, // End Trial 3
+				{ 15, 3, 3}, // End Trial 2
+				{ 10, 1, 4}, // End Trial 1
+			}// End Trial Set 2
+		};
+
 	}
 }
 
