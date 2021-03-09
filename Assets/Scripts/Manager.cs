@@ -193,7 +193,7 @@ public class Manager : MonoBehaviour
 		//trialSets is trialSetNum X question num X 3 [= 0: time, 1: App_num, 2: correct_answer_option]
 		trialSets = new int[2, 15, 3] {
 			{
-				{ 10, 1, 4}, // End Trial 1
+				{ 20, 1, 4}, // End Trial 1
 				{ 15, 3, 3}, // End Trial 2
 				{ 10, 1, 1}, // End Trial 3
 				{ 45, 3, 2}, // End Trial 4
@@ -207,10 +207,10 @@ public class Manager : MonoBehaviour
 				{ 15, 2, 2}, // End Trial 12
 				{ 10, 1, 2}, // End Trial 13
 				{ 20, 2, 4}, // End Trial 14
-				{ 20, 1, 4} // End Trial 15
+				{ 10, 1, 4} // End Trial 15
 			}, // End Trial Set 1
 			{
-				{ 20, 1, 4} // End Trial 15
+				{ 10, 1, 4}, // End Trial 15
 				{ 20, 2, 4}, // End Trial 14
 				{ 10, 1, 2}, // End Trial 13
 				{ 15, 2, 2}, // End Trial 12
@@ -224,7 +224,7 @@ public class Manager : MonoBehaviour
 				{ 45, 3, 2}, // End Trial 4
 				{ 10, 1, 1}, // End Trial 3
 				{ 15, 3, 3}, // End Trial 2
-				{ 10, 1, 4}, // End Trial 1
+				{ 20, 1, 4} // End Trial 1
 			}// End Trial Set 2
 		};
 
