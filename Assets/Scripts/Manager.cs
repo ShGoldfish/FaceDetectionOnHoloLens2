@@ -68,7 +68,6 @@ public class Manager : MonoBehaviour
 			}
 
 			// Speech detection "Answer is:" sets
-			//float duration_to_ans = Time.time - time_asked;
 			//sessionLog.WriteLine(questionNum + ", " + duration_to_ans + ", " + TrialSet[trialSetNum][questionNum][1] + ", " + TrialSet[trialSetNum][questionNum][2]);
 		}
 	}
@@ -123,8 +122,9 @@ public class Manager : MonoBehaviour
 		GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Session();
 	}
 
-	private void Start_nxt_Trial()
+	public void Start_nxt_Trial()
 	{
+		Trial_answered();
 		questionNum++;
 		time_to_ask_next_Q = trialSets[trialSetNum, questionNum, 0] + Time.time;
 		// For each app start trial
@@ -132,6 +132,19 @@ public class Manager : MonoBehaviour
 		GameObject.Find("Email2").GetComponent<AppManager>().Start_Trial();
 		GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Trial();
 	}
+
+	public void Trial_answered()
+	{
+		if (questionNum == -1)
+			return;
+		string trial_line = questionNum + ", " + time_asked + ", " + Time.time + ", " + trialSets[trialSetNum, questionNum, 1] + ", " + trialSets[trialSetNum, questionNum, 2];
+		trial_line += GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
+						GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
+						GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
+		sessionLog.WriteLine(trial_line);
+	}
+
+
 	private void Create_Trial_Dataset()
 	{
 

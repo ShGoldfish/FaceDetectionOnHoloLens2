@@ -12,7 +12,7 @@ internal class MessageBoxMessages
 public class AppManager : MonoBehaviour
 {
 	bool is_trans = false;
-	int user_manual_override = 0;
+	public int user_manual_override = 0;
 	// CIA Variables 
 	const float MENTION_TIMEOUT = 7.0f;
 	const float BLOCKED_TIMEOUT = 1.5f;
