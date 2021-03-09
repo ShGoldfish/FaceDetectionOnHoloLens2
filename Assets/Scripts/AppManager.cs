@@ -9,11 +9,10 @@ internal class MessageBoxMessages
 	public static string AppNotMentioned { get { return "Not mentioned!"; } }
 }
 
-
 public class AppManager : MonoBehaviour
 {
 	bool is_trans = false;
-
+	int user_manual_override = 0;
 	// CIA Variables 
 	const float MENTION_TIMEOUT = 7.0f;
 	const float BLOCKED_TIMEOUT = 1.5f;
@@ -31,27 +30,8 @@ public class AppManager : MonoBehaviour
 
 	private void Start()
 	{
-		is_trans = false;
-		if (Manager.is_ACI)
-		{
-			GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = true;
-			GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = true;
-			GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = true;
-
-			msgBox = GetChildWithName(gameObject, "Msg_Box").GetComponent<TextMesh>();
-			incommingConvo = GetChildWithName(gameObject, "incommingConvo");
-			//fixationIcon = GetChildWithName(gameObject, "FixationIcon");
-			mentionedIcon = GetChildWithName(gameObject, "Mentioned");
-			ResetTimeMentioned();
-			ResetTimeBlocked();
-		}
-		else
-		{
-			GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = false;
-			GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = false;
-			GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = false;
-
-		}
+		Start_Session();
+		Start_Trial();
 	}
 
 	private void FixedUpdate()
@@ -64,8 +44,39 @@ public class AppManager : MonoBehaviour
 		}
 	}
 
+	public void Start_Session()
+	{
+		if (Manager.is_ACI)
+		{
+			GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = true;
+			GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = true;
+			GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = true;
+
+			msgBox = GetChildWithName(gameObject, "Msg_Box").GetComponent<TextMesh>();
+			incommingConvo = GetChildWithName(gameObject, "incommingConvo");
+			//fixationIcon = GetChildWithName(gameObject, "FixationIcon");
+			mentionedIcon = GetChildWithName(gameObject, "Mentioned");
+
+		}
+		else
+		{
+			GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = false;
+			GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = false;
+			GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = false;
+		}
+	}
+
+	public void Start_Trial()
+	{
+		is_trans = false;
+		user_manual_override = 0;
+		ResetTimeMentioned();
+		ResetTimeBlocked();
+
+	}
 	public void ClickedToUpdateTranslucency()
 	{
+		user_manual_override++;
 		if (is_trans)
 			MakeOpaque();
 		else
@@ -98,7 +109,7 @@ public class AppManager : MonoBehaviour
 
 	private void UpdateTranslucency()
 	{
-		if (Manager.is_ACI)
+		if (Manager.is_ACI && user_manual_override == 0)
 		{
 			// not talking
 			if (!Manager.Get_isTalking() || Manager.Get_numFaces() < 1)

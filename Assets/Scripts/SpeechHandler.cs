@@ -30,10 +30,6 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 		// This event is fired when the recognizer stops, whether from Stop() being called, a timeout occurring, or some other error.
 		dictationRecognizer.DictationComplete += DictationRecognizer_DictationComplete;
 
-	}
-
-	internal void Run_MySH()
-	{
 		dictationRecognizer = new DictationRecognizer();
 		dictationRecognizer.AutoSilenceTimeoutSeconds = TIMEOUT;
 		// 3.a: Register for dictationRecognizer.DictationHypothesis and implement DictationHypothesis below
@@ -53,12 +49,34 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 
 	}
 
-	internal void End_MySH()
-	{
-		PhraseRecognitionSystem.Restart();
-		dictationRecognizer.Dispose();
-		Microphone.End(deviceName);
-	}
+	//internal void Run_MySH()
+	//{
+	//	dictationRecognizer = new DictationRecognizer();
+	//	dictationRecognizer.AutoSilenceTimeoutSeconds = TIMEOUT;
+	//	// 3.a: Register for dictationRecognizer.DictationHypothesis and implement DictationHypothesis below
+	//	// This event is fired while the user is talking. As the recognizer listens, it provides text of what it's heard so far.
+	//	dictationRecognizer.DictationHypothesis += DictationRecognizer_DictationHypothesis;
+
+	//	// 3.a: Register for dictationRecognizer.DictationComplete and implement DictationComplete below
+	//	// This event is fired when the recognizer stops, whether from Stop() being called, a timeout occurring, or some other error.
+	//	dictationRecognizer.DictationComplete += DictationRecognizer_DictationComplete;
+
+	//	PhraseRecognitionSystem.Shutdown();
+	//	dictationRecognizer.Start();
+	//	// Query the maximum frequency of the default microphone. Use 'unused' to ignore the minimum frequency.
+	//	int unused;
+	//	Microphone.GetDeviceCaps(deviceName, out unused, out samplingRate);
+	//	Microphone.Start(deviceName, false, messageLength, samplingRate);
+
+	//}
+
+	//internal void End_MySH()
+	//{
+		//is_ACI = false;
+		//PhraseRecognitionSystem.Restart();
+		//dictationRecognizer.Dispose();
+		//Microphone.End(deviceName);
+	//}
 
 	private void Update()
 	{

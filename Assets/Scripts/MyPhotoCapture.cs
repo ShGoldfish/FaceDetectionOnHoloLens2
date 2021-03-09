@@ -48,10 +48,7 @@ public class MyPhotoCapture : MonoBehaviour
 			cameraResolutionHeight = cameraResolution.height,
 			pixelFormat = CapturePixelFormat.BGRA32
 		};
-	}
 
-	internal void RunPC()
-	{
 		imageBufferBytesArray = null;
 
 		// Photo Capture 
@@ -68,6 +65,25 @@ public class MyPhotoCapture : MonoBehaviour
 		// Debugging
 		time_before_send = 0.0f;
 	}
+
+	//internal void RunPC()
+	//{
+	//	imageBufferBytesArray = null;
+
+	//	// Photo Capture 
+	//	cameraResolution = PhotoCapture.SupportedResolutions.OrderByDescending((res) => res.width * res.height).First();
+	//	targetTexture = new Texture2D(cameraResolution.width, cameraResolution.height, TextureFormat.BGRA32, false);
+	//	m_CameraParameters = new CameraParameters(WebCamMode.PhotoMode)
+	//	{
+	//		hologramOpacity = 0.0f,
+	//		cameraResolutionWidth = cameraResolution.width,
+	//		cameraResolutionHeight = cameraResolution.height,
+	//		pixelFormat = CapturePixelFormat.BGRA32
+	//	};
+	//	PhotoCapture.CreateAsync(false, OnPhotoCaptureCreated);
+	//	// Debugging
+	//	time_before_send = 0.0f;
+	//}
 
 	// ############################################# PHOTO CAPTURE
 	private void OnPhotoCaptureCreated(PhotoCapture captureObject)
@@ -91,10 +107,10 @@ public class MyPhotoCapture : MonoBehaviour
 	{
 		if (result.success)
 		{
-			if (!Manager.is_ACI)
-			{
-				photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
-			}
+			//if (!Manager.is_ACI)
+			//{
+			//	photoCaptureObject.StopPhotoModeAsync(OnStoppedPhotoMode);
+			//}
 			// Copy the raw image data into our target texture
 			photoCaptureFrame.UploadImageDataToTexture(targetTexture);
 			targetTexture.wrapMode = TextureWrapMode.Clamp;
@@ -108,8 +124,11 @@ public class MyPhotoCapture : MonoBehaviour
 
 			// Thread
 			//CreateWebRequests();
-			StartCoroutine("PostPhoto");
-			StartCoroutine("GetFaces");
+			if (Manager.is_ACI)
+			{
+				StartCoroutine("PostPhoto");
+				StartCoroutine("GetFaces");
+			}
 		}
 	}
 

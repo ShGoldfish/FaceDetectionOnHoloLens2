@@ -27,7 +27,7 @@ public class FileLog : MonoBehaviour
 
     public void WriteLine(string line) // you pass in one trial's date "1.1, 1, 4, ..."
     {
-		//Lines are [Question_number, Duration_to_answer, questioned_app, right_answer) 
+		//Lines are [Question_number, Duration_to_answer, questioned_app, right_answer, num_user_manual_override) 
 		File.AppendAllText(fileName, "\n" + line);
     }
 }

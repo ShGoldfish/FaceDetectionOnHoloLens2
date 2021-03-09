@@ -11,9 +11,9 @@ public class Manager : MonoBehaviour
 	// Interface mode: is it glanceable or ACI?
 	public static bool is_ACI = false;
 	private int trialSetNum = 0;
-	private int questionNum = 0;
+	private int questionNum = -1;
 	private float time_to_ask_next_Q;
-	private float time_asked;
+	private static float time_asked;
 	private FileLog sessionLog;
 	private int[,,] trialSets;
 
@@ -32,10 +32,10 @@ public class Manager : MonoBehaviour
 	// public bool test_talking;
 	void Start()
 	{
+		Create_Trial_Dataset();
 		//Test
 		OnClick_NxtSession();
 
-		Create_Trial_Dataset();
 		// TODO: must be called in trail manager: mode must be passed in from there
 		//Change_SessionMod(is_ACI);
 		time_asked = Time.time;
@@ -62,18 +62,14 @@ public class Manager : MonoBehaviour
 			if ( Time.time >= time_to_ask_next_Q)
 			{
 				//TrialSet[trialSetNum][questionNum][1] is 1 or 2 or 3 showing if the question 1 (from app 1) should be asked
-				//ask question type TrialSet[trialSetNum][questionNum][1] 
+				//ask (play sound) question type TrialSet[trialSetNum][questionNum][1] 
 				time_asked = Time.time;
 				time_to_ask_next_Q = float.NegativeInfinity;
 			}
 
 			// Speech detection "Answer is:" sets
-			//time_to_ask_next_Q = TrialSet[trialSetNum][questionNum][0] + Time.time;
-			//trialSet is trialSetNum X question num X 3 [= 0: time, 1: App_num, 2: correct_answer_option]
 			//float duration_to_ans = Time.time - time_asked;
 			//sessionLog.WriteLine(questionNum + ", " + duration_to_ans + ", " + TrialSet[trialSetNum][questionNum][1] + ", " + TrialSet[trialSetNum][questionNum][2]);
-			//questionNum++;
-
 		}
 	}
 
@@ -83,21 +79,20 @@ public class Manager : MonoBehaviour
 		Change_SessionMod(!is_ACI);
 		sessionLog = new FileLog();
 		trialSetNum = (trialSetNum + 1) % 2;
-		questionNum = 0;
+		questionNum = -1;
 
 		// time_to_ask_next_Q Changes after a question is answered. Trial set rund based on this [will be -inf to indicate do not run fwd]
-		//time_to_ask_next_Q = TrialSet[trialSetNum][questionNum][0] + Time.time;
-		//trialSet is trialSetNum X question num X 3 [= 0: time, 1: App_num, 2: correct_answer_option]
-		sessionLog.SetHeader( "_SessionFile", trialSetNum + "_" + is_ACI );
+		sessionLog.SetHeader( "_SessionFile", trialSetNum + "_" + is_ACI + "_" + Time.time);
+		Start_nxt_Trial();
 	}
 
 	internal void Change_SessionMod(bool input_Mod)
 	{
 		//may get an input from trial manager to set glanceable or non [each has 2 glanceable and 1 intelligent]
-		if (is_ACI)
-		{
-			gameObject.GetComponent<SpeechHandler>().End_MySH();
-		}
+		//if (is_ACI)
+		//{
+		//	gameObject.GetComponent<SpeechHandler>().End_MySH();
+		//}
 
 		is_ACI = input_Mod;
 		if (is_ACI)
@@ -114,79 +109,29 @@ public class Manager : MonoBehaviour
 			faces_box = new List<List<int>>();
 			isTalking = false;
 			num_faces = 0;
-
-			GameObject.Find("Main Camera").GetComponent<MyPhotoCapture>().RunPC();
-			gameObject.GetComponent<SpeechHandler>().Run_MySH();
+			//GameObject.Find("Main Camera").GetComponent<MyPhotoCapture>().RunPC();
+			//gameObject.GetComponent<SpeechHandler>().Run_MySH();
 
 		}
 		else
 		{
 			GameObject.Find("MessageFace").GetComponent<MeshRenderer>().enabled = false;
 			GameObject.Find("MessageVoice").GetComponent<MeshRenderer>().enabled = false;
-
 		}
+		GameObject.Find("Weather1").GetComponent<AppManager>().Start_Session();
+		GameObject.Find("Email2").GetComponent<AppManager>().Start_Session();
+		GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Session();
 	}
 
-	// All ACI Related Functions
-	internal static void Set_justMentioned(bool v)
+	private void Start_nxt_Trial()
 	{
-		if (speechContext == MySpeechContext.None)
-			justMentioned = false;
-		else
-			justMentioned = v;
+		questionNum++;
+		time_to_ask_next_Q = trialSets[trialSetNum, questionNum, 0] + Time.time;
+		// For each app start trial
+		GameObject.Find("Weather1").GetComponent<AppManager>().Start_Trial();
+		GameObject.Find("Email2").GetComponent<AppManager>().Start_Trial();
+		GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Trial();
 	}
-
-	internal static bool Get_justMentioned()
-	{
-		return justMentioned;
-	}
-
-
-	internal static bool Get_isTalking()
-	{
-		return isTalking;
-	}
-	internal static void Set_isTalking(bool b)
-	{
-		isTalking = b;
-		if(!isTalking)
-			Reset_SpeechContext();
-	}
-
-	internal static void Set_SpeechContext(int context)
-	//public void Set_SpeechContext(int context)
-	{
-		if (context == (int)MySpeechContext.None)
-			return;
-		speechContext = (MySpeechContext)context;
-		Set_justMentioned(true);
-	}
-
-	internal static void Reset_SpeechContext()
-	{
-		speechContext = MySpeechContext.None;
-	}
-	internal static string Get_SpeechContext()
-	{
-		int n = (int)speechContext;
-		return speechContext + n.ToString();
-	}
-
-	internal static int Get_numFaces()
-	{
-		return num_faces;
-	}
-	internal static List<List<int>> Get_FaceBoxes()
-	{
-		return faces_box;
-	}
-
-	internal static void Set_Faces(int n_faces, List<List<int>> faces)
-	{
-		num_faces = n_faces;
-		faces_box = faces;
-	}
-
 	private void Create_Trial_Dataset()
 	{
 
@@ -229,5 +174,66 @@ public class Manager : MonoBehaviour
 		};
 
 	}
+	// All ACI Related Functions
+	internal static void Set_justMentioned(bool v)
+	{
+		if (speechContext == MySpeechContext.None)
+			justMentioned = false;
+		else
+			justMentioned = v;
+	}
+
+	internal static bool Get_justMentioned()
+	{
+		return justMentioned;
+	}
+
+
+	internal static bool Get_isTalking()
+	{
+		return isTalking;
+	}
+	internal static void Set_isTalking(bool b)
+	{
+		isTalking = b;
+		if(!isTalking)
+			Reset_SpeechContext();
+	}
+
+	internal static void Set_SpeechContext(int context)
+	//public void Set_SpeechContext(int context)
+	{
+		if (context == (int)MySpeechContext.None)
+			return;
+		speechContext = (MySpeechContext)context;
+		time_asked = Time.time;
+		Set_justMentioned(true);
+	}
+
+	internal static void Reset_SpeechContext()
+	{
+		speechContext = MySpeechContext.None;
+	}
+	internal static string Get_SpeechContext()
+	{
+		int n = (int)speechContext;
+		return speechContext + n.ToString();
+	}
+
+	internal static int Get_numFaces()
+	{
+		return num_faces;
+	}
+	internal static List<List<int>> Get_FaceBoxes()
+	{
+		return faces_box;
+	}
+
+	internal static void Set_Faces(int n_faces, List<List<int>> faces)
+	{
+		num_faces = n_faces;
+		faces_box = faces;
+	}
+
 }
 
