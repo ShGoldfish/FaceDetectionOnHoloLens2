@@ -157,7 +157,7 @@ public class Manager : MonoBehaviour
 		//{
 		//	gameObject.GetComponent<SpeechHandler>().End_MySH();
 		//}
-		print("change session mode from: solo " + solo + " ACI: " + is_ACI);
+		//print("change session mode from: solo " + solo + " ACI: " + is_ACI);
 		sessionLog = new FileLog();
 		// come with method for the rotation of Change_SessionMod parameter 
 		if (solo)
@@ -222,7 +222,7 @@ public class Manager : MonoBehaviour
 		GameObject.Find("Email2").GetComponent<AppManager>().Start_Session();
 		GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Session();
 
-		print("change session mode to: solo " + solo + " ACI: " + is_ACI);
+		//print("change session mode to: solo " + solo + " ACI: " + is_ACI);
 		UpdateTooltipText();
 	}
 
