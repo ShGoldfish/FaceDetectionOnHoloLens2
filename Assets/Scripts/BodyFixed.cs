@@ -32,19 +32,18 @@ public class BodyFixed : MonoBehaviour
 	public void MoveUp(bool go_up)
 	{
 		float app_y;
-		if (Time.time - time_moved > MOVE_TIMEOUT)
-		{
+		
 			if (go_up)
 			{
 				app_y = 0.2f;
+				time_moved = Time.time;
+				position = new Vector3(position.x, app_y, position.z);
 			}
-			else
+			else if (Time.time - time_moved > MOVE_TIMEOUT)
 			{
 				app_y = -0.1f;
-			}
-			time_moved = Time.time;
-			position = new Vector3(position.x, app_y, position.z);
-		}
+				position = new Vector3(position.x, app_y, position.z);
+			}	
 	}
 
 	private void initiate_transform()
