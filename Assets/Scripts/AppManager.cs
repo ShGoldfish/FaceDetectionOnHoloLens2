@@ -19,7 +19,7 @@ public class AppManager : MonoBehaviour
 	// Each App's vars
 	float timeWhenBlocked;
 	float timeWhenMentioned;
-	bool mentioned;
+	public bool mentioned { get; set; }
 	bool blocking;
 	TextMesh msgBox;
 	//GameObject fixationIcon;

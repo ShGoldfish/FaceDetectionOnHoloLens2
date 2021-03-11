@@ -11,16 +11,18 @@ public class Manager : MonoBehaviour
 	public AudioClip audioClip1;
 	public AudioClip audioClip2;
 	public AudioClip audioClip3;
+
+	const float PRINT_TIME_INTERVAL = 4.0f;
 	// Interface mode: is it glanceable or ACI?
 	public static bool is_ACI = false;
 	bool solo = true;
 	bool firstSocial = true;
-	private int trialSetNum = 0;
 	private int questionNum = -1;
 	private float time_to_ask_next_Q;
 	private static float time_asked;
+	private float time_last_print;
 	private FileLog sessionLog;
-	private int[,,] trialSets;
+	private int[,] trialSet;
 
 	// Textbox Management
 	static TextMesh msgVoice;
@@ -37,6 +39,10 @@ public class Manager : MonoBehaviour
 	// public bool test_talking;
 	void Start()
 	{
+		////////////TEST
+		//////////////////END TEST
+
+
 		solo = true;
 		firstSocial = true;
 		Create_Trial_Dataset();
@@ -45,6 +51,7 @@ public class Manager : MonoBehaviour
 		//Change_SessionMod(is_ACI);
 		time_asked = Time.time;
 		time_to_ask_next_Q = float.NegativeInfinity;
+		time_last_print = 0.0f;
 	}
 
 	void Update()
@@ -58,22 +65,45 @@ public class Manager : MonoBehaviour
 				msgVoice.text = "Speech: " + isTalking;
 			else
 				msgVoice.text = "Speech about " + speechContext;
-			//test
-			// Set_isTalking(test_talking);
+
+			// Write line on ACI
+			if (Time.time - time_last_print >= PRINT_TIME_INTERVAL)
+			{
+				string socialGlanceable_line =  num_faces + ", " +
+												isTalking + ", " +
+												GameObject.Find("Weather1").GetComponent<AppManager>().mentioned + ", " +
+												GameObject.Find("Email2").GetComponent<AppManager>().mentioned + ", " +
+												GameObject.Find("Fitbit3").GetComponent<AppManager>().mentioned + ", " +
+												GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
+												GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
+												GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
+				sessionLog.WriteLine(socialGlanceable_line);
+				time_last_print = Time.time;
+			}
 		}
 		//if time_to_ask_next_Q is -inf that means they are answering so do not continue  Trial set timer to run the next question
-		if (!float.IsNegativeInfinity(time_to_ask_next_Q))
+		else if (solo & !float.IsNegativeInfinity(time_to_ask_next_Q))
 		{
 			if ( Time.time >= time_to_ask_next_Q)
 			{
 				//TrialSet[trialSetNum][questionNum][1] is 1 or 2 or 3 showing if the question 1 (from app 1) should be asked
-				Ask_Question(trialSets[trialSetNum, questionNum, 1]);
+				Ask_Question(trialSet[questionNum, 1]);
 				time_asked = Time.time;
 				time_to_ask_next_Q = float.NegativeInfinity;
 			}
 
 			// Speech detection "Answer is:" sets
 			//sessionLog.WriteLine(questionNum + ", " + duration_to_ans + ", " + TrialSet[trialSetNum][questionNum][1] + ", " + TrialSet[trialSetNum][questionNum][2]);
+		}
+		else //if (!solo & !is_ACI )every 5 seconds
+		if(Time.time - time_last_print >= 5)
+		{
+			string socialGlanceable_line = GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
+							GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
+							GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
+			sessionLog.WriteLine(socialGlanceable_line);
+			time_last_print = Time.time;
+
 		}
 	}
 
@@ -105,41 +135,53 @@ public class Manager : MonoBehaviour
 
 	public void OnClick_NxtSession()
 	{
+			sessionLog = new FileLog();
 		// come with method for the rotation of Change_SessionMod parameter 
 		if (solo)
 		{
 			is_ACI = false;
 			solo = false;
-		}
-		else if (firstSocial)
-		{
-			is_ACI = UnityEngine.Random.Range(0, 100) > 50;
-			firstSocial = false;
+			string fileName = DateTime.Now + "_SoloSession";
+			fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
+			sessionLog.SetHeader(fileName, "Trial_number, time_asked, time_trial_ended, questioned_app, right_answer, num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3");
+
+			questionNum = -1;
+			Start_nxt_Trial();
 		}
 		else
-			is_ACI = !is_ACI;
+		{
+			if (firstSocial)
+			{
+				Trial_answered(); // to write the line corresponding to last trial on solo
+				is_ACI = UnityEngine.Random.Range(0, 100) > 50;
+				firstSocial = false;
+			}
+			else
+			{
+				is_ACI = !is_ACI;
+			}
+			string fileName = DateTime.Now + "_SocialSession" + (is_ACI ?	
+																		"_ACI" : 
+																		"_Basic");
+			fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
+			sessionLog.SetHeader(fileName, is_ACI ?
+													"Number_of_faces, is_tallking, Mentioned_App1, Mentioned_App2, Mentioned_App3 , num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3" : 
+													"num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3");
 
-		Change_SessionMod(is_ACI);
-		sessionLog = new FileLog();
-		trialSetNum = (trialSetNum + 1) % 2;
-		questionNum = -1;
+		}
 
-		// time_to_ask_next_Q Changes after a question is answered. Trial set rund based on this [will be -inf to indicate do not run fwd]
-		string fileName = DateTime.Now + "_SessionFile";
-		fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
-		sessionLog.SetHeader(fileName, trialSetNum + "_" + is_ACI + "_" + Time.time);
-		Start_nxt_Trial();
+		Change_SessionMod();
+
 	}
 
-	internal void Change_SessionMod(bool input_Mod)
+	internal void Change_SessionMod()
 	{
 		//may get an input from trial manager to set glanceable or non [each has 2 glanceable and 1 intelligent]
 		//if (is_ACI)
 		//{
 		//	gameObject.GetComponent<SpeechHandler>().End_MySH();
 		//}
-
-		is_ACI = input_Mod;
+		
 		if (is_ACI)
 		{
 			// Textbox Management
@@ -170,22 +212,25 @@ public class Manager : MonoBehaviour
 
 	public void Start_nxt_Trial()
 	{
-		Trial_answered();
-		questionNum++;
-		time_to_ask_next_Q = trialSets[trialSetNum, questionNum, 0] + Time.time;
-		Set_Answer(trialSets[trialSetNum, questionNum, 1], trialSets[trialSetNum, questionNum, 2]);
+		if (solo)
+		{
+			Trial_answered();
+			questionNum++;
+			time_to_ask_next_Q = trialSet[questionNum, 0] + Time.time;
+			Set_Answer(trialSet[questionNum, 1], trialSet[questionNum, 2]);
 
-		// For each app start trial
-		GameObject.Find("Weather1").GetComponent<AppManager>().Start_Trial();
-		GameObject.Find("Email2").GetComponent<AppManager>().Start_Trial();
-		GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Trial();
+			// For each app start trial
+			GameObject.Find("Weather1").GetComponent<AppManager>().Start_Trial();
+			GameObject.Find("Email2").GetComponent<AppManager>().Start_Trial();
+			GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Trial();
+		}
 	}
 
 	public void Trial_answered()
 	{
 		if (questionNum == -1)
 			return;
-		string trial_line = questionNum + ", " + time_asked + ", " + Time.time + ", " + trialSets[trialSetNum, questionNum, 1] + ", " + trialSets[trialSetNum, questionNum, 2];
+		string trial_line = questionNum + ", " + time_asked + ", " + Time.time + ", " + trialSet[questionNum, 1] + ", " + trialSet[questionNum, 2];
 		trial_line += ", " + GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
 						GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
 						GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
@@ -197,7 +242,7 @@ public class Manager : MonoBehaviour
 	{
 
 		//trialSets is trialSetNum X question num X 3 [= 0: time, 1: App_num, 2: correct_answer_option]
-		trialSets = new int[2, 15, 3] {
+		trialSet = new int[15, 3]
 			{
 				{ 20, 1, 4}, // End Trial 1
 				{ 15, 3, 3}, // End Trial 2
@@ -214,25 +259,25 @@ public class Manager : MonoBehaviour
 				{ 10, 1, 2}, // End Trial 13
 				{ 20, 2, 4}, // End Trial 14
 				{ 10, 1, 4} // End Trial 15
-			}, // End Trial Set 1
-			{
-				{ 10, 1, 4}, // End Trial 15
-				{ 20, 2, 4}, // End Trial 14
-				{ 10, 1, 2}, // End Trial 13
-				{ 15, 2, 2}, // End Trial 12
-				{ 20, 3, 4}, // End Trial 11
-				{ 20, 2, 1}, // End Trial 10
-				{ 15, 1, 3}, // End Trial 9
-				{ 15, 3, 1}, // End Trial 8
-				{ 30, 2, 3}, // End Trial 7
-				{ 10, 2, 1}, // End Trial 6
-				{ 10, 3, 3}, // End Trial 5
-				{ 45, 3, 2}, // End Trial 4
-				{ 10, 1, 1}, // End Trial 3
-				{ 15, 3, 3}, // End Trial 2
-				{ 20, 1, 4} // End Trial 1
-			}// End Trial Set 2
-		};
+			}; // End Trial Set 1
+		//	{
+		//		{ 10, 1, 4}, // End Trial 15
+		//		{ 20, 2, 4}, // End Trial 14
+		//		{ 10, 1, 2}, // End Trial 13
+		//		{ 15, 2, 2}, // End Trial 12
+		//		{ 20, 3, 4}, // End Trial 11
+		//		{ 20, 2, 1}, // End Trial 10
+		//		{ 15, 1, 3}, // End Trial 9
+		//		{ 15, 3, 1}, // End Trial 8
+		//		{ 30, 2, 3}, // End Trial 7
+		//		{ 10, 2, 1}, // End Trial 6
+		//		{ 10, 3, 3}, // End Trial 5
+		//		{ 45, 3, 2}, // End Trial 4
+		//		{ 10, 1, 1}, // End Trial 3
+		//		{ 15, 3, 3}, // End Trial 2
+		//		{ 20, 1, 4} // End Trial 1
+		//	}// End Trial Set 2
+		//};
 
 	}
 	// All ACI Related Functions
