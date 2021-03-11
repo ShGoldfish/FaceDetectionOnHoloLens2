@@ -30,6 +30,9 @@ public class AppManager : MonoBehaviour
 
 	private void Start()
 	{
+		msgBox = null;
+		incommingConvo = null;
+		mentionedIcon = null;
 		Start_Session();
 		Start_Trial();
 	}
@@ -63,6 +66,7 @@ public class AppManager : MonoBehaviour
 			GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = false;
 			GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = false;
 			GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = false;
+
 		}
 	}
 
@@ -197,15 +201,21 @@ public class AppManager : MonoBehaviour
 	private void ResetTimeMentioned()
 	{
 		timeWhenMentioned = float.PositiveInfinity;
-		msgBox.text = MessageBoxMessages.AppNotMentioned;
-		mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		if (Manager.is_ACI)
+		{
+			msgBox.text = MessageBoxMessages.AppNotMentioned;
+			mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		}
 		mentioned = false;
 	}
 	private void SetTimeMentioned()
 	{
 		timeWhenMentioned = Time.time;
-		msgBox.text = MessageBoxMessages.AppMentioned;
-		mentionedIcon.GetComponent<SpriteRenderer>().color = Color.white;
+		if (Manager.is_ACI)
+		{
+			msgBox.text = MessageBoxMessages.AppMentioned;
+			mentionedIcon.GetComponent<SpriteRenderer>().color = Color.white;
+		}
 		mentioned = true;
 	}
 	private void ResetTimeBlocked()

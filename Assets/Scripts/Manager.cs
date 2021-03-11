@@ -37,9 +37,8 @@ public class Manager : MonoBehaviour
 	{
 		Create_Trial_Dataset();
 		//Test
-		OnClick_NxtSession();
+		OnClick_NxtSession(is_ACI);
 
-		// TODO: must be called in trail manager: mode must be passed in from there
 		//Change_SessionMod(is_ACI);
 		time_asked = Time.time;
 		time_to_ask_next_Q = float.NegativeInfinity;
@@ -101,16 +100,18 @@ public class Manager : MonoBehaviour
 		// TODO: Set the questions answer on app to option
 	}
 
-	public void OnClick_NxtSession()
+	public void OnClick_NxtSession(bool sessionMode)
 	{
 		// come with method for the rotation of Change_SessionMod parameter 
-		Change_SessionMod(!is_ACI);
+		Change_SessionMod(sessionMode);
 		sessionLog = new FileLog();
 		trialSetNum = (trialSetNum + 1) % 2;
 		questionNum = -1;
 
 		// time_to_ask_next_Q Changes after a question is answered. Trial set rund based on this [will be -inf to indicate do not run fwd]
-		sessionLog.SetHeader( "_SessionFile", trialSetNum + "_" + is_ACI + "_" + Time.time);
+		string fileName = DateTime.Now + "_SessionFile";
+		fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
+		sessionLog.SetHeader( fileName, trialSetNum + "_" + is_ACI + "_" + Time.time);
 		Start_nxt_Trial();
 	}
 
