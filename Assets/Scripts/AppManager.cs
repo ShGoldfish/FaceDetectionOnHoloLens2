@@ -11,7 +11,7 @@ internal class MessageBoxMessages
 
 public class AppManager : MonoBehaviour
 {
-	bool is_trans = false;
+	bool is_trans = true;
 	public int user_manual_override = 0;
 	// CIA Variables 
 	const float MENTION_TIMEOUT = 7.0f;
@@ -73,10 +73,13 @@ public class AppManager : MonoBehaviour
 	public void Start_Trial()
 	{
 		is_trans = false;
+		if (Manager.is_ACI)
+		{
+			MakeTranslusent();
+		}
 		user_manual_override = 0;
 		ResetTimeMentioned();
 		ResetTimeBlocked();
-
 	}
 	public void ClickedToUpdateTranslucency()
 	{
@@ -115,39 +118,46 @@ public class AppManager : MonoBehaviour
 	{
 		if (Manager.is_ACI && user_manual_override == 0)
 		{
-			// not talking
-			if (!Manager.Get_isTalking() || Manager.Get_numFaces() < 1)
-			{
-				MakeOpaque();
-				return;
-			}
-			if (blocking)
-			{
-				MakeTranslusent();
-				return;
-			}
-			// Is talking and there is a face that is not blocking:
-			// But has recently been blocked => wait till timeOut
-			if (Time.time - timeWhenBlocked >= 0.0f)
-			{
-				if (Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)
-				{
-					return;
-				}
-				else
-				{
-					ResetTimeBlocked();
-				}
-			}
-			// if talking about this app 
 			if (mentioned)
 			{
 				MakeOpaque();
 				return;
 			}
 			MakeTranslusent();
+
+			//// not talking
+			//if (!Manager.Get_isTalking() || Manager.Get_numFaces() < 1)
+			//{
+			//	MakeOpaque();
+			//	return;
+			//}
+			//if (blocking)
+			//{
+			//	MakeTranslusent();
+			//	return;
+			//}
+			//// Is talking and there is a face that is not blocking:
+			//// But has recently been blocked => wait till timeOut
+			//if (Time.time - timeWhenBlocked >= 0.0f)
+			//{
+			//	if (Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)
+			//	{
+			//		return;
+			//	}
+			//	else
+			//	{
+			//		ResetTimeBlocked();
+			//	}
+			//}
+			//// if talking about this app 
+			//if (mentioned)
+			//{
+			//	MakeOpaque();
+			//	return;
+			//}
+			//MakeTranslusent();
 		}
-		
+
 	}
 
 	//IEnumerator IsBlockingAnyFaces()
@@ -183,6 +193,18 @@ public class AppManager : MonoBehaviour
 	}
 	private void MakeOpaque()
 	{
+		if (Manager.is_ACI)
+		{
+			if (blocking)
+			{
+				//MMove up and change img
+			}
+			else
+			{
+				// Original Z
+				// original img
+			}
+		}
 		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
 		//fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
 		if (Manager.is_ACI)
