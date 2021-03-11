@@ -246,6 +246,8 @@ public class Manager : MonoBehaviour
 			{
 				time_to_ask_next_Q = trialSet[trialSetNum, questionNum, 0] + Time.time;
 			}
+			else
+				solo = false;
 			
 		}
 		// For each app start trial
