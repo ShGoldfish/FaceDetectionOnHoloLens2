@@ -8,6 +8,9 @@ using UnityEngine;
 
 public class Manager : MonoBehaviour
 {
+	public AudioClip audioClip1;
+	public AudioClip audioClip2;
+	public AudioClip audioClip3;
 	// Interface mode: is it glanceable or ACI?
 	public static bool is_ACI = false;
 	private int trialSetNum = 0;
@@ -72,9 +75,25 @@ public class Manager : MonoBehaviour
 		}
 	}
 
-	private void Ask_Question(int v)
+	private void Ask_Question(int app)
 	{
+		AudioSource audioSource = GetComponent<AudioSource>();
+		
 		// Play the audio that asks question 1 [from app 1]
+		if (app == 1)
+		{
+			//Scope.app.speech.synthesizeSpeech({ 'text': 'Say this text out loud'});
+			audioSource.clip = audioClip1;
+		}
+		else if (app == 2)
+		{
+			audioSource.clip = audioClip2;
+		}
+		else
+		{
+			audioSource.clip = audioClip3;
+		}
+		audioSource.Play();
 	}
 
 	private void Set_Answer(int app, int option)
@@ -150,7 +169,7 @@ public class Manager : MonoBehaviour
 		if (questionNum == -1)
 			return;
 		string trial_line = questionNum + ", " + time_asked + ", " + Time.time + ", " + trialSets[trialSetNum, questionNum, 1] + ", " + trialSets[trialSetNum, questionNum, 2];
-		trial_line += GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
+		trial_line += ", " + GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
 						GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
 						GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
 		sessionLog.WriteLine(trial_line);
