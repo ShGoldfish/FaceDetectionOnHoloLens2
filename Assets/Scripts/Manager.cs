@@ -231,7 +231,6 @@ public class Manager : MonoBehaviour
 		if (solo)
 		{
 			string trial_line;
-
 			if (questionNum > -1)
 			{
 				trial_line = questionNum + ", " + 
@@ -250,7 +249,7 @@ public class Manager : MonoBehaviour
 			}
 			else
 				solo = false;
-			
+			UpdateTooltipText();
 		}
 		// For each app start trial
 		GameObject.Find("Weather1").GetComponent<AppManager>().Start_Trial();
@@ -379,7 +378,22 @@ public class Manager : MonoBehaviour
 		else
 			sessionName = "Social_Basic";
 
-		GameObject.Find("CurrentSession").GetComponent<TextMesh>().text =sessionName;
+		GameObject.Find("CurrentSession").GetComponent<TextMesh>().text = sessionName;
+		if (solo)
+		{
+			GameObject.Find("CurrentTrial").GetComponent<MeshRenderer>().enabled = true;
+			string trialNum;
+			if (questionNum < 9)
+				trialNum = "Trial Number: " + questionNum;
+			else
+				trialNum = "End Session!";
+
+			GameObject.Find("CurrentTrial").GetComponent<TextMesh>().text = trialNum;
+		}
+		else
+		{
+			GameObject.Find("CurrentTrial").GetComponent<MeshRenderer>().enabled = false;
+		}
 	}
 }
 
