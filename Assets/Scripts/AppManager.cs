@@ -34,7 +34,6 @@ public class AppManager : MonoBehaviour
 		incommingConvo = null;
 		mentionedIcon = null;
 		Start_Session();
-		Start_Trial();
 	}
 
 	private void FixedUpdate()
@@ -49,6 +48,7 @@ public class AppManager : MonoBehaviour
 
 	public void Start_Session()
 	{
+		print("app manager start session:");
 		if (Manager.is_ACI)
 		{
 			GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = true;
@@ -68,19 +68,24 @@ public class AppManager : MonoBehaviour
 			GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = false;
 
 		}
+		Start_Trial();
 	}
 
 	public void Start_Trial()
 	{
-		is_trans = false;
+		print("app manager start trial:");
+		user_manual_override = 0;
 		if (Manager.is_ACI)
 		{
-			MakeTranslusent();
+			is_trans = true;
 		}
-		user_manual_override = 0;
+		else
+			is_trans = false;
+		UpdateTranslucency();
 		ResetTimeMentioned();
 		ResetTimeBlocked();
 	}
+
 	public void ClickedToUpdateTranslucency()
 	{
 		user_manual_override++;
@@ -116,16 +121,11 @@ public class AppManager : MonoBehaviour
 
 	private void UpdateTranslucency()
 	{
-		if (Manager.is_ACI && user_manual_override == 0)
+		if (user_manual_override > 0)
+			return;
+		if (Manager.is_ACI)
 		{
-			if (mentioned)
-			{
-				MakeOpaque();
-				return;
-			}
-			MakeTranslusent();
-
-			//// not talking
+			// not talking
 			//if (!Manager.Get_isTalking() || Manager.Get_numFaces() < 1)
 			//{
 			//	MakeOpaque();
@@ -136,8 +136,8 @@ public class AppManager : MonoBehaviour
 			//	MakeTranslusent();
 			//	return;
 			//}
-			//// Is talking and there is a face that is not blocking:
-			//// But has recently been blocked => wait till timeOut
+			// Is talking and there is a face that is not blocking:
+			// But has recently been blocked => wait till timeOut
 			//if (Time.time - timeWhenBlocked >= 0.0f)
 			//{
 			//	if (Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)
@@ -148,16 +148,27 @@ public class AppManager : MonoBehaviour
 			//	{
 			//		ResetTimeBlocked();
 			//	}
-			//}
-			//// if talking about this app 
-			//if (mentioned)
-			//{
-			//	MakeOpaque();
-			//	return;
-			//}
-			//MakeTranslusent();
-		}
 
+			if (blocking)
+			{
+				//MMove up and change img
+			}
+			else
+			{
+				// Original Z
+				// original img
+			}
+
+			// if talking about this app 
+			if (mentioned)
+			{
+				MakeOpaque();
+				return;
+			}
+			MakeTranslusent();
+		}
+		else
+			MakeOpaque();
 	}
 
 	//IEnumerator IsBlockingAnyFaces()
@@ -193,18 +204,6 @@ public class AppManager : MonoBehaviour
 	}
 	private void MakeOpaque()
 	{
-		if (Manager.is_ACI)
-		{
-			if (blocking)
-			{
-				//MMove up and change img
-			}
-			else
-			{
-				// Original Z
-				// original img
-			}
-		}
 		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
 		//fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
 		if (Manager.is_ACI)

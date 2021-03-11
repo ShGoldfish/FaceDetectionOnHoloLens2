@@ -74,7 +74,8 @@ public class Manager : MonoBehaviour
 			if (Time.time - time_last_print >= PRINT_TIME_INTERVAL)
 			{
 				// TODO: need to have trial sets from here to make sure consistancy of setting answer with my questions!
-				Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
+				// Should add trialSetNum for non-solo ones
+				//Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
 
 				string socialGlanceable_line =  num_faces + ", " +
 												isTalking + ", " +
@@ -97,6 +98,7 @@ public class Manager : MonoBehaviour
 				Ask_Question(trialSet[trialSetNum, questionNum, 1]);
 				time_asked = Time.time;
 				time_to_ask_next_Q = float.NegativeInfinity;
+				
 			}
 
 		}
@@ -105,7 +107,7 @@ public class Manager : MonoBehaviour
 		if (Time.time - time_last_print >= PRINT_TIME_INTERVAL)
 		{
 			// TODO: need to have trial sets from here to make sure consistancy of setting answer with my questions!
-			Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
+			//Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
 
 			string socialGlanceable_line = GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
 							GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
@@ -118,6 +120,7 @@ public class Manager : MonoBehaviour
 
 	private void Ask_Question(int app)
 	{
+
 		AudioSource audioSource = GetComponent<AudioSource>();
 		Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
 
@@ -145,12 +148,13 @@ public class Manager : MonoBehaviour
 
 	public void OnClick_NxtSession()
 	{
+
+		print(" manager nxt session:");
 		sessionLog = new FileLog();
 		// come with method for the rotation of Change_SessionMod parameter 
 		if (solo)
 		{
 			is_ACI = false;
-			solo = false;
 			string fileName = DateTime.Now + "_SoloSession";
 			fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
 			sessionLog.SetHeader(fileName, "Trial_number, time_asked, time_trial_ended, " +
@@ -164,7 +168,6 @@ public class Manager : MonoBehaviour
 		{
 			if (firstSocial)
 			{
-				Trial_answered(); // to write the line corresponding to last trial on solo
 				is_ACI = UnityEngine.Random.Range(0, 100) > 50;
 				firstSocial = false;
 			}
@@ -190,12 +193,14 @@ public class Manager : MonoBehaviour
 
 	internal void Change_SessionMod()
 	{
+
+		print(" manager change session:");
 		//may get an input from trial manager to set glanceable or non [each has 2 glanceable and 1 intelligent]
 		//if (is_ACI)
 		//{
 		//	gameObject.GetComponent<SpeechHandler>().End_MySH();
 		//}
-		
+
 		if (is_ACI)
 		{
 			// Textbox Management
@@ -219,6 +224,7 @@ public class Manager : MonoBehaviour
 			GameObject.Find("MessageFace").GetComponent<MeshRenderer>().enabled = false;
 			GameObject.Find("MessageVoice").GetComponent<MeshRenderer>().enabled = false;
 		}
+
 		GameObject.Find("Weather1").GetComponent<AppManager>().Start_Session();
 		GameObject.Find("Email2").GetComponent<AppManager>().Start_Session();
 		GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Session();
@@ -231,7 +237,11 @@ public class Manager : MonoBehaviour
 			Trial_answered();
 			questionNum++;
 			time_to_ask_next_Q = trialSet[trialSetNum, questionNum, 0] + Time.time;
-
+			if (questionNum == 9)
+			{
+				solo = false;
+				OnClick_NxtSession();
+			}
 			// For each app start trial
 			GameObject.Find("Weather1").GetComponent<AppManager>().Start_Trial();
 			GameObject.Find("Email2").GetComponent<AppManager>().Start_Trial();
@@ -248,6 +258,7 @@ public class Manager : MonoBehaviour
 						GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
 						GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
 		sessionLog.WriteLine(trial_line);
+
 	}
 
 

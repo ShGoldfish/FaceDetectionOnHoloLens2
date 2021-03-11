@@ -189,7 +189,7 @@ public class MyPhotoCapture : MonoBehaviour
 			{
 				yield return postWebRequest.SendWebRequest();
 			}
-			Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds to Post.");    // ~0.065seconds
+			//Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds to Post.");    // ~0.065seconds
 			posting = false;
 		}
 
@@ -233,7 +233,7 @@ public class MyPhotoCapture : MonoBehaviour
 					Manager.Set_Faces(n_faces, faces);
 				}
 			}
-			Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds to Get.");    // ~0.065seconds
+			//Debug.Log("Network Connection took " + (Time.time - time_before_send) + " seconds to Get.");    // ~0.065seconds
 			getting = false;
 
 		}
