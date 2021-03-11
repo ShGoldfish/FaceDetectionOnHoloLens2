@@ -11,6 +11,7 @@ public class Manager : MonoBehaviour
 	public AudioClip audioClip1;
 	public AudioClip audioClip2;
 	public AudioClip audioClip3;
+	public AudioClip audioDing;
 
 	const float PRINT_TIME_INTERVAL = 4.0f;
 	// Interface mode: is it glanceable or ACI?
@@ -222,6 +223,7 @@ public class Manager : MonoBehaviour
 		GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Session();
 
 		print("change session mode to: solo " + solo + " ACI: " + is_ACI);
+		UpdateTooltipText();
 	}
 
 	public void Start_nxt_Trial()
@@ -359,5 +361,25 @@ public class Manager : MonoBehaviour
 		faces_box = faces;
 	}
 
+	public void PlayDing()
+	{
+		AudioSource audioSource = GetComponent<AudioSource>();
+		audioSource.clip = audioDing;
+		audioSource.Play();
+	}
+
+	public void UpdateTooltipText()
+	{
+		GameObject.Find("CurrentSession").GetComponent<MeshRenderer>().enabled = true;
+		string sessionName;
+		if (solo)
+			sessionName = "Solo_Basic";
+		else if (is_ACI)
+			sessionName = "Social ACI";
+		else
+			sessionName = "Social_Basic";
+
+		GameObject.Find("CurrentSession").GetComponent<TextMesh>().text =sessionName;
+	}
 }
 

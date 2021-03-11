@@ -147,17 +147,18 @@ public class AppManager : MonoBehaviour
 			//		ResetTimeBlocked();
 			//	}
 
-			if (blocking)
-			{
-				//MMove up and change img
-				GetComponent<BodyFixed>().up = true;
-			}
-			else
-			{
-				// Original Z
-				// original img
-				GetComponent<BodyFixed>().up = false;
-			}
+			GetComponent<BodyFixed>().MoveUp(blocking);
+			//if (blocking)
+			//{
+			//	//MMove up and change img
+			//	GetComponent<BodyFixed>().up = true;
+			//}
+			//else
+			//{
+			//	// Original Z
+			//	// original img
+			//	GetComponent<BodyFixed>().up = false;
+			//}
 
 			// if talking about this app 
 			if (mentioned)
