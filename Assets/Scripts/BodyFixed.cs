@@ -7,10 +7,13 @@ public class BodyFixed : MonoBehaviour
 {
 	private Quaternion rotation;
 	private Vector3 position;
+	float time_moved;
+	const float MOVE_TIMEOUT = 4.0f;
 
 	void Awake()
 	{
 		initiate_transform();
+		time_moved = Time.time;
 	}
 
 
@@ -28,13 +31,20 @@ public class BodyFixed : MonoBehaviour
 
 	public void MoveUp(bool go_up)
 	{
-
 		float app_y;
-		if (go_up)
-			app_y = 0.1f;
-		else
-			app_y = -0.1f;
-		position = new Vector3(position.x, app_y, position.z);
+		if (Time.time - time_moved > MOVE_TIMEOUT)
+		{
+			if (go_up)
+			{
+				app_y = 0.2f;
+			}
+			else
+			{
+				app_y = -0.1f;
+			}
+			time_moved = Time.time;
+			position = new Vector3(position.x, app_y, position.z);
+		}
 	}
 
 	private void initiate_transform()
