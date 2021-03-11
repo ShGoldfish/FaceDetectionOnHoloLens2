@@ -48,7 +48,6 @@ public class AppManager : MonoBehaviour
 
 	public void Start_Session()
 	{
-		print("app manager start session:");
 		if (Manager.is_ACI)
 		{
 			GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = true;
@@ -73,7 +72,6 @@ public class AppManager : MonoBehaviour
 
 	public void Start_Trial()
 	{
-		print("app manager start trial:");
 		user_manual_override = 0;
 		if (Manager.is_ACI)
 		{

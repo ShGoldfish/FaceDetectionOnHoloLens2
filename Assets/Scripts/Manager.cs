@@ -42,17 +42,14 @@ public class Manager : MonoBehaviour
 	{
 		////////////TEST
 		//////////////////END TEST
-
-
 		solo = true;
 		firstSocial = true;
 		// TODO: Should be synced with the webApp
 		trialSetNum = UnityEngine.Random.Range(0, 100) % 2;
 
 		Create_Trial_Dataset();
-		OnClick_NxtSession();
+		Change_SessionMod();
 
-		//Change_SessionMod(is_ACI);
 		time_asked = Time.time;
 		time_to_ask_next_Q = float.NegativeInfinity;
 		time_last_print = 0.0f;
@@ -102,20 +99,20 @@ public class Manager : MonoBehaviour
 			}
 
 		}
-		else //if (!solo & !is_ACI )every 5 seconds
+		else if (!solo & !is_ACI )
 			 // Write line on glanceable social
-		if (Time.time - time_last_print >= PRINT_TIME_INTERVAL)
-		{
-			// TODO: need to have trial sets from here to make sure consistancy of setting answer with my questions!
-			//Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
+			if (Time.time - time_last_print >= PRINT_TIME_INTERVAL)
+			{
+				// TODO: need to have trial sets from here to make sure consistancy of setting answer with my questions!
+				//Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
 
-			string socialGlanceable_line = GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
-							GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
-							GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
-			sessionLog.WriteLine(socialGlanceable_line);
-			time_last_print = Time.time;
+				string socialGlanceable_line = GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
+								GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
+								GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
+				sessionLog.WriteLine(socialGlanceable_line);
+				time_last_print = Time.time;
 
-		}
+			}
 	}
 
 	private void Ask_Question(int app)
@@ -148,8 +145,18 @@ public class Manager : MonoBehaviour
 
 	public void OnClick_NxtSession()
 	{
+		solo = false;
+		Change_SessionMod();
+	}
 
-		print(" manager nxt session:");
+	internal void Change_SessionMod()
+	{
+		//may get an input from trial manager to set glanceable or non [each has 2 glanceable and 1 intelligent]
+		//if (is_ACI)
+		//{
+		//	gameObject.GetComponent<SpeechHandler>().End_MySH();
+		//}
+		print("change session mode from: solo " + solo + " ACI: " + is_ACI);
 		sessionLog = new FileLog();
 		// come with method for the rotation of Change_SessionMod parameter 
 		if (solo)
@@ -175,32 +182,17 @@ public class Manager : MonoBehaviour
 			{
 				is_ACI = !is_ACI;
 			}
-			string fileName = DateTime.Now + "_SocialSession" + (is_ACI ?	
-																		"_ACI" : 
+			string fileName = DateTime.Now + "_SocialSession" + (is_ACI ?
+																		"_ACI" :
 																		"_Basic");
 			fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
 			sessionLog.SetHeader(fileName, is_ACI ?
 													"Number_of_faces, is_tallking, " +
 													"Mentioned_App1, Mentioned_App2, Mentioned_App3," +
-													"num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3" : 
+													"num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3" :
 													"num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3");
 
 		}
-
-		Change_SessionMod();
-
-	}
-
-	internal void Change_SessionMod()
-	{
-
-		print(" manager change session:");
-		//may get an input from trial manager to set glanceable or non [each has 2 glanceable and 1 intelligent]
-		//if (is_ACI)
-		//{
-		//	gameObject.GetComponent<SpeechHandler>().End_MySH();
-		//}
-
 		if (is_ACI)
 		{
 			// Textbox Management
@@ -228,39 +220,39 @@ public class Manager : MonoBehaviour
 		GameObject.Find("Weather1").GetComponent<AppManager>().Start_Session();
 		GameObject.Find("Email2").GetComponent<AppManager>().Start_Session();
 		GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Session();
+
+		print("change session mode to: solo " + solo + " ACI: " + is_ACI);
 	}
 
 	public void Start_nxt_Trial()
 	{
 		if (solo)
 		{
-			Trial_answered();
-			questionNum++;
-			time_to_ask_next_Q = trialSet[trialSetNum, questionNum, 0] + Time.time;
-			if (questionNum == 9)
+			string trial_line;
+
+			if (questionNum > -1)
 			{
-				solo = false;
-				OnClick_NxtSession();
+				trial_line = questionNum + ", " + 
+								time_asked + ", " + Time.time + ", " + 
+								trialSet[trialSetNum, questionNum, 1] + ", " + 
+								trialSet[trialSetNum, questionNum, 2] + ", " + 
+								GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
+								GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
+								GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
+				sessionLog.WriteLine(trial_line);
 			}
-			// For each app start trial
-			GameObject.Find("Weather1").GetComponent<AppManager>().Start_Trial();
-			GameObject.Find("Email2").GetComponent<AppManager>().Start_Trial();
-			GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Trial();
+			questionNum++;
+			if (questionNum < 9)
+			{
+				time_to_ask_next_Q = trialSet[trialSetNum, questionNum, 0] + Time.time;
+			}
+			
 		}
+		// For each app start trial
+		GameObject.Find("Weather1").GetComponent<AppManager>().Start_Trial();
+		GameObject.Find("Email2").GetComponent<AppManager>().Start_Trial();
+		GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Trial();
 	}
-
-	public void Trial_answered()
-	{
-		if (questionNum == -1)
-			return;
-		string trial_line = questionNum + ", " + time_asked + ", " + Time.time + ", " + trialSet[trialSetNum, questionNum, 1] + ", " + trialSet[trialSetNum, questionNum, 2];
-		trial_line += ", " + GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
-						GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
-						GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
-		sessionLog.WriteLine(trial_line);
-
-	}
-
 
 	private void Create_Trial_Dataset()
 	{
