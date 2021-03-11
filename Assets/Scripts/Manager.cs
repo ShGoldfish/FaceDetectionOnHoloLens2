@@ -13,6 +13,8 @@ public class Manager : MonoBehaviour
 	public AudioClip audioClip3;
 	// Interface mode: is it glanceable or ACI?
 	public static bool is_ACI = false;
+	bool solo = true;
+	bool firstSocial = true;
 	private int trialSetNum = 0;
 	private int questionNum = -1;
 	private float time_to_ask_next_Q;
@@ -35,9 +37,10 @@ public class Manager : MonoBehaviour
 	// public bool test_talking;
 	void Start()
 	{
+		solo = true;
+		firstSocial = true;
 		Create_Trial_Dataset();
-		//Test
-		OnClick_NxtSession(is_ACI);
+		OnClick_NxtSession();
 
 		//Change_SessionMod(is_ACI);
 		time_asked = Time.time;
@@ -100,10 +103,23 @@ public class Manager : MonoBehaviour
 		// TODO: Set the questions answer on app to option
 	}
 
-	public void OnClick_NxtSession(bool sessionMode)
+	public void OnClick_NxtSession()
 	{
 		// come with method for the rotation of Change_SessionMod parameter 
-		Change_SessionMod(sessionMode);
+		if (solo)
+		{
+			is_ACI = false;
+			solo = false;
+		}
+		else if (firstSocial)
+		{
+			is_ACI = UnityEngine.Random.Range(0, 100) > 50;
+			firstSocial = false;
+		}
+		else
+			is_ACI = !is_ACI;
+
+		Change_SessionMod(is_ACI);
 		sessionLog = new FileLog();
 		trialSetNum = (trialSetNum + 1) % 2;
 		questionNum = -1;
@@ -111,7 +127,7 @@ public class Manager : MonoBehaviour
 		// time_to_ask_next_Q Changes after a question is answered. Trial set rund based on this [will be -inf to indicate do not run fwd]
 		string fileName = DateTime.Now + "_SessionFile";
 		fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
-		sessionLog.SetHeader( fileName, trialSetNum + "_" + is_ACI + "_" + Time.time);
+		sessionLog.SetHeader(fileName, trialSetNum + "_" + is_ACI + "_" + Time.time);
 		Start_nxt_Trial();
 	}
 
