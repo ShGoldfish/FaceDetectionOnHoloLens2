@@ -7,11 +7,12 @@ public class BodyFixed : MonoBehaviour
 {
 	private Quaternion rotation;
 	private Vector3 position;
-	
+	public bool up { set; get; }
 
 	void Awake()
 	{
 		initiate_transform();
+		up = false;
 	}
 
 
@@ -42,10 +43,16 @@ public class BodyFixed : MonoBehaviour
 		else
 		{
 			app_x = 0.14f * (app_num - 2);
-			app_y = 0.0f;
+
+			if (up)
+				app_y = 0.2f;
+			else
+				app_y = 0.0f;
+
 			app_z = 1.0f;
 			if (app_num == 2)
 				app_z = 1.04f;
+			
 			
 		}
 		position = new Vector3(app_x, app_y, app_z);
