@@ -13,6 +13,8 @@ public class BodyFixed : MonoBehaviour
 	void Awake()
 	{
 		initiate_transform();
+		//position = transform.position;
+		//rotation = transform.rotation;
 		time_moved = Time.time;
 	}
 
@@ -48,25 +50,30 @@ public class BodyFixed : MonoBehaviour
 
 	private void initiate_transform()
 	{
-		int app_num;
 		float app_x, app_y, app_z;
-		app_num = Convert.ToInt16(gameObject.name.Substring(gameObject.name.Length - 1));
-		if (app_num == 0)
-		{
-			app_x = 0.5f ;
-			app_y = -0.5f;
-			app_z = .0f;
+		switch (gameObject.name.ToLower()) {
+			case "email":
+				app_x = 0.0f;
+				app_y = 0.0f;
+				app_z = 0.525f;
+				break;
+			case "fitbit":
+				app_x = 0.12f;
+				app_y = 0.0f;
+				app_z = 0.5f;
+				break;
+			case "weather":
+				app_x = -0.12f;
+				app_y = 0.0f;
+				app_z = 0.5f;
+				break;
+			default:
+				app_x = 0.14f;
+				app_y = -0.1f;
+				app_z = 0.5f;
+				break;
 		}
-		else
-		{
-			app_x = 0.14f * (app_num - 2);
-			app_y = -0.1f;
-			app_z = 1.0f;
-			if (app_num == 2)
-				app_z = 1.04f;
-				
-		}
-		position = new Vector3(app_x, app_y, app_z);
+		position = new Vector3(app_x, app_y, app_z+.075f);
 		rotation = transform.rotation;
 	}
 }

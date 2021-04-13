@@ -77,12 +77,12 @@ public class Manager : MonoBehaviour
 
 				string socialGlanceable_line =  num_faces + ", " +
 												isTalking + ", " +
-												GameObject.Find("Weather1").GetComponent<AppManager>().mentioned + ", " +
-												GameObject.Find("Email2").GetComponent<AppManager>().mentioned + ", " +
-												GameObject.Find("Fitbit3").GetComponent<AppManager>().mentioned + ", " +
-												GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
-												GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
-												GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
+												GameObject.Find("Weather").GetComponent<AppManager>().mentioned + ", " +
+												GameObject.Find("Email").GetComponent<AppManager>().mentioned + ", " +
+												GameObject.Find("Fitbit").GetComponent<AppManager>().mentioned + ", " +
+												GameObject.Find("Weather").GetComponent<AppManager>().user_manual_override + ", " +
+												GameObject.Find("Email").GetComponent<AppManager>().user_manual_override + ", " +
+												GameObject.Find("Fitbit").GetComponent<AppManager>().user_manual_override;
 				sessionLog.WriteLine(socialGlanceable_line);
 				time_last_print = Time.time;
 			}
@@ -107,9 +107,9 @@ public class Manager : MonoBehaviour
 				// TODO: need to have trial sets from here to make sure consistancy of setting answer with my questions!
 				//Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
 
-				string socialGlanceable_line = GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
-								GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
-								GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
+				string socialGlanceable_line = GameObject.Find("Weather").GetComponent<AppManager>().user_manual_override + ", " +
+								GameObject.Find("Email").GetComponent<AppManager>().user_manual_override + ", " +
+								GameObject.Find("Fitbit").GetComponent<AppManager>().user_manual_override;
 				sessionLog.WriteLine(socialGlanceable_line);
 				time_last_print = Time.time;
 
@@ -142,6 +142,20 @@ public class Manager : MonoBehaviour
 	private void Set_Answer(int app, int option)
 	{
 		// TODO: Set the questions answer on app to option
+		switch (app)
+		{
+			case 1:
+				GameObject.Find("Email").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("email" + option);
+				break;
+			case 2:
+				GameObject.Find("Fitbit").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("fitbit" + option);
+				break;
+			case 3:
+				GameObject.Find("Weather").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("weather"+option);
+				break;
+			default:
+				break;
+		}
 	}
 
 	public void OnClick_NxtSession()
@@ -218,9 +232,9 @@ public class Manager : MonoBehaviour
 			GameObject.Find("MessageVoice").GetComponent<MeshRenderer>().enabled = false;
 		}
 
-		GameObject.Find("Weather1").GetComponent<AppManager>().Start_Session();
-		GameObject.Find("Email2").GetComponent<AppManager>().Start_Session();
-		GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Session();
+		GameObject.Find("Weather").GetComponent<AppManager>().Start_Session();
+		GameObject.Find("Email").GetComponent<AppManager>().Start_Session();
+		GameObject.Find("Fitbit").GetComponent<AppManager>().Start_Session();
 
 		//print("change session mode to: solo " + solo + " ACI: " + is_ACI);
 		UpdateTooltipText();
@@ -237,9 +251,9 @@ public class Manager : MonoBehaviour
 								time_asked + ", " + Time.time + ", " + 
 								trialSet[trialSetNum, questionNum, 1] + ", " + 
 								trialSet[trialSetNum, questionNum, 2] + ", " + 
-								GameObject.Find("Weather1").GetComponent<AppManager>().user_manual_override + ", " +
-								GameObject.Find("Email2").GetComponent<AppManager>().user_manual_override + ", " +
-								GameObject.Find("Fitbit3").GetComponent<AppManager>().user_manual_override;
+								GameObject.Find("Weather").GetComponent<AppManager>().user_manual_override + ", " +
+								GameObject.Find("Email").GetComponent<AppManager>().user_manual_override + ", " +
+								GameObject.Find("Fitbit").GetComponent<AppManager>().user_manual_override;
 				sessionLog.WriteLine(trial_line);
 			}
 			questionNum++;
@@ -252,9 +266,9 @@ public class Manager : MonoBehaviour
 			UpdateTooltipText();
 		}
 		// For each app start trial
-		GameObject.Find("Weather1").GetComponent<AppManager>().Start_Trial();
-		GameObject.Find("Email2").GetComponent<AppManager>().Start_Trial();
-		GameObject.Find("Fitbit3").GetComponent<AppManager>().Start_Trial();
+		GameObject.Find("Weather").GetComponent<AppManager>().Start_Trial();
+		GameObject.Find("Email").GetComponent<AppManager>().Start_Trial();
+		GameObject.Find("Fitbit").GetComponent<AppManager>().Start_Trial();
 	}
 
 	private void Create_Trial_Dataset()
