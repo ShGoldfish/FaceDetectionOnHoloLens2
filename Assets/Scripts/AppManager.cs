@@ -22,10 +22,10 @@ public class AppManager : MonoBehaviour
 	float timeWhenMentioned;
 	public bool mentioned { get; set; }
 	bool blocking;
-	TextMesh msgBox;
+	//TextMesh msgBox;
 	//GameObject fixationIcon;
-	GameObject incommingConvo;
-	GameObject mentionedIcon;
+	//GameObject incommingConvo;
+	//GameObject mentionedIcon;
 	// Renderer purposes
 	public Rect rect_faceBoxOnScreen, rect_app;
 
@@ -41,9 +41,9 @@ public class AppManager : MonoBehaviour
 	}
 	private void Start()
 	{
-		msgBox = null;
-		incommingConvo = null;
-		mentionedIcon = null;
+		//msgBox = null;
+		//incommingConvo = null;
+		//mentionedIcon = null;
 		Start_Session();
 	}
 
@@ -61,25 +61,25 @@ public class AppManager : MonoBehaviour
 	{
 		var culture = new CultureInfo("en-US");
 		sessionLog.WriteLine("\n\n" + DateTime.Now.ToString(culture) +"," + (Manager.is_ACI ? "ACI " : "Glanceable ") + "Session Started");
-		if (Manager.is_ACI)
-		{
-			GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = true;
-			GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = true;
-			GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = true;
+		//if (Manager.is_ACI)
+		//{
+		//	GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = true;
+		//	GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = true;
+		//	GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = true;
 
-			msgBox = GetChildWithName(gameObject, "Msg_Box").GetComponent<TextMesh>();
-			incommingConvo = GetChildWithName(gameObject, "incommingConvo");
-			//fixationIcon = GetChildWithName(gameObject, "FixationIcon");
-			mentionedIcon = GetChildWithName(gameObject, "Mentioned");
+		//	msgBox = GetChildWithName(gameObject, "Msg_Box").GetComponent<TextMesh>();
+		//	incommingConvo = GetChildWithName(gameObject, "incommingConvo");
+		//	//fixationIcon = GetChildWithName(gameObject, "FixationIcon");
+		//	mentionedIcon = GetChildWithName(gameObject, "Mentioned");
 
-		}
-		else
-		{
-			GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = false;
-			GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = false;
-			GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = false;
+		//}
+		//else
+		//{
+		GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = false;
+		GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = false;
+		GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = false;
 
-		}
+		//}
 		Start_Trial();
 	}
 
@@ -127,8 +127,6 @@ public class AppManager : MonoBehaviour
 		}
 		if (Manager.Get_justMentioned() && Manager.Get_SpeechContext() == gameObject.name)
 		{
-			var culture = new CultureInfo("en-US");
-			sessionLog.WriteLine(DateTime.Now.ToString(culture) + ", Mentioned in Conversation");
 			SetTimeMentioned();
 			Manager.Set_justMentioned(false);
 			return;
@@ -228,48 +226,52 @@ public class AppManager : MonoBehaviour
 	{
 		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
 		//fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		if (Manager.is_ACI)
-		{
-			incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-			mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		}
+		//if (Manager.is_ACI)
+		//{
+		//	incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		//	mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		//}
 		is_trans = true;
 	}
 	private void MakeOpaque()
 	{
 		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
 		//fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
-		if (Manager.is_ACI)
-		{
-			if (!blocking)
-				incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-			else
-				incommingConvo.GetComponent<SpriteRenderer>().color = Color.white;
-			if (!mentioned)
-				mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-			else
-				mentionedIcon.GetComponent<SpriteRenderer>().color = Color.white;
-		}
+		//if (Manager.is_ACI)
+		//{
+		//	if (!blocking)
+		//		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		//	else
+		//		incommingConvo.GetComponent<SpriteRenderer>().color = Color.white;
+		//	if (!mentioned)
+		//		mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		//	else
+		//		mentionedIcon.GetComponent<SpriteRenderer>().color = Color.white;
+		//}
 		is_trans = false;
 	}
 	private void ResetTimeMentioned()
 	{
 		timeWhenMentioned = float.PositiveInfinity;
-		if (Manager.is_ACI)
-		{
-			msgBox.text = MessageBoxMessages.AppNotMentioned;
-			mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		}
+		//if (Manager.is_ACI)
+		//{
+		//	msgBox.text = MessageBoxMessages.AppNotMentioned;
+		//	mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		//}
+
 		mentioned = false;
 	}
 	private void SetTimeMentioned()
 	{
 		timeWhenMentioned = Time.time;
-		if (Manager.is_ACI)
-		{
-			msgBox.text = MessageBoxMessages.AppMentioned;
-			mentionedIcon.GetComponent<SpriteRenderer>().color = Color.white;
-		}
+		//if (Manager.is_ACI)
+		//{
+		//	msgBox.text = MessageBoxMessages.AppMentioned;
+		//	mentionedIcon.GetComponent<SpriteRenderer>().color = Color.white;
+		//}
+
+		var culture = new CultureInfo("en-US");
+		sessionLog.WriteLine(DateTime.Now.ToString(culture) + ", Mentioned in Conversation");
 		mentioned = true;
 	}
 	private void ResetTimeBlocked()

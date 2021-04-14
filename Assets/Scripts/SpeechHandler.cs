@@ -107,18 +107,20 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 		int context = 4;
 		if (text.Contains("weather") || text.Contains("cloudy") || text.Contains("sunny") ||
 			text.Contains("hot") || text.Contains("cold") ||
-			text.Contains("rainy") || text.Contains("snowing"))
+			text.Contains("rainy") || text.Contains("snowing") || text.Contains("temperature") || text.Contains("fahrenheit"))
 		{
 			context = 1;
 		}
-		if (text.Contains("email") || text.Contains("inbox"))
+		if (text.Contains("email") || text.Contains("inbox") || text.Contains("VIP") || text.Contains("message") || text.Contains("messages") || text.Contains("emails") || text.Contains("gmail"))
 		{
 			context = 2;
 		}
-		if (text.Contains("activity") || text.Contains("calory") 
+		if (text.Contains("activity") || text.Contains("calory")
+			|| text.Contains("Miles") || text.Contains("walk")
 			|| text.Contains("calories") || text.Contains("fitbit") 
 			|| text.Contains("calory") || text.Contains("heart beat") 
-			|| text.Contains("steps"))
+			|| text.Contains("steps") || text.Contains("workout") 
+			|| text.Contains("activity"))
 		{
 			context = 3;
 		}

@@ -61,7 +61,7 @@ public class Manager : MonoBehaviour
 
 		//Reset Answers Every 5 seconds
 		option = 1;
-		InvokeRepeating("Reset_Answers", 5.0f, 5.0f);
+		InvokeRepeating("Reset_Answers", 10.0f, 10.0f);
 
 	}
 
@@ -367,7 +367,7 @@ public class Manager : MonoBehaviour
 			Reset_SpeechContext();
 	}
 
-	internal static void Set_SpeechContext(int context)
+	public static void Set_SpeechContext(int context)
 	//public void Set_SpeechContext(int context)
 	{
 		if (context == (int)MySpeechContext.None)
