@@ -384,7 +384,7 @@ public class Manager : MonoBehaviour
 	internal static string Get_SpeechContext()
 	{
 		int n = (int)speechContext;
-		return speechContext + n.ToString();
+		return speechContext.ToString();// + n.ToString();
 	}
 
 	internal static int Get_numFaces()

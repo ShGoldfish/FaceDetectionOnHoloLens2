@@ -16,7 +16,7 @@ public class AppManager : MonoBehaviour
 	public int user_manual_override = 0;
 	// CIA Variables 
 	const float MENTION_TIMEOUT = 7.0f;
-	const float BLOCKED_TIMEOUT = 1.5f;
+	const float BLOCKED_TIMEOUT = 4.0f;
 	// Each App's vars
 	float timeWhenBlocked;
 	float timeWhenMentioned;
@@ -200,6 +200,10 @@ public class AppManager : MonoBehaviour
 	//IEnumerator IsBlockingAnyFaces()
 	void IsBlockingAnyFaces()
 	{
+		//if (blocking  && Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)
+		//{
+		//	return;
+		//}
 		// Renderer purposes
 		rect_faceBoxOnScreen = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
 		List<List<int>> faceboxes = Manager.Get_FaceBoxes();
