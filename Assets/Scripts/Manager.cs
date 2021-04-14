@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using UnityEditor;
 using UnityEngine;
 
@@ -18,13 +19,14 @@ public class Manager : MonoBehaviour
 	public static bool is_ACI = false;
 	bool solo = true;
 	bool firstSocial = true;
-	private int questionNum = -1;
-	private int trialSetNum;
-	private float time_to_ask_next_Q;
-	private static float time_asked;
+	//private int questionNum = -1;
+	//private int trialSetNum;
+	//private float time_to_ask_next_Q;
+	//private static float time_asked;
 	private float time_last_print;
-	private FileLog sessionLog;
-	private int[,,] trialSet;
+	private static FileLog managerLog;
+	private int option = 1;
+	//private int[,,] trialSet;
 
 	// Textbox Management
 	static TextMesh msgVoice;
@@ -46,14 +48,21 @@ public class Manager : MonoBehaviour
 		solo = true;
 		firstSocial = true;
 		// TODO: Should be synced with the webApp
-		trialSetNum = UnityEngine.Random.Range(0, 100) % 2;
+		//trialSetNum = UnityEngine.Random.Range(0, 100) % 2;
 
-		Create_Trial_Dataset();
+		//Create_Trial_Dataset();
+		managerLog = new FileLog();
+		managerLog.SetHeader("manager", "Time, Event ");
 		Change_SessionMod();
 
-		time_asked = Time.time;
-		time_to_ask_next_Q = float.NegativeInfinity;
+		//time_asked = Time.time;
+		//time_to_ask_next_Q = float.NegativeInfinity;
 		time_last_print = 0.0f;
+
+		//Reset Answers Every 5 seconds
+		option = 1;
+		InvokeRepeating("Reset_Answers", 5.0f, 5.0f);
+
 	}
 
 	void Update()
@@ -68,94 +77,103 @@ public class Manager : MonoBehaviour
 			else
 				msgVoice.text = "Speech about " + speechContext;
 
-			// Write line on ACI
-			if (Time.time - time_last_print >= PRINT_TIME_INTERVAL)
-			{
-				// TODO: need to have trial sets from here to make sure consistancy of setting answer with my questions!
-				// Should add trialSetNum for non-solo ones
-				//Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
+			//// Write line on ACI
+			//if (Time.time - time_last_print >= PRINT_TIME_INTERVAL)
+			//{
+			//	// TODO: need to have trial sets from here to make sure consistancy of setting answer with my questions!
+			//	// Should add trialSetNum for non-solo ones
+			//	//Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
 
-				string socialGlanceable_line =  num_faces + ", " +
-												isTalking + ", " +
-												GameObject.Find("Weather").GetComponent<AppManager>().mentioned + ", " +
-												GameObject.Find("Email").GetComponent<AppManager>().mentioned + ", " +
-												GameObject.Find("Fitbit").GetComponent<AppManager>().mentioned + ", " +
-												GameObject.Find("Weather").GetComponent<AppManager>().user_manual_override + ", " +
-												GameObject.Find("Email").GetComponent<AppManager>().user_manual_override + ", " +
-												GameObject.Find("Fitbit").GetComponent<AppManager>().user_manual_override;
-				sessionLog.WriteLine(socialGlanceable_line);
-				time_last_print = Time.time;
-			}
+			//	string socialGlanceable_line =  num_faces + ", " +
+			//									isTalking + ", " +
+			//									GameObject.Find("Weather").GetComponent<AppManager>().mentioned + ", " +
+			//									GameObject.Find("Email").GetComponent<AppManager>().mentioned + ", " +
+			//									GameObject.Find("Fitbit").GetComponent<AppManager>().mentioned + ", " +
+			//									GameObject.Find("Weather").GetComponent<AppManager>().user_manual_override + ", " +
+			//									GameObject.Find("Email").GetComponent<AppManager>().user_manual_override + ", " +
+			//									GameObject.Find("Fitbit").GetComponent<AppManager>().user_manual_override;
+			//	sessionLog.WriteLine(socialGlanceable_line);
+			//	time_last_print = Time.time;
+			//}
 		}
-		//if time_to_ask_next_Q is -inf that means they are answering so do not continue  Trial set timer to run the next question
-		else if (solo & !float.IsNegativeInfinity(time_to_ask_next_Q))
-		{
-			if ( Time.time >= time_to_ask_next_Q)
-			{
-				//TrialSet[trialSetNum][questionNum][1] is 1 or 2 or 3 showing if the question 1 (from app 1) should be asked
-				Ask_Question(trialSet[trialSetNum, questionNum, 1]);
-				time_asked = Time.time;
-				time_to_ask_next_Q = float.NegativeInfinity;
+		////if time_to_ask_next_Q is -inf that means they are answering so do not continue  Trial set timer to run the next question
+		//else if (solo & !float.IsNegativeInfinity(time_to_ask_next_Q))
+		//{
+		//	if ( Time.time >= time_to_ask_next_Q)
+		//	{
+		//		//TrialSet[trialSetNum][questionNum][1] is 1 or 2 or 3 showing if the question 1 (from app 1) should be asked
+		//		Ask_Question(trialSet[trialSetNum, questionNum, 1]);
+		//		time_asked = Time.time;
+		//		time_to_ask_next_Q = float.NegativeInfinity;
 				
-			}
+		//	}
 
-		}
-		else if (!solo & !is_ACI )
-			 // Write line on glanceable social
-			if (Time.time - time_last_print >= PRINT_TIME_INTERVAL)
-			{
-				// TODO: need to have trial sets from here to make sure consistancy of setting answer with my questions!
-				//Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
+		//}
+		//else if (!solo & !is_ACI )
+		//	 // Write line on glanceable social
+		//	if (Time.time - time_last_print >= PRINT_TIME_INTERVAL)
+		//	{
+		//		// TODO: need to have trial sets from here to make sure consistancy of setting answer with my questions!
+		//		//Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
 
-				string socialGlanceable_line = GameObject.Find("Weather").GetComponent<AppManager>().user_manual_override + ", " +
-								GameObject.Find("Email").GetComponent<AppManager>().user_manual_override + ", " +
-								GameObject.Find("Fitbit").GetComponent<AppManager>().user_manual_override;
-				sessionLog.WriteLine(socialGlanceable_line);
-				time_last_print = Time.time;
+		//		string socialGlanceable_line = GameObject.Find("Weather").GetComponent<AppManager>().user_manual_override + ", " +
+		//						GameObject.Find("Email").GetComponent<AppManager>().user_manual_override + ", " +
+		//						GameObject.Find("Fitbit").GetComponent<AppManager>().user_manual_override;
+		//		sessionLog.WriteLine(socialGlanceable_line);
+		//		time_last_print = Time.time;
 
-			}
+		//	}
 	}
 
-	private void Ask_Question(int app)
+	//private void Ask_Question(int app)
+	//{
+
+	//	AudioSource audioSource = GetComponent<AudioSource>();
+	//	Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
+
+	//	// Play the audio that asks question 1 [from app 1]
+	//	if (app == 1)
+	//	{
+	//		//Scope.app.speech.synthesizeSpeech({ 'text': 'Say this text out loud'});
+	//		audioSource.clip = audioClip1;
+	//	}
+	//	else if (app == 2)
+	//	{
+	//		audioSource.clip = audioClip2;
+	//	}
+	//	else
+	//	{
+	//		audioSource.clip = audioClip3;
+	//	}
+	//	audioSource.Play();
+	//}
+
+	//private void Set_Answer(int app, int option)
+	//{
+	//	// TODO: Set the questions answer on app to option
+	//	switch (app)
+	//	{
+	//		case 1:
+	//			GameObject.Find("Email").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("email" + option);
+	//			break;
+	//		case 2:
+	//			GameObject.Find("Fitbit").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("fitbit" + option);
+	//			break;
+	//		case 3:
+	//			GameObject.Find("Weather").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("weather" + option);
+	//			break;
+	//		default:
+	//			break;
+	//	}
+	//}
+	private void Reset_Answers()
 	{
-
-		AudioSource audioSource = GetComponent<AudioSource>();
-		Set_Answer(trialSet[trialSetNum, questionNum, 1], trialSet[trialSetNum, questionNum, 2]);
-
-		// Play the audio that asks question 1 [from app 1]
-		if (app == 1)
-		{
-			//Scope.app.speech.synthesizeSpeech({ 'text': 'Say this text out loud'});
-			audioSource.clip = audioClip1;
-		}
-		else if (app == 2)
-		{
-			audioSource.clip = audioClip2;
-		}
-		else
-		{
-			audioSource.clip = audioClip3;
-		}
-		audioSource.Play();
-	}
-
-	private void Set_Answer(int app, int option)
-	{
-		// TODO: Set the questions answer on app to option
-		switch (app)
-		{
-			case 1:
-				GameObject.Find("Email").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("email" + option);
-				break;
-			case 2:
-				GameObject.Find("Fitbit").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("fitbit" + option);
-				break;
-			case 3:
-				GameObject.Find("Weather").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("weather"+option);
-				break;
-			default:
-				break;
-		}
+			GameObject.Find("Email").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("email" + option);
+			GameObject.Find("Fitbit").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("fitbit" + option);
+			GameObject.Find("Weather").GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("weather" + option);
+			var culture = new CultureInfo("en-US");
+			managerLog.WriteLine(DateTime.Now.ToString(culture) + ", App answers changed to " + option);
+			option= (UnityEngine.Random.Range(0, 100)) %6;
 	}
 
 	public void OnClick_NxtSession()
@@ -172,19 +190,19 @@ public class Manager : MonoBehaviour
 		//	gameObject.GetComponent<SpeechHandler>().End_MySH();
 		//}
 		//print("change session mode from: solo " + solo + " ACI: " + is_ACI);
-		sessionLog = new FileLog();
+		//sessionLog = new FileLog();
 		// come with method for the rotation of Change_SessionMod parameter 
+		string mod;
 		if (solo)
 		{
 			is_ACI = false;
-			string fileName = DateTime.Now + "_SoloSession";
-			fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
-			sessionLog.SetHeader(fileName, "Trial_number, time_asked, time_trial_ended, " +
-											"questioned_app, right_answer, num_user_manual_override_App1, " +
-											"num_user_manual_override_App2, num_user_manual_override_App3");
-
-			questionNum = -1;
-			Start_nxt_Trial();
+			//string fileName = DateTime.Now + "_SoloSession";
+			//fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
+			//sessionLog.SetHeader(fileName, "Trial_number, time_asked, time_trial_ended, " +
+			//								"questioned_app, right_answer, num_user_manual_override_App1, " +
+			//								"num_user_manual_override_App2, num_user_manual_override_App3");
+			//questionNum = -1;
+			//Start_nxt_Trial();
 		}
 		else
 		{
@@ -197,15 +215,15 @@ public class Manager : MonoBehaviour
 			{
 				is_ACI = !is_ACI;
 			}
-			string fileName = DateTime.Now + "_SocialSession" + (is_ACI ?
-																		"_ACI" :
-																		"_Basic");
-			fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
-			sessionLog.SetHeader(fileName, is_ACI ?
-													"Number_of_faces, is_tallking, " +
-													"Mentioned_App1, Mentioned_App2, Mentioned_App3," +
-													"num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3" :
-													"num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3");
+			//string fileName = DateTime.Now + "_SocialSession" + (is_ACI ?
+			//															"_ACI" :
+			//															"_Basic");
+			//fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
+			//sessionLog.SetHeader(fileName, is_ACI ?
+			//										"Number_of_faces, is_tallking, " +
+			//										"Mentioned_App1, Mentioned_App2, Mentioned_App3," +
+			//										"num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3" :
+			//										"num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3");
 
 		}
 		if (is_ACI)
@@ -222,6 +240,8 @@ public class Manager : MonoBehaviour
 			faces_box = new List<List<int>>();
 			isTalking = false;
 			num_faces = 0;
+
+			mod = "ACI";
 			//GameObject.Find("Main Camera").GetComponent<MyPhotoCapture>().RunPC();
 			//gameObject.GetComponent<SpeechHandler>().Run_MySH();
 
@@ -230,75 +250,81 @@ public class Manager : MonoBehaviour
 		{
 			GameObject.Find("MessageFace").GetComponent<MeshRenderer>().enabled = false;
 			GameObject.Find("MessageVoice").GetComponent<MeshRenderer>().enabled = false;
+
+			if (solo)
+				mod = "Solo Glanceable";
+			else
+				mod = "Social Glanceable";
 		}
 
 		GameObject.Find("Weather").GetComponent<AppManager>().Start_Session();
 		GameObject.Find("Email").GetComponent<AppManager>().Start_Session();
 		GameObject.Find("Fitbit").GetComponent<AppManager>().Start_Session();
-
+		var culture = new CultureInfo("en-US");
+		managerLog.WriteLine("\n\n" + DateTime.Now.ToString(culture) + ", Session Changed to " + mod);
 		//print("change session mode to: solo " + solo + " ACI: " + is_ACI);
 		UpdateTooltipText();
 	}
 
-	public void Start_nxt_Trial()
-	{
-		if (solo)
-		{
-			string trial_line;
-			if (questionNum > -1)
-			{
-				trial_line = questionNum + ", " + 
-								time_asked + ", " + Time.time + ", " + 
-								trialSet[trialSetNum, questionNum, 1] + ", " + 
-								trialSet[trialSetNum, questionNum, 2] + ", " + 
-								GameObject.Find("Weather").GetComponent<AppManager>().user_manual_override + ", " +
-								GameObject.Find("Email").GetComponent<AppManager>().user_manual_override + ", " +
-								GameObject.Find("Fitbit").GetComponent<AppManager>().user_manual_override;
-				sessionLog.WriteLine(trial_line);
-			}
-			questionNum++;
-			if (questionNum < 9)
-			{
-				time_to_ask_next_Q = trialSet[trialSetNum, questionNum, 0] + Time.time;
-			}
-			else
-				solo = false;
-			UpdateTooltipText();
-		}
-		// For each app start trial
-		GameObject.Find("Weather").GetComponent<AppManager>().Start_Trial();
-		GameObject.Find("Email").GetComponent<AppManager>().Start_Trial();
-		GameObject.Find("Fitbit").GetComponent<AppManager>().Start_Trial();
-	}
+	//public void Start_nxt_Trial()
+	//{
+	//	if (solo)
+	//	{
+	//		string trial_line;
+	//		if (questionNum > -1)
+	//		{
+	//			trial_line = questionNum + ", " + 
+	//							time_asked + ", " + Time.time + ", " + 
+	//							trialSet[trialSetNum, questionNum, 1] + ", " + 
+	//							trialSet[trialSetNum, questionNum, 2] + ", " + 
+	//							GameObject.Find("Weather").GetComponent<AppManager>().user_manual_override + ", " +
+	//							GameObject.Find("Email").GetComponent<AppManager>().user_manual_override + ", " +
+	//							GameObject.Find("Fitbit").GetComponent<AppManager>().user_manual_override;
+	//			sessionLog.WriteLine(trial_line);
+	//		}
+	//		questionNum++;
+	//		if (questionNum < 9)
+	//		{
+	//			time_to_ask_next_Q = trialSet[trialSetNum, questionNum, 0] + Time.time;
+	//		}
+	//		else
+	//			solo = false;
+	//		UpdateTooltipText();
+	//	}
+	//	// For each app start trial
+	//	GameObject.Find("Weather").GetComponent<AppManager>().Start_Trial();
+	//	GameObject.Find("Email").GetComponent<AppManager>().Start_Trial();
+	//	GameObject.Find("Fitbit").GetComponent<AppManager>().Start_Trial();
+	//}
 
-	private void Create_Trial_Dataset()
-	{
+	//private void Create_Trial_Dataset()
+	//{
 
-		//trialSets is trialSetNum X question num X 3 [= 0: time, 1: App_num, 2: correct_answer_option]
-		trialSet = new int[2, 9, 3]{
-			{
-				{ 10, 2, 0}, // End Trial 6
-				{ 20, 1, 1}, // End Trial 1
-				{ 15, 3, 0}, // End Trial 2
-				{ 10, 1, 1}, // End Trial 3
-				{ 45, 3, 1}, // End Trial 4
-				{ 10, 3, 3}, // End Trial 5
-				{ 30, 2, 0}, // End Trial 7
-				{ 15, 2, 1}, // End Trial 8
-				{ 15, 1, 0} // End Trial 9
-			}, // End Trial Set 1
-			{
-				{ 45, 1, 1}, // End Trial 15
-				{ 20, 2, 1}, // End Trial 14
-				{ 10, 1, 1}, // End Trial 13
-				{ 15, 2, 0}, // End Trial 12
-				{ 30, 3, 0}, // End Trial 11
-				{ 10, 2, 1}, // End Trial 10
-				{ 15, 1, 0}, // End Trial 9
-				{ 15, 3, 0}, // End Trial 8
-				{ 20, 3, 1} // End Trial 7
-		}// End Trial Set 2
-	};
+	//	//trialSets is trialSetNum X question num X 3 [= 0: time, 1: App_num, 2: correct_answer_option]
+	//	trialSet = new int[2, 9, 3]{
+	//		{
+	//			{ 10, 2, 0}, // End Trial 6
+	//			{ 20, 1, 1}, // End Trial 1
+	//			{ 15, 3, 0}, // End Trial 2
+	//			{ 10, 1, 1}, // End Trial 3
+	//			{ 45, 3, 1}, // End Trial 4
+	//			{ 10, 3, 3}, // End Trial 5
+	//			{ 30, 2, 0}, // End Trial 7
+	//			{ 15, 2, 1}, // End Trial 8
+	//			{ 15, 1, 0} // End Trial 9
+	//		}, // End Trial Set 1
+	//		{
+	//			{ 45, 1, 1}, // End Trial 15
+	//			{ 20, 2, 1}, // End Trial 14
+	//			{ 10, 1, 1}, // End Trial 13
+	//			{ 15, 2, 0}, // End Trial 12
+	//			{ 30, 3, 0}, // End Trial 11
+	//			{ 10, 2, 1}, // End Trial 10
+	//			{ 15, 1, 0}, // End Trial 9
+	//			{ 15, 3, 0}, // End Trial 8
+	//			{ 20, 3, 1} // End Trial 7
+	//	}// End Trial Set 2
+	//};
 
 	//	{ 20, 2, 1}, // End Trial 10
 	////	{{ 20, 3, 4}, // End Trial 11
@@ -312,7 +338,7 @@ public class Manager : MonoBehaviour
 	//			{ 10, 1, 1}, // End Trial 3
 	//			{ 15, 3, 3}, // End Trial 2
 	//			{ 20, 1, 4} // End Trial 1
-}
+	//}
 	// All ACI Related Functions
 	internal static void Set_justMentioned(bool v)
 	{
@@ -334,6 +360,8 @@ public class Manager : MonoBehaviour
 	}
 	internal static void Set_isTalking(bool b)
 	{
+		if (isTalking != b)
+			managerLog.WriteLine(DateTime.Now.ToString("en-US") + ( b ? ", Started" : ", Stopped") + "Talking");
 		isTalking = b;
 		if(!isTalking)
 			Reset_SpeechContext();
@@ -345,7 +373,7 @@ public class Manager : MonoBehaviour
 		if (context == (int)MySpeechContext.None)
 			return;
 		speechContext = (MySpeechContext)context;
-		time_asked = Time.time;
+		//time_asked = Time.time;
 		Set_justMentioned(true);
 	}
 
@@ -370,6 +398,11 @@ public class Manager : MonoBehaviour
 
 	internal static void Set_Faces(int n_faces, List<List<int>> faces)
 	{
+		if (num_faces != n_faces)
+		{
+			var culture = new CultureInfo("en-US");
+			managerLog.WriteLine(DateTime.Now.ToString(culture) + ", " + n_faces + "Faces");
+		}
 		num_faces = n_faces;
 		faces_box = faces;
 	}
@@ -393,21 +426,21 @@ public class Manager : MonoBehaviour
 			sessionName = "Social_Basic";
 
 		GameObject.Find("CurrentSession").GetComponent<TextMesh>().text = sessionName;
-		if (solo)
-		{
-			GameObject.Find("CurrentTrial").GetComponent<MeshRenderer>().enabled = true;
-			string trialNum;
-			if (questionNum < 9)
-				trialNum = "Trial Number: " + questionNum;
-			else
-				trialNum = "End Session!";
+		//if (solo)
+		//{
+		//	GameObject.Find("CurrentTrial").GetComponent<MeshRenderer>().enabled = true;
+		//	//string trialNum;
+		//	if (questionNum < 9)
+		//		trialNum = "Trial Number: " + questionNum;
+		//	else
+		//		trialNum = "End Session!";
 
-			GameObject.Find("CurrentTrial").GetComponent<TextMesh>().text = trialNum;
-		}
-		else
-		{
-			GameObject.Find("CurrentTrial").GetComponent<MeshRenderer>().enabled = false;
-		}
+		//	GameObject.Find("CurrentTrial").GetComponent<TextMesh>().text = trialNum;
+		//}
+		//else
+		//{
+		//	GameObject.Find("CurrentTrial").GetComponent<MeshRenderer>().enabled = false;
+		//}
 	}
 }
 

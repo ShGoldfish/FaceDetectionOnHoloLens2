@@ -2,6 +2,7 @@
 using UnityEngine;
 using System;
 using System.Collections;
+using System.Globalization;
 
 internal class MessageBoxMessages
 {
@@ -28,6 +29,16 @@ public class AppManager : MonoBehaviour
 	// Renderer purposes
 	public Rect rect_faceBoxOnScreen, rect_app;
 
+	//Log fiels
+	private FileLog sessionLog;
+
+	private void Awake()
+	{
+
+		sessionLog = new FileLog();
+		string fileName = gameObject.name;
+		sessionLog.SetHeader(fileName, "Time, Event ");
+	}
 	private void Start()
 	{
 		msgBox = null;
@@ -48,6 +59,8 @@ public class AppManager : MonoBehaviour
 
 	public void Start_Session()
 	{
+		var culture = new CultureInfo("en-US");
+		sessionLog.WriteLine("\n\n" + DateTime.Now.ToString(culture) +"," + (Manager.is_ACI ? "ACI " : "Glanceable ") + "Session Started");
 		if (Manager.is_ACI)
 		{
 			GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = true;
@@ -86,11 +99,23 @@ public class AppManager : MonoBehaviour
 
 	public void ClickedToUpdateTranslucency()
 	{
+		//in ACI user cannot manually over-ride
+		if (Manager.is_ACI)
+			return;
+
 		user_manual_override++;
 		if (is_trans)
+		{
 			MakeOpaque();
+			var culture = new CultureInfo("en-US");
+			sessionLog.WriteLine(DateTime.Now.ToString(culture) + ", Manually made Opaque" );
+		}
 		else
+		{
 			MakeTranslusent();
+			var culture = new CultureInfo("en-US");
+			sessionLog.WriteLine(DateTime.Now.ToString(culture) + ", Manually made Translucent");
+		}
 	}
 
 	private void UpdateMentioned()
@@ -102,6 +127,8 @@ public class AppManager : MonoBehaviour
 		}
 		if (Manager.Get_justMentioned() && Manager.Get_SpeechContext() == gameObject.name)
 		{
+			var culture = new CultureInfo("en-US");
+			sessionLog.WriteLine(DateTime.Now.ToString(culture) + ", Mentioned in Conversation");
 			SetTimeMentioned();
 			Manager.Set_justMentioned(false);
 			return;
@@ -178,6 +205,7 @@ public class AppManager : MonoBehaviour
 		// Renderer purposes
 		rect_faceBoxOnScreen = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
 		List<List<int>> faceboxes = Manager.Get_FaceBoxes();
+		bool was_blocking = blocking;
 		blocking = false;
 		foreach (List<int> faceBox in faceboxes)
 		{
@@ -188,7 +216,11 @@ public class AppManager : MonoBehaviour
 				SetTimeBlocked();
 				break;
 			}
-			//yield return new WaitForEndOfFrame();
+		}
+		if (was_blocking != blocking)
+		{
+			var culture = new CultureInfo("en-US");
+			sessionLog.WriteLine(DateTime.Now.ToString(culture) + ", is" + (blocking ? " " : "not") + "Blocking a face");
 		}
 	}
 
