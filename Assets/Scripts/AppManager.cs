@@ -200,10 +200,10 @@ public class AppManager : MonoBehaviour
 	//IEnumerator IsBlockingAnyFaces()
 	void IsBlockingAnyFaces()
 	{
-		//if (blocking  && Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)
-		//{
-		//	return;
-		//}
+		if (blocking  && Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)
+		{
+			return;
+		}
 		// Renderer purposes
 		rect_faceBoxOnScreen = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
 		List<List<int>> faceboxes = Manager.Get_FaceBoxes();
