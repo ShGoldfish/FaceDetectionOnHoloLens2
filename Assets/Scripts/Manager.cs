@@ -9,16 +9,16 @@ using UnityEngine;
 
 public class Manager : MonoBehaviour
 {
-	public AudioClip audioClip1;
-	public AudioClip audioClip2;
-	public AudioClip audioClip3;
+	//public AudioClip audioClip1;
+	//public AudioClip audioClip2;
+	//public AudioClip audioClip3;
 	public AudioClip audioDing;
 
 	const float PRINT_TIME_INTERVAL = 4.0f;
 	// Interface mode: is it glanceable or ACI?
 	public static bool is_ACI = false;
-	bool solo = true;
-	bool firstSocial = true;
+	//bool solo = true;
+	//bool firstSocial = true;
 	//private int questionNum = -1;
 	//private int trialSetNum;
 	//private float time_to_ask_next_Q;
@@ -45,12 +45,13 @@ public class Manager : MonoBehaviour
 	{
 		////////////TEST
 		//////////////////END TEST
-		solo = true;
-		firstSocial = true;
+		//solo = true;
+		//firstSocial = true;
 		// TODO: Should be synced with the webApp
 		//trialSetNum = UnityEngine.Random.Range(0, 100) % 2;
 
 		//Create_Trial_Dataset();
+		is_ACI = true;
 		managerLog = new FileLog();
 		managerLog.SetHeader("manager", "Time, Event ");
 		Change_SessionMod();
@@ -178,7 +179,7 @@ public class Manager : MonoBehaviour
 
 	public void OnClick_NxtSession()
 	{
-		solo = false;
+		//solo = false;
 		Change_SessionMod();
 	}
 
@@ -192,40 +193,42 @@ public class Manager : MonoBehaviour
 		//print("change session mode from: solo " + solo + " ACI: " + is_ACI);
 		//sessionLog = new FileLog();
 		// come with method for the rotation of Change_SessionMod parameter 
-		string mod;
-		if (solo)
-		{
-			is_ACI = false;
-			//string fileName = DateTime.Now + "_SoloSession";
-			//fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
-			//sessionLog.SetHeader(fileName, "Trial_number, time_asked, time_trial_ended, " +
-			//								"questioned_app, right_answer, num_user_manual_override_App1, " +
-			//								"num_user_manual_override_App2, num_user_manual_override_App3");
-			//questionNum = -1;
-			//Start_nxt_Trial();
-		}
-		else
-		{
-			if (firstSocial)
-			{
-				is_ACI = UnityEngine.Random.Range(0, 100) > 50;
-				firstSocial = false;
-			}
-			else
-			{
-				is_ACI = !is_ACI;
-			}
-			//string fileName = DateTime.Now + "_SocialSession" + (is_ACI ?
-			//															"_ACI" :
-			//															"_Basic");
-			//fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
-			//sessionLog.SetHeader(fileName, is_ACI ?
-			//										"Number_of_faces, is_tallking, " +
-			//										"Mentioned_App1, Mentioned_App2, Mentioned_App3," +
-			//										"num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3" :
-			//										"num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3");
+		//string mod;
+		//if (solo)
+		//{
+		//	is_ACI = false;
+		//	//string fileName = DateTime.Now + "_SoloSession";
+		//	//fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
+		//	//sessionLog.SetHeader(fileName, "Trial_number, time_asked, time_trial_ended, " +
+		//	//								"questioned_app, right_answer, num_user_manual_override_App1, " +
+		//	//								"num_user_manual_override_App2, num_user_manual_override_App3");
+		//	//questionNum = -1;
+		//	//Start_nxt_Trial();
+		//}
+		//else
+		//{
+		//if (firstSocial)
+		//{
+		//	is_ACI = UnityEngine.Random.Range(0, 100) > 50;
+		//	firstSocial = false;
+		//}
+		//else
+		////{
+		//	is_ACI = !is_ACI;
+		//}
+		//string fileName = DateTime.Now + "_SocialSession" + (is_ACI ?
+		//															"_ACI" :
+		//															"_Basic");
+		//fileName = fileName.Replace(@"/", "_").Replace(@":", "_").Replace(@" ", "_");
+		//sessionLog.SetHeader(fileName, is_ACI ?
+		//										"Number_of_faces, is_tallking, " +
+		//										"Mentioned_App1, Mentioned_App2, Mentioned_App3," +
+		//										"num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3" :
+		//										"num_user_manual_override_App1, num_user_manual_override_App2, num_user_manual_override_App3");
 
-		}
+		//}
+		string mod;
+		is_ACI = !is_ACI;
 		if (is_ACI)
 		{
 			// Textbox Management
@@ -241,7 +244,7 @@ public class Manager : MonoBehaviour
 			isTalking = false;
 			num_faces = 0;
 
-			mod = "ACI";
+			mod = "Social ACI";
 			//GameObject.Find("Main Camera").GetComponent<MyPhotoCapture>().RunPC();
 			//gameObject.GetComponent<SpeechHandler>().Run_MySH();
 
@@ -251,10 +254,11 @@ public class Manager : MonoBehaviour
 			GameObject.Find("MessageFace").GetComponent<MeshRenderer>().enabled = false;
 			GameObject.Find("MessageVoice").GetComponent<MeshRenderer>().enabled = false;
 
-			if (solo)
-				mod = "Solo Glanceable";
-			else
-				mod = "Social Glanceable";
+			mod = "Basic AR";
+			//if (solo)
+			//	mod = "Solo Glanceable";
+			//else
+			//	mod = "Social Glanceable";
 		}
 
 		GameObject.Find("Weather").GetComponent<AppManager>().Start_Session();
@@ -418,12 +422,10 @@ public class Manager : MonoBehaviour
 	{
 		GameObject.Find("CurrentSession").GetComponent<MeshRenderer>().enabled = true;
 		string sessionName;
-		if (solo)
-			sessionName = "Solo_Basic";
-		else if (is_ACI)
+		if (is_ACI)
 			sessionName = "Social ACI";
 		else
-			sessionName = "Social_Basic";
+			sessionName = "Basic AR";
 
 		GameObject.Find("CurrentSession").GetComponent<TextMesh>().text = sessionName;
 		//if (solo)
