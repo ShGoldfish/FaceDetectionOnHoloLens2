@@ -55,12 +55,7 @@ public class AppManager : MonoBehaviour
 		{
 			UpdateMentioned();
 			IsBlockingAnyFaces();
-			if (Time.time - time_clicked >= CLICKED_TIMEOUT)
-			{
-				user_manual_override = 0;
-				time_clicked = float.PositiveInfinity;
-				UpdateTranslucency();
-			}
+			UpdateTranslucency();
 		}
 
 	}
@@ -94,7 +89,7 @@ public class AppManager : MonoBehaviour
 	public void Start_Trial()
 	{
 		user_manual_override = 0;
-		time_clicked = float.PositiveInfinity;
+		time_clicked = float.NegativeInfinity;
 		if (Manager.is_ACI)
 		{
 			is_trans = true;
@@ -153,57 +148,39 @@ public class AppManager : MonoBehaviour
 
 	private void UpdateTranslucency()
 	{
+		// If manually over-ride 
 		if (user_manual_override > 0)
-			return;
-		if (Manager.is_ACI)
 		{
-			// not talking
-			//if (!Manager.Get_isTalking() || Manager.Get_numFaces() < 1)
-			//{
-			//	MakeOpaque();
-			//	return;
-			//}
-			//if (blocking)
-			//{
-			//	MakeTranslusent();
-			//	return;
-			//}
-			// Is talking and there is a face that is not blocking:
-			// But has recently been blocked => wait till timeOut
-			//if (Time.time - timeWhenBlocked >= 0.0f)
-			//{
-			//	if (Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)
-			//	{
-			//		return;
-			//	}
-			//	else
-			//	{
-			//		ResetTimeBlocked();
-			//	}
+			// if it is ACI and timed out for manual, run defaults of that mode
+			if (Manager.is_ACI && Time.time - time_clicked >= CLICKED_TIMEOUT)
+			{
+				user_manual_override = 0;
+				time_clicked = float.NegativeInfinity;
+			}
+			// if it's not ACI or hasn't timedout => don't do anything [and follow user's manual over-ride]
+			else
+			{
+				return;
+			}
+		}
 
-			GetComponent<BodyFixed>().MoveUp(blocking);
-			//if (blocking)
-			//{
-			//	//MMove up and change img
-			//	GetComponent<BodyFixed>().up = true;
-			//}
-			//else
-			//{
-			//	// Original Z
-			//	// original img
-			//	GetComponent<BodyFixed>().up = false;
-			//}
-
+		if (!Manager.is_ACI)
+		{
+			// if it's not ACI always keep app's opaque
+			MakeOpaque();	
+		}
+		else
+		{
 			// if talking about this app 
 			if (mentioned)
 			{
 				MakeOpaque();
+				GetComponent<BodyFixed>().MoveUp(blocking);
 				return;
 			}
 			MakeTranslusent();
+			GetComponent<BodyFixed>().MoveUp(false);
 		}
-		else
-			MakeOpaque();
 	}
 
 	//IEnumerator IsBlockingAnyFaces()
