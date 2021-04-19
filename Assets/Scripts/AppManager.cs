@@ -17,6 +17,7 @@ public class AppManager : MonoBehaviour
 	// CIA Variables 
 	const float MENTION_TIMEOUT = 7.0f;
 	const float BLOCKED_TIMEOUT = 4.0f;
+	const float CLICKED_TIMEOUT = 5.0f;
 	// Each App's vars
 	float timeWhenBlocked;
 	float timeWhenMentioned;
@@ -31,6 +32,7 @@ public class AppManager : MonoBehaviour
 
 	//Log fiels
 	private FileLog sessionLog;
+	private float time_clicked;
 
 	private void Awake()
 	{
@@ -53,8 +55,14 @@ public class AppManager : MonoBehaviour
 		{
 			UpdateMentioned();
 			IsBlockingAnyFaces();
-			UpdateTranslucency();
+			if (Time.time - time_clicked >= CLICKED_TIMEOUT)
+			{
+				user_manual_override = 0;
+				time_clicked = float.PositiveInfinity;
+				UpdateTranslucency();
+			}
 		}
+
 	}
 
 	public void Start_Session()
@@ -86,6 +94,7 @@ public class AppManager : MonoBehaviour
 	public void Start_Trial()
 	{
 		user_manual_override = 0;
+		time_clicked = float.PositiveInfinity;
 		if (Manager.is_ACI)
 		{
 			is_trans = true;
@@ -101,7 +110,7 @@ public class AppManager : MonoBehaviour
 	{
 		//in ACI user cannot manually over-ride
 		if (Manager.is_ACI)
-			return;
+			time_clicked = Time.time;
 
 		user_manual_override++;
 		if (is_trans)
