@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine.UI;
 using UnityEngine;
+using System;
+using System.Globalization;
 #if WINDOWS_UWP
 using Windows.Storage;
 #endif
@@ -13,7 +15,7 @@ public class FileLog : MonoBehaviour
     string path;
 
 	// Use this for initialization
-	public void SetHeader(string appName, string header) // header is like "time, accuracy, level, ......"
+	public void SetFileName(string appName) 
 	{
 #if WINDOWS_UWP
         // Get local folder on HoloLense
@@ -22,13 +24,18 @@ public class FileLog : MonoBehaviour
         path = ".\\";
 #endif
 		fileName = path + "\\" + appName+ ".csv";
-        File.AppendAllText(fileName, "\n" + header + "\n");
     }
 
     public void WriteLine(string line) // you pass in one trial's date "1.1, 1, 4, ..."
     {
-		// time_trial_ended may differ from time_answered. we need time_answered from audio rec
-		//Lines are [Question_number, time_asked, time_trial_ended, questioned_app, right_answer, num_user_manual_override) 
-		File.AppendAllText(fileName, "\n" + line);
+		File.AppendAllText(fileName, "\n" + GetTimeInEasternStandardTime() + ", " + line);
     }
+
+	public string GetTimeInEasternStandardTime()
+	{
+		TimeZoneInfo easternStandardTime = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+		DateTimeOffset timeInEST = TimeZoneInfo.ConvertTime(DateTime.Now, easternStandardTime);
+		var culture = new CultureInfo("en-US");
+		return timeInEST.ToString(culture);
+	}
 }

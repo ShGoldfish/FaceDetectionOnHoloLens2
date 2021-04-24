@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using System;
-using System.Collections;
-using System.Globalization;
 
 internal class MessageBoxMessages
 {
@@ -11,42 +9,66 @@ internal class MessageBoxMessages
 }
 
 public class AppManager : MonoBehaviour
-{
-	bool is_trans = true;
-	public int user_manual_override = 0;
-	// CIA Variables 
+{ 
 	const float MENTION_TIMEOUT = 7.0f;
-	const float BLOCKED_TIMEOUT = 4.0f;
+	const float BLOCKED_TIMEOUT = 5.0f;
 	const float CLICKED_TIMEOUT = 5.0f;
+
 	// Each App's vars
-	float timeWhenBlocked;
-	float timeWhenMentioned;
-	public bool mentioned { get; set; }
-	bool blocking;
+	private int user_manual_override;
+	private bool mentioned { get; set; }
+	private bool blocking;
+	private bool is_trans;
+	private bool is_up;
+		// time holders
+	private float timeWhenBlocked;
+	private float timeWhenMentioned;
+	private float time_clicked;
+
 	//TextMesh msgBox;
 	//GameObject fixationIcon;
 	//GameObject incommingConvo;
 	//GameObject mentionedIcon;
+
 	// Renderer purposes
 	public Rect rect_faceBoxOnScreen, rect_app;
 
 	//Log fiels
 	private FileLog sessionLog;
-	private float time_clicked;
+
 
 	private void Awake()
 	{
-
 		sessionLog = new FileLog();
-		string fileName = gameObject.name;
-		sessionLog.SetHeader(fileName, "Time, Event ");
+		sessionLog.SetFileName(gameObject.name);
 	}
+
+
 	private void Start()
 	{
-		//msgBox = null;
-		//incommingConvo = null;
-		//mentionedIcon = null;
 		Start_Session();
+	}
+	public void Start_Session()
+	{
+		sessionLog.WriteLine(Manager.is_ACI ? "ACI Session Started" : "Glanceable Session Started");
+
+		GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = false;
+		GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = false;
+		GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = false;
+
+		if (Manager.is_ACI)
+		{
+			is_trans = true;
+		}
+		else
+			is_trans = false;
+		is_up = false;
+
+		ResetClicked();
+		ResetMentioned();
+		ResetBlocked();
+		ResetY();
+		UpdateTranslucency();
 	}
 
 	private void FixedUpdate()
@@ -56,88 +78,40 @@ public class AppManager : MonoBehaviour
 			UpdateMentioned();
 			IsBlockingAnyFaces();
 			UpdateTranslucency();
+			UpdateY();
 		}
-
-	}
-
-	public void Start_Session()
-	{
-		var culture = new CultureInfo("en-US");
-		sessionLog.WriteLine("\n\n" + DateTime.Now.ToString(culture) +"," + (Manager.is_ACI ? "ACI " : "Glanceable ") + "Session Started");
-		//if (Manager.is_ACI)
-		//{
-		//	GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = true;
-		//	GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = true;
-		//	GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = true;
-
-		//	msgBox = GetChildWithName(gameObject, "Msg_Box").GetComponent<TextMesh>();
-		//	incommingConvo = GetChildWithName(gameObject, "incommingConvo");
-		//	//fixationIcon = GetChildWithName(gameObject, "FixationIcon");
-		//	mentionedIcon = GetChildWithName(gameObject, "Mentioned");
-
-		//}
-		//else
-		//{
-		GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = false;
-		GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = false;
-		GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = false;
-
-		//}
-		Start_Trial();
-	}
-
-	public void Start_Trial()
-	{
-		user_manual_override = 0;
-		time_clicked = float.NegativeInfinity;
-		if (Manager.is_ACI)
-		{
-			is_trans = true;
-		}
-		else
-			is_trans = false;
-		UpdateTranslucency();
-		ResetTimeMentioned();
-		ResetTimeBlocked();
 	}
 
 	public void ClickedToUpdateTranslucency()
 	{
-		//in ACI user cannot manually over-ride
-		if (Manager.is_ACI)
-			time_clicked = Time.time;
-
-		user_manual_override++;
+		SetClicked();
 		if (is_trans)
 		{
 			MakeOpaque();
-			var culture = new CultureInfo("en-US");
-			sessionLog.WriteLine(DateTime.Now.ToString(culture) + ", Manually made Opaque" );
 		}
 		else
 		{
 			MakeTranslusent();
-			var culture = new CultureInfo("en-US");
-			sessionLog.WriteLine(DateTime.Now.ToString(culture) + ", Manually made Translucent");
 		}
 	}
 
 	private void UpdateMentioned()
 	{
+		// Is only called in ACI
 		if (!Manager.Get_isTalking())
 		{
-			ResetTimeMentioned();
+			ResetMentioned();
 			return;
 		}
 		if (Manager.Get_justMentioned() && Manager.Get_SpeechContext() == gameObject.name)
 		{
-			SetTimeMentioned();
+			SetMentioned();
 			Manager.Set_justMentioned(false);
 			return;
 		}
-		if (Time.time - timeWhenMentioned >= MENTION_TIMEOUT)
+		if (Time.time - timeWhenMentioned >= MENTION_TIMEOUT) // Timeout
 		{
-			ResetTimeMentioned();
+			ResetMentioned();
 			if (Manager.Get_SpeechContext() == gameObject.name)
 			{
 				Manager.Reset_SpeechContext();
@@ -145,17 +119,15 @@ public class AppManager : MonoBehaviour
 			return;
 		}
 	}
-
 	private void UpdateTranslucency()
 	{
 		// If manually over-ride 
 		if (user_manual_override > 0)
 		{
 			// if it is ACI and timed out for manual, run defaults of that mode
-			if (Manager.is_ACI && Time.time - time_clicked >= CLICKED_TIMEOUT)
+			if (Manager.is_ACI && Time.time - time_clicked >= CLICKED_TIMEOUT)  // Timeout
 			{
-				user_manual_override = 0;
-				time_clicked = float.NegativeInfinity;
+				ResetClicked();
 			}
 			// if it's not ACI or hasn't timedout => don't do anything [and follow user's manual over-ride]
 			else
@@ -173,26 +145,102 @@ public class AppManager : MonoBehaviour
 		{
 			// if talking about this app 
 			if (mentioned)
-			{
 				MakeOpaque();
-				GetComponent<BodyFixed>().MoveUp(blocking);
-				return;
-			}
-			MakeTranslusent();
-			GetComponent<BodyFixed>().MoveUp(false);
+			else
+				MakeTranslusent();
 		}
 	}
+	private void UpdateY()
+	{
+		if (blocking && !is_trans)
+		{
+			if (!is_up)
+			{
+				sessionLog.WriteLine("Moved up");
+				GetComponent<BodyFixed>().MoveUp(true);
+				is_up = true;
+				return;
+			}
+		}
+		if (is_up)
+			ResetY();
+		
+	}
 
-	//IEnumerator IsBlockingAnyFaces()
+	private void MakeTranslusent()
+	{
+		if (user_manual_override == 0)
+			sessionLog.WriteLine("Made Translucent");
+		else
+			sessionLog.WriteLine("Made Translucent Manually");
+		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		is_trans = true;
+	}
+	private void MakeOpaque()
+	{
+		if(user_manual_override == 0)
+			sessionLog.WriteLine("Made Opaque");
+		else
+			sessionLog.WriteLine("Made Opaque Manually");
+		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+		is_trans = false;
+	}
+
+	private void ResetMentioned()
+	{
+		sessionLog.WriteLine("Not mentioned");
+		timeWhenMentioned = float.NegativeInfinity;
+		mentioned = false;
+	}
+	private void ResetBlocked()
+	{
+		sessionLog.WriteLine("Is not blocking a face");
+		timeWhenBlocked = float.NegativeInfinity;
+		blocking = false;
+	}
+	private void ResetClicked()
+	{
+		sessionLog.WriteLine("Manual override time out");
+		time_clicked = float.NegativeInfinity;
+		user_manual_override = 0;
+	}
+	private void ResetY()
+	{
+		sessionLog.WriteLine("Moved down");
+		GetComponent<BodyFixed>().MoveUp(false);
+		is_up = false;
+	}
+
+	private void SetMentioned()
+	{
+		sessionLog.WriteLine("Mentioned in Conversation");
+		timeWhenMentioned = Time.time;
+		mentioned = true;
+	}
+	private void SetBlocked()
+	{
+		sessionLog.WriteLine("Is blocking a face");
+		timeWhenBlocked = Time.time;
+		blocking = true;
+	}
+	private void SetClicked()
+	{
+		sessionLog.WriteLine("Manual override");
+		time_clicked = Time.time;
+		user_manual_override ++;
+	}
+
 	void IsBlockingAnyFaces()
 	{
-		if (blocking  && Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)
+		if (blocking && Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)  // not Timeout
 		{
 			return;
 		}
+
 		// Renderer purposes
 		rect_faceBoxOnScreen = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
 		List<List<int>> faceboxes = Manager.Get_FaceBoxes();
+
 		bool was_blocking = blocking;
 		blocking = false;
 		foreach (List<int> faceBox in faceboxes)
@@ -200,77 +248,13 @@ public class AppManager : MonoBehaviour
 			bool overlapping = IsOverlapping(faceBox);
 			if (overlapping)
 			{
-				blocking = true;
-				SetTimeBlocked();
-				break;
+				SetBlocked();
+				return;
 			}
 		}
-		if (was_blocking != blocking)
-		{
-			var culture = new CultureInfo("en-US");
-			sessionLog.WriteLine(DateTime.Now.ToString(culture) + ", is" + (blocking ? " " : "not") + "Blocking a face");
-		}
-	}
-
-	private void MakeTranslusent()
-	{
-		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		//fixationIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		//if (Manager.is_ACI)
-		//{
-		//	incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		//	mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		//}
-		is_trans = true;
-	}
-	private void MakeOpaque()
-	{
-		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
-		//fixationIcon.GetComponent<SpriteRenderer>().color = Color.white;
-		//if (Manager.is_ACI)
-		//{
-		//	if (!blocking)
-		//		incommingConvo.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		//	else
-		//		incommingConvo.GetComponent<SpriteRenderer>().color = Color.white;
-		//	if (!mentioned)
-		//		mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		//	else
-		//		mentionedIcon.GetComponent<SpriteRenderer>().color = Color.white;
-		//}
-		is_trans = false;
-	}
-	private void ResetTimeMentioned()
-	{
-		timeWhenMentioned = float.PositiveInfinity;
-		//if (Manager.is_ACI)
-		//{
-		//	msgBox.text = MessageBoxMessages.AppNotMentioned;
-		//	mentionedIcon.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
-		//}
-
-		mentioned = false;
-	}
-	private void SetTimeMentioned()
-	{
-		timeWhenMentioned = Time.time;
-		//if (Manager.is_ACI)
-		//{
-		//	msgBox.text = MessageBoxMessages.AppMentioned;
-		//	mentionedIcon.GetComponent<SpriteRenderer>().color = Color.white;
-		//}
-
-		var culture = new CultureInfo("en-US");
-		sessionLog.WriteLine(DateTime.Now.ToString(culture) + ", Mentioned in Conversation");
-		mentioned = true;
-	}
-	private void ResetTimeBlocked()
-	{
-		timeWhenBlocked = float.PositiveInfinity;
-	}
-	private void SetTimeBlocked()
-	{
-		timeWhenBlocked = Time.time;
+		// if code gets here means it is not blocking rn => if it wasn't blocking already we don't need to change anything
+		if (was_blocking)
+			ResetBlocked();
 	}
 
 	private bool IsOverlapping(List<int> faceBox)
@@ -305,24 +289,6 @@ public class AppManager : MonoBehaviour
 		return rect_faceBoxOnScreen.Overlaps(rect_app);
 	}
 	
-	//public void ChangeFixation()
-	//{
-	//	bool bodyFixed = GetComponent<BodyFixed>().enabled;
-		// Change the icon
-		//if (bodyFixed)
-		//{
-			// switching to world fixed:
-			//fixationIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("WorldZone");
-
-		//}
-		//else
-		//{
-			// switching to body fixed:
-			//fixationIcon.GetComponent<SpriteRenderer>().sprite = Resources.Load<Sprite>("BodyZone");
-		//}
-	//	GetComponent<BodyFixed>().enabled = !bodyFixed;
-	//}
-
 	/// <summary>
 	/// Returns the on screen x, y, w, h of the GameObject go's collider
 	/// </summary>
