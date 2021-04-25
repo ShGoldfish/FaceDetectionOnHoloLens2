@@ -12,7 +12,7 @@ public class AppManager : MonoBehaviour
 { 
 	const float MENTION_TIMEOUT = 7.0f;
 	const float BLOCKED_TIMEOUT = 5.0f;
-	const float CLICKED_TIMEOUT = 5.0f;
+	const float CLICKED_TIMEOUT = 7.0f;
 
 	// Each App's vars
 	private int user_manual_override;
@@ -43,32 +43,25 @@ public class AppManager : MonoBehaviour
 		sessionLog.SetFileName(gameObject.name);
 	}
 
-
-	private void Start()
-	{
-		Start_Session();
-	}
 	public void Start_Session()
 	{
-		sessionLog.WriteLine(Manager.is_ACI ? "ACI Session Started" : "Glanceable Session Started");
-
+		sessionLog.WriteLine("  ");
+		sessionLog.WriteLine("Resetting Everything to Start new session");
 		GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = false;
 		GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = false;
 		GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = false;
 
-		if (Manager.is_ACI)
-		{
-			is_trans = true;
-		}
-		else
-			is_trans = false;
-		is_up = false;
+		is_trans = !Manager.is_ACI;
 
 		ResetClicked();
 		ResetMentioned();
 		ResetBlocked();
 		ResetY();
 		UpdateTranslucency();
+
+		sessionLog.WriteLine(Manager.is_ACI ? "ACI Session Started" : "Glanceable Session Started");
+		sessionLog.WriteLine("  ");
+
 	}
 
 	private void FixedUpdate()
@@ -98,7 +91,7 @@ public class AppManager : MonoBehaviour
 	private void UpdateMentioned()
 	{
 		// Is only called in ACI
-		if (!Manager.Get_isTalking())
+		if ( mentioned && !Manager.Get_isTalking())
 		{
 			ResetMentioned();
 			return;
@@ -109,7 +102,7 @@ public class AppManager : MonoBehaviour
 			Manager.Set_justMentioned(false);
 			return;
 		}
-		if (Time.time - timeWhenMentioned >= MENTION_TIMEOUT) // Timeout
+		if (mentioned && Time.time - timeWhenMentioned >= MENTION_TIMEOUT) // Timeout
 		{
 			ResetMentioned();
 			if (Manager.Get_SpeechContext() == gameObject.name)
@@ -136,7 +129,7 @@ public class AppManager : MonoBehaviour
 			}
 		}
 
-		if (!Manager.is_ACI)
+		if (!Manager.is_ACI && is_trans)
 		{
 			// if it's not ACI always keep app's opaque
 			MakeOpaque();	
@@ -144,9 +137,9 @@ public class AppManager : MonoBehaviour
 		else
 		{
 			// if talking about this app 
-			if (mentioned)
+			if (mentioned && is_trans)
 				MakeOpaque();
-			else
+			else if (!is_trans)
 				MakeTranslusent();
 		}
 	}
@@ -162,7 +155,7 @@ public class AppManager : MonoBehaviour
 				return;
 			}
 		}
-		if (is_up)
+		else if (is_up)
 			ResetY();
 		
 	}
@@ -225,7 +218,6 @@ public class AppManager : MonoBehaviour
 	}
 	private void SetClicked()
 	{
-		sessionLog.WriteLine("Manual override");
 		time_clicked = Time.time;
 		user_manual_override ++;
 	}

@@ -77,8 +77,7 @@ public class Manager : MonoBehaviour
 				msgVoice.text = "Speech: " + isTalking;
 			else
 				msgVoice.text = "Speech about " + speechContext;
-
-			
+		
 		}
 		
 	}
@@ -134,7 +133,10 @@ public class Manager : MonoBehaviour
 		GameObject.Find("Weather").GetComponent<AppManager>().Start_Session();
 		GameObject.Find("Email").GetComponent<AppManager>().Start_Session();
 		GameObject.Find("Fitbit").GetComponent<AppManager>().Start_Session();
-		managerLog.WriteLine("Session Changed to " + mod);
+
+		managerLog.WriteLine("  ");
+		managerLog.WriteLine(" Session Changed to " + mod);
+		managerLog.WriteLine("  ");
 		UpdateTooltipText();
 	}
 
@@ -160,29 +162,39 @@ public class Manager : MonoBehaviour
 	internal static void Set_isTalking(bool b)
 	{
 		if (isTalking != b)
-			managerLog.WriteLine(b ? " Started Talking" : " Stopped Talking");
-		isTalking = b;
-		if(!isTalking)
-			Reset_SpeechContext();
+		{
+			isTalking = b;
+			if (!isTalking)
+				Reset_SpeechContext();
+			managerLog.WriteLine(isTalking ? " Started Talking" : " Stopped Talking");
+		}
 	}
 
 	public static void Set_SpeechContext(int context)
-	//public void Set_SpeechContext(int context)
 	{
-		if (context == (int)MySpeechContext.None)
+		// change the context only if it is different (to improve performance and control IO repeats)
+		if ((int)speechContext != context)
 		{
-			managerLog.WriteLine(" Talking about None");
-			return;
+			if (context == (int)MySpeechContext.None)
+			{
+				Reset_SpeechContext();
+				managerLog.WriteLine("Talking about None");
+				return;
+			}
+			speechContext = (MySpeechContext)context;
+			managerLog.WriteLine(" Talking about " + (MySpeechContext)context);
+			Set_justMentioned(true);
 		}
-		speechContext = (MySpeechContext)context;
-		managerLog.WriteLine(" Talking about " + (MySpeechContext)context);
-		Set_justMentioned(true);
+		else if (context != (int)MySpeechContext.None)
+		{
+			// If the context isn't changing but an app was mentioned again make sure the mentioned time-out keeps it in mind
+			Set_justMentioned(true);
+		}
 	}
 
 	internal static void Reset_SpeechContext()
 	{
 		speechContext = MySpeechContext.None;
-		managerLog.WriteLine(" Stopped Talking");
 	}
 	internal static string Get_SpeechContext()
 	{
@@ -203,9 +215,9 @@ public class Manager : MonoBehaviour
 	{
 		if (num_faces != n_faces)
 		{
-			managerLog.WriteLine( n_faces + "Faces");
+			managerLog.WriteLine( " " + n_faces + " Faces");
+			num_faces = n_faces;
 		}
-		num_faces = n_faces;
 		faces_box = faces;
 	}
 
