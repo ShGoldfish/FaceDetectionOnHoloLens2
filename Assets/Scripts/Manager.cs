@@ -178,7 +178,8 @@ public class Manager : MonoBehaviour
 			if (context == (int)MySpeechContext.None)
 			{
 				Reset_SpeechContext();
-				managerLog.WriteLine("Talking about None");
+				GameObject.Find(Get_SpeechContext()).GetComponent<AppManager>().ResetMentioned();
+				managerLog.WriteLine(" Talking about None");
 				return;
 			}
 			speechContext = (MySpeechContext)context;

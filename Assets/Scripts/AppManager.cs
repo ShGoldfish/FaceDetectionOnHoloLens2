@@ -11,8 +11,8 @@ internal class MessageBoxMessages
 public class AppManager : MonoBehaviour
 { 
 	const float MENTION_TIMEOUT = 7.0f;
-	const float BLOCKED_TIMEOUT = 5.0f;
-	const float CLICKED_TIMEOUT = 7.0f;
+	const float BLOCKED_TIMEOUT = 7.0f;
+	const float CLICKED_TIMEOUT = 6.0f;
 
 	// Each App's vars
 	private int user_manual_override;
@@ -91,9 +91,10 @@ public class AppManager : MonoBehaviour
 	private void UpdateMentioned()
 	{
 		// Is only called in ACI
-		if ( mentioned && !Manager.Get_isTalking())
+		if (!Manager.Get_isTalking())
 		{
-			ResetMentioned();
+			if(mentioned)
+				ResetMentioned();
 			return;
 		}
 		if (Manager.Get_justMentioned() && Manager.Get_SpeechContext() == gameObject.name)
@@ -102,12 +103,15 @@ public class AppManager : MonoBehaviour
 			Manager.Set_justMentioned(false);
 			return;
 		}
-		if (mentioned && Time.time - timeWhenMentioned >= MENTION_TIMEOUT) // Timeout
+		if (Time.time - timeWhenMentioned >= MENTION_TIMEOUT) // Timeout
 		{
-			ResetMentioned();
-			if (Manager.Get_SpeechContext() == gameObject.name)
+			if (mentioned)
 			{
-				Manager.Reset_SpeechContext();
+				ResetMentioned();
+				if (Manager.Get_SpeechContext() == gameObject.name)
+				{
+					Manager.Reset_SpeechContext();
+				}
 			}
 			return;
 		}
@@ -129,16 +133,20 @@ public class AppManager : MonoBehaviour
 			}
 		}
 
-		if (!Manager.is_ACI && is_trans)
+		if (!Manager.is_ACI)
 		{
 			// if it's not ACI always keep app's opaque
-			MakeOpaque();	
+			if ( is_trans)
+				MakeOpaque();	
 		}
 		else
 		{
 			// if talking about this app 
-			if (mentioned && is_trans)
-				MakeOpaque();
+			if (mentioned)
+			{
+				if (is_trans)
+					MakeOpaque();
+			}
 			else if (!is_trans)
 				MakeTranslusent();
 		}
@@ -166,7 +174,7 @@ public class AppManager : MonoBehaviour
 			sessionLog.WriteLine("Made Translucent");
 		else
 			sessionLog.WriteLine("Made Translucent Manually");
-		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.1f);
+		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.2f);
 		is_trans = true;
 	}
 	private void MakeOpaque()
@@ -179,7 +187,7 @@ public class AppManager : MonoBehaviour
 		is_trans = false;
 	}
 
-	private void ResetMentioned()
+	public void ResetMentioned()
 	{
 		sessionLog.WriteLine("Not mentioned");
 		timeWhenMentioned = float.NegativeInfinity;
