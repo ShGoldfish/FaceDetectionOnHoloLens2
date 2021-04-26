@@ -225,7 +225,7 @@ public class AppManager : MonoBehaviour
 	{
 		timeWhenBlocked = Time.time;
 		blocking = true;
-		if (was_blocking) 
+		if (!was_blocking) 
 		{
 			sessionLog.WriteLine("Is blocking a face");
 		}
