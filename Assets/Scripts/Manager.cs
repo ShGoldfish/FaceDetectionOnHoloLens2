@@ -29,8 +29,8 @@ public class Manager : MonoBehaviour
 	//private int[,,] trialSet;
 
 	// Textbox Management
-	static TextMesh msgVoice;
-	static TextMesh msgFace;
+	//static TextMesh msgVoice;
+	//static TextMesh msgFace;
 
 	// Context Management
 	static bool isTalking;
@@ -66,21 +66,21 @@ public class Manager : MonoBehaviour
 
 	}
 
-	void Update()
-	{
-		if (is_ACI)
-		{
-			// Update the text boxes
-			msgFace.text = "Number of faces: " + num_faces.ToString();
+	//void Update()
+	//{
+	//	if (is_ACI)
+	//	{
+	//		// Update the text boxes
+	//		msgFace.text = "Number of faces: " + num_faces.ToString();
 
-			if (!isTalking || speechContext == MySpeechContext.None)
-				msgVoice.text = "Speech: " + isTalking;
-			else
-				msgVoice.text = "Speech about " + speechContext;
+	//		if (!isTalking || speechContext == MySpeechContext.None)
+	//			msgVoice.text = "Speech: " + isTalking;
+	//		else
+	//			msgVoice.text = "Speech about " + speechContext;
 		
-		}
+	//	}
 		
-	}
+	//}
 
 	
 	private void Reset_Answers()
@@ -105,11 +105,11 @@ public class Manager : MonoBehaviour
 		if (is_ACI)
 		{
 			// Textbox Management
-			GameObject.Find("MessageFace").GetComponent<MeshRenderer>().enabled = true;
-			GameObject.Find("MessageVoice").GetComponent<MeshRenderer>().enabled = true;
-			msgFace = GameObject.Find("MessageFace").GetComponent<TextMesh>();
-			msgVoice = GameObject.Find("MessageVoice").GetComponent<TextMesh>();
-			msgFace.text = "Connect Face detection to the IP Address: " + MyPhotoCapture.ipEndPoint;
+			//GameObject.Find("MessageFace").GetComponent<MeshRenderer>().enabled = true;
+			//GameObject.Find("MessageVoice").GetComponent<MeshRenderer>().enabled = true;
+			//msgFace = GameObject.Find("MessageFace").GetComponent<TextMesh>();
+			//msgVoice = GameObject.Find("MessageVoice").GetComponent<TextMesh>();
+			//msgFace.text = "Connect Face detection to the IP Address: " + MyPhotoCapture.ipEndPoint;
 			
 			// Context Management
 			speechContext = MySpeechContext.None;
@@ -124,8 +124,8 @@ public class Manager : MonoBehaviour
 		}
 		else
 		{
-			GameObject.Find("MessageFace").GetComponent<MeshRenderer>().enabled = false;
-			GameObject.Find("MessageVoice").GetComponent<MeshRenderer>().enabled = false;
+			//GameObject.Find("MessageFace").GetComponent<MeshRenderer>().enabled = false;
+			//GameObject.Find("MessageVoice").GetComponent<MeshRenderer>().enabled = false;
 
 			mod = "Basic AR";
 		}

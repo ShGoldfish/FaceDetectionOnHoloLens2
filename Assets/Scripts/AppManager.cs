@@ -35,7 +35,7 @@ public class AppManager : MonoBehaviour
 
 	//Log fiels
 	private FileLog sessionLog;
-
+	private bool was_blocking;
 
 	private void Awake()
 	{
@@ -214,15 +214,21 @@ public class AppManager : MonoBehaviour
 
 	private void SetMentioned()
 	{
-		sessionLog.WriteLine("Mentioned in Conversation");
 		timeWhenMentioned = Time.time;
-		mentioned = true;
+		if (!mentioned)
+		{
+			sessionLog.WriteLine("Mentioned in Conversation");
+			mentioned = true;
+		}
 	}
 	private void SetBlocked()
 	{
-		sessionLog.WriteLine("Is blocking a face");
 		timeWhenBlocked = Time.time;
 		blocking = true;
+		if (was_blocking) 
+		{
+			sessionLog.WriteLine("Is blocking a face");
+		}
 	}
 	private void SetClicked()
 	{
@@ -230,18 +236,20 @@ public class AppManager : MonoBehaviour
 		user_manual_override ++;
 	}
 
+	// MADE CHANG?ES TO CTHIS
+
 	void IsBlockingAnyFaces()
 	{
-		if (blocking && Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)  // not Timeout
-		{
-			return;
-		}
+		//if (blocking && Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)  // not Timeout
+		//{
+		//	//return;
+		//}
 
 		// Renderer purposes
 		rect_faceBoxOnScreen = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
 		List<List<int>> faceboxes = Manager.Get_FaceBoxes();
+		was_blocking = blocking;
 
-		bool was_blocking = blocking;
 		blocking = false;
 		foreach (List<int> faceBox in faceboxes)
 		{
@@ -252,9 +260,12 @@ public class AppManager : MonoBehaviour
 				return;
 			}
 		}
-		// if code gets here means it is not blocking rn => if it wasn't blocking already we don't need to change anything
-		if (was_blocking)
-			ResetBlocked();
+		if (was_blocking && Time.time - timeWhenBlocked < BLOCKED_TIMEOUT) // was blocking and has not timed out yet
+		{
+			blocking = true;
+			return;
+		}
+		ResetBlocked();
 	}
 
 	private bool IsOverlapping(List<int> faceBox)
