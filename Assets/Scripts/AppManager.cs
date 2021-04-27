@@ -50,9 +50,12 @@ public class AppManager : MonoBehaviour
 		GetChildWithName(gameObject, "Msg_Box").GetComponent<MeshRenderer>().enabled = false;
 		GetChildWithName(gameObject, "incommingConvo").GetComponent<SpriteRenderer>().enabled = false;
 		GetChildWithName(gameObject, "Mentioned").GetComponent<SpriteRenderer>().enabled = false;
+		// set for write in log file purpose
+		was_blocking = false;
+		mentioned = false;
+
 
 		is_trans = !Manager.is_ACI;
-
 		ResetClicked();
 		ResetMentioned();
 		ResetBlocked();
@@ -189,13 +192,19 @@ public class AppManager : MonoBehaviour
 
 	public void ResetMentioned()
 	{
-		sessionLog.WriteLine("Not mentioned");
+		if (mentioned)
+		{
+			sessionLog.WriteLine("Not mentioned");
+		}
 		timeWhenMentioned = float.NegativeInfinity;
 		mentioned = false;
 	}
 	private void ResetBlocked()
 	{
-		sessionLog.WriteLine("Is not blocking a face");
+		if (was_blocking)
+		{
+			sessionLog.WriteLine("Is not blocking a face");
+		}
 		timeWhenBlocked = float.NegativeInfinity;
 		blocking = false;
 	}
@@ -240,11 +249,6 @@ public class AppManager : MonoBehaviour
 
 	void IsBlockingAnyFaces()
 	{
-		//if (blocking && Time.time - timeWhenBlocked < BLOCKED_TIMEOUT)  // not Timeout
-		//{
-		//	//return;
-		//}
-
 		// Renderer purposes
 		rect_faceBoxOnScreen = new Rect(0.0f, 0.0f, 0.0f, 0.0f);
 		List<List<int>> faceboxes = Manager.Get_FaceBoxes();
