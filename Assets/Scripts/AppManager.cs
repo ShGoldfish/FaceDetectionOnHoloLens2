@@ -11,8 +11,8 @@ internal class MessageBoxMessages
 public class AppManager : MonoBehaviour
 { 
 	const float MENTION_TIMEOUT = 7.0f;
-	const float BLOCKED_TIMEOUT = 7.0f;
-	const float CLICKED_TIMEOUT = 6.0f;
+	const float BLOCKED_TIMEOUT = 4.0f;
+	const float CLICKED_TIMEOUT = 7.0f;
 
 	// Each App's vars
 	private int user_manual_override;
@@ -173,20 +173,24 @@ public class AppManager : MonoBehaviour
 
 	private void MakeTranslusent()
 	{
+		var ans_trans = GetChildWithName(gameObject, "Ans_trans");
 		if (user_manual_override == 0)
 			sessionLog.WriteLine("Made Translucent");
 		else
 			sessionLog.WriteLine("Made Translucent Manually");
-		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.2f);
+		gameObject.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, 0.08f);
+		ans_trans.SetActive(true);
 		is_trans = true;
 	}
 	private void MakeOpaque()
 	{
-		if(user_manual_override == 0)
+		var ans_trans = GetChildWithName(gameObject, "Ans_trans");
+		if (user_manual_override == 0)
 			sessionLog.WriteLine("Made Opaque");
 		else
 			sessionLog.WriteLine("Made Opaque Manually");
 		gameObject.GetComponent<SpriteRenderer>().color = Color.white;
+		ans_trans.SetActive(false);
 		is_trans = false;
 	}
 
