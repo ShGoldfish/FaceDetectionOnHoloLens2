@@ -105,22 +105,19 @@ public class SpeechHandler : MonoBehaviour, IMixedRealitySpeechHandler
 	private void RecognizeMyKeywords(string text)
 	{
 		int context = 4;
-		if (text.Contains("weather") || text.Contains("cloudy") || text.Contains("sunny") ||
-			text.Contains("hot") || text.Contains("cold") ||
-			text.Contains("rainy") || text.Contains("snowing") || text.Contains("temperature") || text.Contains("fahrenheit"))
+		if (text.Contains("By what percentage is it going to Rain on Saturday?") || text.Contains("percentage") || text.Contains("rain") ||
+			text.Contains("Saturday") )
 		{
 			context = 1;
 		}
-		if (text.Contains("email") || text.Contains("inbox") || text.Contains("VIP") || text.Contains("message") || text.Contains("messages") || text.Contains("emails") || text.Contains("gmail"))
+		if (text.Contains("How many unread messages do you have on your gmail?") || text.Contains("messages") || text.Contains("message") || text.Contains("gmail") 
+			|| text.Contains("unread"))
 		{
 			context = 2;
 		}
-		if (text.Contains("activity") || text.Contains("calory")
-			|| text.Contains("Miles") || text.Contains("walk")
-			|| text.Contains("calories") || text.Contains("fitbit") 
-			|| text.Contains("calory") || text.Contains("heart beat") 
-			|| text.Contains("steps") || text.Contains("workout") 
-			|| text.Contains("activity"))
+		if (text.Contains("step") || text.Contains("steps")
+			|| text.Contains("walked") || text.Contains("walk")
+			|| text.Contains("How many steps have you walked so far today?") )
 		{
 			context = 3;
 		}
